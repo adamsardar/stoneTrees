@@ -1,0 +1,7 @@
+\*.Rproj
+.git
+.gitignore
+.Rproj\.user
+^.*\.Rproj$
+^\.Rproj\.user$
+.gitlab-ci.yml
