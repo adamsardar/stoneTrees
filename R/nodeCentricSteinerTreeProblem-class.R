@@ -5,26 +5,37 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                 initialize = function(network, solverChoice = "GLPK", verbose = TRUE){
 
-                                  # TODO validate solver
+                                  # TODO validate solver (and that solver is available)
                                   private$solver <- solverChoice
 
                                   #TODO validate verbose
                                   private$verbosity <- verbose
 
                                   # TODO check network (particularly that it is named)
+                                  if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
                                   private$searchGraph <- network %>% as.undirected %>% simplify
 
-
-
-                                  # edgeDT - both directions (as.undirected -> simplify -> as.directed(both) -> data.frame)
                                   # nodeDT with node indicies
-                                  ## nodeScores - all -1 if absent
+                                  private$nodeDT <- get.data.frame(private$searchGraph, what = "vertices") %>% data.table
+                                  private$nodeDT[, .nodeID := .I]
+
+                                  ## check for nodeScores - all -1 if absent, validate if present
+
+                                  # check for isTerminal attribute, all FALSE if absent, validate if present
+
+                                  # Populate potential terminals
+                                  # Check that there are *some* potential terminals, otherwise error
+
+
+                                  # edgeDT - both directions for each arc
+                                  private$edgeDT <- get.data.frame(as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>% data.table %>% unique
+                                  private$edgeDT[, .edgeID := .I]
+
+                                  private$edgeDT[private$nodeDT, fromNodeID := .nodeID, on = .(from = name)]
+                                  private$edgeDT[private$nodeDT, toNodeID := .nodeID, on = .(to = name)]
 
                                   # Set terminal constraints
-
-                                  # Check that there are *some* potential terminals
-
-                                  #What if no fixed terminals? Skip
+                                  # What if no fixed terminals? Skip
                                   private$addFixedTerminalConstraints()
 
                                   private$addNodeDegreeInequalities()
@@ -48,7 +59,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                     private$solve()
                                   }
 
-                                  return()
+                                  return(sol)
 
                                   },
 
@@ -226,6 +237,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                   if(private$verbosity) message("SOLVING")
 
                                   Rglpk_solve_LP(
+
                                     obj = private$nodeDT[order(.nodeID), nodeScores],
 
                                     mat = rbind(private$fixedTerminalConstraints$variables,
@@ -259,7 +271,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 fixedTerminalIndicies = integer(),
                                 potentialTerminalIndicies = integer(),
 
-                                nodedTerminalConstraints = list(),
+                                fixedTerminalConstraints = list(),
                                 nodeDegreeConstraints = list(),
                                 twoCycleConstraints = list(),
 
