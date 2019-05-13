@@ -5,14 +5,28 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                 initialize = function(network, solverChoice = "GLPK", verbose = TRUE){
 
-                                  # TODO check network
-                                  # search graph - undirected and simple. NAMED
+                                  # TODO validate solver
+                                  private$solver <- solverChoice
 
-                                  # edgeDT - both directions
+                                  #TODO validate verbose
+                                  private$verbosity <- verbose
+
+                                  # TODO check network (particularly that it is named)
+                                  private$searchGraph <- network %>% as.undirected %>% simplify
+
+
+
+                                  # edgeDT - both directions (as.undirected -> simplify -> as.directed(both) -> data.frame)
                                   # nodeDT with node indicies
                                   ## nodeScores - all -1 if absent
 
+                                  # Set terminal constraints
+
+                                  # Check that there are *some* potential terminals
+
+                                  #What if no fixed terminals? Skip
                                   private$addFixedTerminalConstraints()
+
                                   private$addNodeDegreeInequalities()
                                   private$addTwoCycleInequalities()
 
@@ -23,14 +37,20 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                                         directions = character(),
                                                                         rhs = numeric() )
 
-                                  # TODO validate solver
-                                  private$solver <- solverChoice
-
-                                  #TODO validate verbose
-                                  private$verbosity <- verbose
+                                  invisible(self)
                                 },
 
-                                solve = function(){stop("Not yet implemented")},
+
+                                getSingleSteinerSolution(){
+
+                                  while(!solutionConnected){
+
+                                    private$solve()
+                                  }
+
+                                  return()
+
+                                  },
 
                                 getNodeDT = function(){ private$nodeDT },
                                 getEdgeDT = function(){ private$edgeDT },
@@ -59,6 +79,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                           variables = fixedTerminals_variables[private$fixedTerminalsIndicies, ],
                                                           directions = rep("==", nrow(private$fixedTerminalsIndicies)),
                                                           rhs = rep(1, nrow(private$fixedTerminalsIndicies)) )
+
+                                  if(private$verbosity) message("Adding ",nrow(fixedTerminals_variables)," node fixed terminal constraints ...")
+
                                   invisible(self)
                                 },
 
@@ -73,6 +96,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                     variables = nodeDegreeInequalities_variables,
                                     directions = rep(">=", nrow(nodeDegreeInequalities_variables)),
                                     rhs = rep(0, nrow(nodeDegreeInequalities_variables)) )
+
+                                  if(private$verbosity) message("Adding ",nrow(nodeDegreeInequalities_variables)," node degree inequality constraints ...")
 
                                   invisible(self)
                                 },
@@ -99,6 +124,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                     variables = twoCycle_variables,
                                     directions = rep(">=", nrow(twoCycle_variables)),
                                     rhs = rep(0, nrow(twoCycle_variables)) )
+
+                                  if(private$verbosity) message("Adding ",nrow(twoCycle_variables)," two-cycle constraints ...")
 
                                   invisible(self)
                                 },
@@ -150,7 +177,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                   graphDiameter <- diameter(private$searchGraph)
 
-                                  if(private$verbosity) message("Adding ",nrow(terminalPairsInDifferentComponents)," connectivity constraint based upon node seperators")
+                                  if(private$verbosity) message("Adding ",nrow(terminalPairsInDifferentComponents)," connectivity constraints based upon node seperators")
 
                                   # For each terminal pair i,j; compute R_j (reachable set from R_j in graph ommiting C_i) and compute the minimum node-seperator set N_ij = A(C_i) intersect R_j
                                   for(r in 1:nrow(terminalPairsInDifferentComponents)){
@@ -193,6 +220,38 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                   invisible(self)
                                 },
 
+                                # Optimise under current constraints using a solver agnostic interface
+                                solve = function(){
+
+                                  if(private$verbosity) message("SOLVING")
+
+                                  Rglpk_solve_LP(
+                                    obj = private$nodeDT[order(.nodeID), nodeScores],
+
+                                    mat = rbind(private$fixedTerminalConstraints$variables,
+                                                private$nodeDegreeConstraints$variables,
+                                                private$twoCycleConstraints$variables,
+                                                private$connectivityConstraints$variables),
+
+                                    dir = c(private$fixedTerminalConstraints$directions,
+                                            private$nodeDegreeConstraints$directions,
+                                            private$twoCycleConstraints$directions,
+                                            private$connectivityConstraints$directions),
+
+                                    rhs = c(private$fixedTerminalConstraints$rhs,
+                                            private$nodeDegreeConstraints$rhs,
+                                            private$twoCycleConstraints$rhs,
+                                            private$connectivityConstraints$rhs),
+
+                                    max = TRUE,
+
+                                    control = list(verbose = private$verbosity),
+
+                                    types = "B")
+
+
+                                },
+
                                 searchGraph = graph.empty(),
 
                                 # Work with integers rather than names
@@ -200,9 +259,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 fixedTerminalIndicies = integer(),
                                 potentialTerminalIndicies = integer(),
 
-                                nodeScores = numeric(),
-
-                                fixedTerminalConstraints = list(),
+                                nodedTerminalConstraints = list(),
                                 nodeDegreeConstraints = list(),
                                 twoCycleConstraints = list(),
 
@@ -214,4 +271,5 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 solver = character(),
                                 verbosity = logical()
                               )
+
 )
