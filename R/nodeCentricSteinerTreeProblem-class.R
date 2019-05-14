@@ -1,4 +1,12 @@
 
+# TODO input validation
+# TODO Improve the reachability computation - some C++ (now the bottleneck) https://www.geeksforgeeks.org/transitive-closure-of-a-graph-using-dfs/
+
+#' @import R6
+#' @import data.table
+#' @import igraph
+#' @import Matrix
+#' @import Rglpk
 nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                               public = list(
@@ -77,10 +85,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                 isSolutionConnected = function(){
 
-                                  if(private$nodeDT[,all(is.na(inComponent))]){ return(FALSE) }
+                                  if(vcount(private$solutionGraph) == 0){ return(FALSE) }
 
-                                  #If all nodes in solution (not NA) are in the same comonent, then the solution is connected
-                                  return(nrow(private$nodeDT[!is.na(inComponent), .N, by = inComponent]) == 1)
+                                  return(is.connected(private$solutionGraph))
                                   },
 
                                 getSingleSteinerSolution = function(maxItr = 20){
@@ -97,7 +104,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                     itrCount %<>% add(1)
                                   }
 
-                                  return(sol)
+                                  return( private$solutionGraph )
                                 },
 
                                 getNodeDT = function(){ private$nodeDT },
@@ -163,7 +170,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                                             j = c(fromNodeID, toNodeID),
                                                                             x = rep(c(1, -1) , each = length(.edgeID) ),
                                                                             dims = c( length(.edgeID), vcount(private$searchGraph)),
-                                                                            dimnames = list( paste("twoCycleOnEdge", .edgeID) , V(private$searchGraph)$name))]
+                                                                            dimnames = list( paste0("twoCycleOnEdge", .edgeID) , V(private$searchGraph)$name))]
 
                                   # We only care about edges *from* a potential terminal node
                                   twoCycle_variables  %<>% .[ private$edgeDT[fromNodeID %in% private$potentialTerminalIndicies, .edgeID], ]
@@ -188,82 +195,83 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                   # Break solution into connected components. If only a single component, then we're done
                                   componentsSummaryDT <- private$nodeDT[!is.na(inComponent), .N, by = inComponent]
-                                  terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent) & isTerminal]
-
-                                  solutionIsConnected <- nrow(componentsSummaryDT) == 1
+                                  terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent)][.nodeID %in% private$potentialTerminalIndicies]
 
                                   if(private$verbosity){
 
-                                    message(ifelse(solutionIsConnected, "##Solution is connected!##", "##Solution is disconnected!##"))
-                                    message("With ", componentsSummaryDT$N," nodes and ", nrow(terminalsInComponentsDT)," terminals.")
+                                    message(ifelse( self$isSolutionConnected() , "##Solution is connected!##", "##Solution is disconnected!##"))
+                                    message("With ", componentsSummaryDT[,sum(N)]," nodes, ", nrow(terminalsInComponentsDT)," potential terminals and ",
+                                            terminalsInComponentsDT[isTerminal == TRUE, nrow(.SD)], " fixed terminals across ", nrow(componentsSummaryDT), " components.")
                                   }
 
-                                  if(solutionIsConnected){ invisible(self) }
+                                  # Only add additional constraints if required
+                                  if(! self$isSolutionConnected()){
 
-                                  # Create terminal pairs
-                                  # Filter for terminal pairs in different components
-                                  allTerminalPairs <- combn( names(private$terminalIndicies), 2) %>% t %>% as.data.table
-                                  setnames(allTerminalPairs, c("T1nodeID","T2nodeID")) # Note that we are working by node indicies here to avoid using node names
+                                    # Create terminal pairs
+                                    # Filter for terminal pairs in different components
+                                    allTerminalPairs <- combn( private$terminalIndicies, 2) %>% t %>% as.data.table
+                                    setnames(allTerminalPairs, c("T1nodeID","T2nodeID")) # Note that we are working by node indicies here to avoid using node names
 
-                                  allTerminalPairs[private$nodeDT, c("T1inComponent","T1name") := list(inComponent, name), on = .(T1nodeID = .nodeID)]
-                                  allTerminalPairs[private$nodeDT, c("T2inComponent","T2name") := list(inComponent, name), on = .(T2nodeID = .nodeID)]
+                                    allTerminalPairs[private$nodeDT, c("T1inComponent","T1name") := list(inComponent, name), on = .(T1nodeID = .nodeID)]
+                                    allTerminalPairs[private$nodeDT, c("T2inComponent","T2name") := list(inComponent, name), on = .(T2nodeID = .nodeID)]
 
-                                  # Only need keep node pairs where both nodes are in the solution but not in the same component
-                                  terminalPairsInDifferentComponents <-
-                                       allTerminalPairs[!is.na(T1inComponent) & !is.na(T1inComponent)][T1inComponent != T2inComponent]
+                                    # Only need keep node pairs where both nodes are in the solution but not in the same component
+                                    terminalPairsInDifferentComponents <-
+                                      allTerminalPairs[!is.na(T1inComponent) & !is.na(T1inComponent)][T1inComponent != T2inComponent]
 
-                                  # Pre-compute the component surfaces (A(C_i) in paper) - i.e. nodes that are adjacent to C_i but not in C_i
-                                  clusterSurfacesDT <- private$nodeDT[!is.na(inComponent)] %>%
-                                    merge(private$edgeDT, by.x = ".nodeID", by.y = "fromNodeID") %>%
-                                    .[,.(componentSurfaceNodeID = .SD[!toNodeID %in% .nodeID, unique(toNodeID)]), by = inComponent]
+                                    # Pre-compute the component surfaces (A(C_i) in paper) - i.e. nodes that are adjacent to C_i but not in C_i
+                                    clusterSurfacesDT <- private$nodeDT[!is.na(inComponent)] %>%
+                                      merge(private$edgeDT, by.x = ".nodeID", by.y = "fromNodeID") %>%
+                                      .[,.(componentSurfaceNodeID = .SD[!toNodeID %in% .nodeID, unique(toNodeID)]), by = inComponent]
 
-                                  # Matrix to store connectivity constraints
-                                  allConnectivityConstraints <- Matrix(0, sparse = TRUE,
-                                                                       nrow = nrow(terminalPairsInDifferentComponents),
-                                                                       ncol = vcount(private$searchGraph),
-                                                                       dimnames = list(NULL, V(private$searchGraph)$name) )
+                                    # Matrix to store connectivity constraints
+                                    allConnectivityConstraints <- Matrix(0, sparse = TRUE,
+                                                                         nrow = nrow(terminalPairsInDifferentComponents),
+                                                                         ncol = vcount(private$searchGraph),
+                                                                         dimnames = list(NULL, V(private$searchGraph)$name) )
 
-                                  graphDiameter <- diameter(private$searchGraph)
+                                    graphDiameter <- diameter(private$searchGraph)
 
-                                  if(private$verbosity) message("Adding ",nrow(terminalPairsInDifferentComponents)," connectivity constraints based upon node seperators")
+                                    if(private$verbosity) message("Adding ",nrow(terminalPairsInDifferentComponents)," connectivity constraints based upon node seperators")
 
-                                  # For each terminal pair i,j; compute R_j (reachable set from R_j in graph ommiting C_i) and compute the minimum node-seperator set N_ij = A(C_i) intersect R_j
-                                  for(r in 1:nrow(terminalPairsInDifferentComponents)){
+                                    # For each terminal pair i,j; compute R_j (reachable set from R_j in graph ommiting C_i) and compute the minimum node-seperator set N_ij = A(C_i) intersect R_j
+                                    for(r in 1:nrow(terminalPairsInDifferentComponents)){
 
-                                    terminalPair <- terminalPairsInDifferentComponents[r,]
+                                      terminalPair <- terminalPairsInDifferentComponents[r,]
 
-                                    C_i_componentSurfaceNodeIDs <- clusterSurfacesDT[ inComponent ==  terminalPair$T1inComponent, componentSurfaceNodeID]
+                                      C_i_componentSurfaceNodeIDs <- clusterSurfacesDT[ inComponent ==  terminalPair$T1inComponent, componentSurfaceNodeID]
 
-                                    graph_omitCi <- delete_vertices(fullSearchGraph,
-                                                                    V(fullSearchGraph)[ private$nodeDT[inComponent ==  terminalPair$T1inComponent, .nodeID] ])
+                                      graph_omitCi <- delete_vertices(private$searchGraph,
+                                                                      V(private$searchGraph)[ private$nodeDT[inComponent ==  terminalPair$T1inComponent, .nodeID] ])
 
-                                    # Note that this is the graph LESS the Ci componenet - hence we can't precompute upfront.
-                                    # Notice the use of terminal name, not ID
-                                    # Reffered to as Rj in the paper
-                                    nodeNamesReachableFromJ <- V(make_ego_graph(graph_omitCi,
-                                                                                nodes = V(graph_omitCi)[name == terminalPair$T2name],
-                                                                                order = graphDiameter)[[1]])$name
+                                      # Note that this is the graph LESS the Ci componenet - hence we can't precompute upfront.
+                                      # Notice the use of terminal name, not ID
+                                      # Reffered to as Rj in the paper
+                                      nodeNamesReachableFromJ <- V(make_ego_graph(graph_omitCi,
+                                                                                  nodes = V(graph_omitCi)[name == terminalPair$T2name],
+                                                                                  order = graphDiameter)[[1]])$name
 
-                                    # Nodes adjacent to C_i and in R_j consititues a minimal node seperator 𝒩(i,j)
-                                    # Identify minimal node seperator set 𝒩(i,j) = A(C_i) intersect R_j
-                                    minNodeSep_ij_nodeIDs <- intersect(C_i_componentSurfaceNodeIDs,
-                                                                       private$nodeDT[name %in% nodeNamesReachableFromJ, .nodeID])
+                                      # Nodes adjacent to C_i and in R_j consititues a minimal node seperator 𝒩(i,j)
+                                      # Identify minimal node seperator set 𝒩(i,j) = A(C_i) intersect R_j
+                                      minNodeSep_ij_nodeIDs <- intersect(C_i_componentSurfaceNodeIDs,
+                                                                         private$nodeDT[name %in% nodeNamesReachableFromJ, .nodeID])
 
-                                    # Add connectivity constraint
-                                    # y(N) ≥ y_i + y_j -1 ∀ i,j ∈ T, i ≠ j  ∀N ∈ 𝒩(i,j)
-                                    # i.e. if you have i then you must have a node seperator to have j included in the result
-                                    # This acts as a way of repairing a disconnected solution in a lazy fashion (there are exponentially many node seperators, hence enumerating them all up front is not feasible)
-                                    allConnectivityConstraints[r, terminalPair$T1nodeID] <- -1
-                                    allConnectivityConstraints[r, terminalPair$T2nodeID] <- -1
+                                      # Add connectivity constraint
+                                      # y(N) ≥ y_i + y_j -1 ∀ i,j ∈ T, i ≠ j  ∀N ∈ 𝒩(i,j)
+                                      # i.e. if you have i then you must have a node seperator to have j included in the result
+                                      # This acts as a way of repairing a disconnected solution in a lazy fashion (there are exponentially many node seperators, hence enumerating them all up front is not feasible)
+                                      allConnectivityConstraints[r, terminalPair$T1nodeID] <- -1
+                                      allConnectivityConstraints[r, terminalPair$T2nodeID] <- -1
 
-                                    allConnectivityConstraints[r, minNodeSep_ij_nodeIDs] <- 1
+                                      allConnectivityConstraints[r, minNodeSep_ij_nodeIDs] <- 1
+                                    }
+
+                                    # Append connectivity constraints matrix to existing
+                                    private$connectivityConstraints <- list( variables = rbind(private$connectivityConstraints$variables, allConnectivityConstraints) )
+
+                                    private$connectivityConstraints$directions <- rep(">=", nrow(private$connectivityConstraints$variables) )
+                                    private$connectivityConstraints$rhs <- rep(-1, nrow(private$connectivityConstraints$variables) )
                                   }
-
-                                  # Append connectivity constraints matrix to existing
-                                  private$twoCycleConstraints <- list( variables = rbind(private$twoCycleConstraints$variables, allConnectivityConstraints) )
-
-                                  private$twoCycleConstraints$directions <- rep(">=", nrow(private$twoCycleConstraints$variables) )
-                                  private$twoCycleConstraints$rhs <- rep(-1, nrow(private$twoCycleConstraints$variables) )
 
                                   invisible(self)
                                 },
@@ -307,20 +315,18 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                     solutionIndicies <- which(GLPKsolution$solution > 0)
                                   }
 
+                                  # Induce subgraph and assign nodes to components
+                                  private$solutionGraph <- induced_subgraph(private$searchGraph,
+                                                                          V(private$searchGraph)[solutionIndicies])
 
-                                  solIndex <<- solutionIndicies
+                                  disconnectedComponentList <- decompose(private$solutionGraph)
 
-
-                                  #
-                                  graphOfSolution <- induced_subgraph(private$searchGraph,
-                                                                      V(private$searchGraph)[solutionIndicies])
-
-                                  disconnectedComponentList <- decompose(graphOfSolution)
-
+                                  # The nodeDT table and inComponent variable keeps track of which node is where
                                   private$nodeDT[,inComponent := NA_integer_]
 
                                   for(i in 1:length(disconnectedComponentList)){
 
+                                    # Using nodeIDs to track membership
                                     private$nodeDT[.nodeID %in% V(disconnectedComponentList[[i]])$.nodeID, inComponent := i]
                                   }
 
@@ -328,6 +334,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 },
 
                                 searchGraph = graph.empty(),
+
+                                solutionGraph = graph.empty(),
 
                                 # Work with integers rather than names
                                 terminalIndicies = integer(),
