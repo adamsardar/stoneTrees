@@ -14,12 +14,15 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                   # TODO check network (particularly that it is named)
                                   if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
                                   private$searchGraph <- network %>% as.undirected %>% simplify
+                                  V(private$searchGraph)$.nodeID <- 1:vcount(private$searchGraph) #Assign a unique node integer to each node
 
                                   if(length(decompose(private$searchGraph)) != 1) stop("Search network must only have a single connected component.")
 
                                   # nodeDT with node indicies
                                   private$nodeDT <- get.data.frame(private$searchGraph, what = "vertices") %>% data.table
-                                  private$nodeDT[, .nodeID := .I]
+
+                                  # Solution status will effectively be provided by the 'inComponent' attribute
+                                  private$nodeDT[, inComponent := NA_integer_]
 
                                   # check for isTerminal vertex attribute: all FALSE if absent, validate if present
                                   if(! "isTerminal" %in% colnames(private$nodeDT)){
@@ -46,7 +49,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                   terminalIndicies <- unique(c(fixedTerminalIndicies, potentialTerminalIndicies))
 
                                   # Check that there are *some* potential terminals, otherwise error
-                                  if(length(terminalIndicies)) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScores and/or isTerminal vertex attributes!")
+                                  if(length(terminalIndicies) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScores and/or isTerminal vertex attributes!")
 
                                   # edgeDT - both directions for each arc
                                   private$edgeDT <- get.data.frame(as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>% data.table %>% unique
@@ -72,20 +75,30 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                   invisible(self)
                                 },
 
+                                isSolutionConnected = function(){
 
-                                getSingleSteinerSolution(){
+                                  if(private$nodeDT[,all(is.na(inComponent))]){ stop("No nodes in components for solution! Call solver first?") }
 
+                                  #If all nodes in solution (not NA) are in the same comonent, then the solution is connected
+                                  return(nrow(private$nodeDT[!is.na(inComponent), .N, by = inComponent]) == 1)
+                                  },
 
-                                  maxItr <- 100
+                                getSingleSteinerSolution = function(maxItr = 20){
 
-                                  while(!solutionConnected){
+                                  itrCount <- 1
+
+                                  while( (! private$isSolutionConnected() ) & (itrCount <= maxItr) ){
 
                                     private$solve()
+
+                                    #Add connectivity constraints
+                                    private$addConnectivityConstraints()
+
+                                    itrCount %<>% add(1)
                                   }
 
                                   return(sol)
-
-                                  },
+                                },
 
                                 getNodeDT = function(){ private$nodeDT },
                                 getEdgeDT = function(){ private$edgeDT },
@@ -171,7 +184,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 addConnectivityConstraints = function(){
 
                                   # Using a dedicated column in private$nodeDT for cluster membership
-                                  if(private$nodeDT[,all(is.na(inComponent))]){ stop("No nodes in components for solution!") }
+                                  if(private$nodeDT[,all(is.na(inComponent))]){ stop("No nodes in components for solution! Call solver first?") }
 
                                   # Break solution into connected components. If only a single component, then we're done
                                   componentsSummaryDT <- private$nodeDT[!is.na(inComponent), .N, by = inComponent]
@@ -258,45 +271,64 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 # Optimise under current constraints using a solver agnostic interface
                                 solve = function(){
 
-                                  if(private$verbosity) message("SOLVING")
- ...
-                                  RglGLPKsolution <- pk_solve_LP(
+                                  if(private$verbosity) message("SOLVING ...")
 
-                                    obj = private$nodeDT[order(.nodeID), nodeScores],
+                                  if(length(private$potentialTerminalIndicies) == 1){
 
-                                    mat = rbind(private$fixedTerminalConstraints$variables,
-                                                private$nodeDegreeConstraints$variables,
-                                                private$twoCycleConstraints$variables,
-                                                private$connectivityConstraints$variables),
+                                    message("Only a single potential termianl - a trivial solution")
+                                    solutionIndicies <- private$potentialTerminalIndicies
+                                  }else{
 
-                                    dir = c(private$fixedTerminalConstraints$directions,
-                                            private$nodeDegreeConstraints$directions,
-                                            private$twoCycleConstraints$directions,
-                                            private$connectivityConstraints$directions),
+                                    GLPKsolution <- Rglpk_solve_LP(
 
-                                    rhs = c(private$fixedTerminalConstraints$rhs,
-                                            private$nodeDegreeConstraints$rhs,
-                                            private$twoCycleConstraints$rhs,
-                                            private$connectivityConstraints$rhs),
+                                      obj = private$nodeDT[order(.nodeID), nodeScores],
 
-                                    max = TRUE,
+                                      mat = rbind(private$fixedTerminalConstraints$variables,
+                                                  private$nodeDegreeConstraints$variables,
+                                                  private$twoCycleConstraints$variables,
+                                                  private$connectivityConstraints$variables),
 
-                                    control = list(verbose = private$verbosity),
+                                      dir = c(private$fixedTerminalConstraints$directions,
+                                              private$nodeDegreeConstraints$directions,
+                                              private$twoCycleConstraints$directions,
+                                              private$connectivityConstraints$directions),
 
-                                    types = "B")
+                                      rhs = c(private$fixedTerminalConstraints$rhs,
+                                              private$nodeDegreeConstraints$rhs,
+                                              private$twoCycleConstraints$rhs,
+                                              private$connectivityConstraints$rhs),
+
+                                      max = TRUE,
+
+                                      control = list(verbose = private$verbosity),
+
+                                      types = "B")
+
+                                    solutionIndicies <- which(GLPKsolution$solution > 0)
+                                  }
 
 
-                                    graphOfSolution <- induced_subgraph(private$searchGraph,
-                                                                       V(private$searchGraph)[which(GLPKsolution$solution > 0)])
-                              },
-  return(graphOfSolution)
-                                
+                                  #
+                                  graphOfSolution <- induced_subgraph(private$searchGraph,
+                                                                      V(private$searchGraph)[solutionIndicies])
+
+                                  disconnectedComponentList <- decompose(graphOfSolution)
+
+                                  private$nodeDT[,.nodeID:= NA_integer_]
+
+                                  for(i in 1:length(disconnectedComponentList)){
+
+                                    private$nodeDT[.nodeID %in% V(disconnectedComponentList[[i]])$.nodeID, inComponent := i]
+                                  }
+
+                                  invisible()
+                                },
+
                                 searchGraph = graph.empty(),
 
-  
                                 solutionGraph = graph.empty(),
 
-                             # Work with integers rather than names
+                                # Work with integers rather than names
                                 terminalIndicies = integer(),
                                 fixedTerminalIndicies = integer(),
                                 potentialTerminalIndicies = integer(),
