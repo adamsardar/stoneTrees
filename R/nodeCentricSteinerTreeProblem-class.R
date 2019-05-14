@@ -15,17 +15,38 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                   if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
                                   private$searchGraph <- network %>% as.undirected %>% simplify
 
+                                  if(length(decompose(private$searchGraph)) != 1) stop("Search network must only have a single connected component.")
+
                                   # nodeDT with node indicies
                                   private$nodeDT <- get.data.frame(private$searchGraph, what = "vertices") %>% data.table
                                   private$nodeDT[, .nodeID := .I]
 
-                                  ## check for nodeScores - all -1 if absent, validate if present
+                                  # check for isTerminal vertex attribute: all FALSE if absent, validate if present
+                                  if(! "isTerminal" %in% colnames(private$nodeDT)){
 
-                                  # check for isTerminal attribute, all FALSE if absent, validate if present
+                                    private$nodeDT[, isTerminal := FALSE]
+                                  }else{
 
-                                  # Populate potential terminals
+                                    if( ! (is.logical(private$nodeDT$isTerminal) & all(!is.na(private$nodeDT$isTerminal))) ) stop("isTerminal node attributes *must* all be boolean, with no NA's")
+                                  }
+
+                                  # check for nodeScores: all -1 if absent, validate if present
+                                  if(! "nodeScores" %in% colnames(private$nodeDT)){
+
+                                    private$nodeDT[, nodeScores := -1]
+                                  }else{
+
+                                    if( ! (is.numeric(private$nodeDT$nodeScore) & all(!is.na(private$nodeDT$nodeScore))) ) stop("nodeScore node attributes *must* all be numeric values, with no NA's")
+                                  }
+
+
+                                  fixedTerminalIndicies <- private$nodeDT[isTerminal == TRUE, .nodeID] # Fixed terminals must be included in a solution
+                                  potentialTerminalIndicies <- private$nodeDT[nodeScore > 0, .nodeID] # potential terminals are those with nodeScore greater than 0
+
+                                  terminalIndicies <- unique(c(fixedTerminalIndicies, potentialTerminalIndicies))
+
                                   # Check that there are *some* potential terminals, otherwise error
-
+                                  if(length(terminalIndicies)) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScores and/or isTerminal vertex attributes!")
 
                                   # edgeDT - both directions for each arc
                                   private$edgeDT <- get.data.frame(as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>% data.table %>% unique
@@ -53,6 +74,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
 
                                 getSingleSteinerSolution(){
+
+
+                                  maxItr <- 100
 
                                   while(!solutionConnected){
 
@@ -235,8 +259,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                 solve = function(){
 
                                   if(private$verbosity) message("SOLVING")
-
-                                  Rglpk_solve_LP(
+ ...
+                                  RglGLPKsolution <- pk_solve_LP(
 
                                     obj = private$nodeDT[order(.nodeID), nodeScores],
 
@@ -262,11 +286,17 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                     types = "B")
 
 
-                                },
-
+                                    graphOfSolution <- induced_subgraph(private$searchGraph,
+                                                                       V(private$searchGraph)[which(GLPKsolution$solution > 0)])
+                              },
+  return(graphOfSolution)
+                                
                                 searchGraph = graph.empty(),
 
-                                # Work with integers rather than names
+  
+                                solutionGraph = graph.empty(),
+
+                             # Work with integers rather than names
                                 terminalIndicies = integer(),
                                 fixedTerminalIndicies = integer(),
                                 potentialTerminalIndicies = integer(),
