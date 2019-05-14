@@ -124,11 +124,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                                   V(private$searchGraph)$name))
 
                                   private$fixedTerminalConstraints <- list(
-                                                          variables = fixedTerminals_variables[private$fixedTerminalsIndicies, ],
-                                                          directions = rep("==", nrow(private$fixedTerminalsIndicies)),
-                                                          rhs = rep(1, nrow(private$fixedTerminalsIndicies)) )
+                                                          variables = fixedTerminals_variables[private$fixedTerminalIndicies, ],
+                                                          directions = rep("==", length(private$fixedTerminalIndicies)),
+                                                          rhs = rep(1, length(private$fixedTerminalIndicies)) )
 
-                                  if(private$verbosity) message("Adding ",nrow(fixedTerminals_variables)," node fixed terminal constraints ...")
+                                  if(private$verbosity) message("Adding ", length(private$fixedTerminalIndicies)," fixed terminal constraints ...")
 
                                   invisible(self)
                                 },
