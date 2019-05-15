@@ -13,8 +13,9 @@ LazyData: true
 Imports:
     data.table (>= 1.12),
     igraph (>= 1.2),
-    Matrix (>= 1.2),    
+    Matrix (>= 1.2),
     R6 (>= 2.4),
     Rglpk (>= 0.6)
 Suggests: 
     testthat (>= 2.1.0)
+RoxygenNote: 6.1.1
