@@ -1,6 +1,6 @@
 Package: stoneTrees
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Solve node centric Steiner tree problems
 Version: 0.1
 Date: 09-May-2019
 Authors@R: c( person("Adam", "Sardar", email = "adam@sardar.me.uk", role = c("aut", "cre", "cph")) )
@@ -10,3 +10,11 @@ Description: A package aimed at solving Steiner ('stone') tree problems with uni
 License: MPL-2.0
 Encoding: UTF-8
 LazyData: true
+Imports:
+    data.table (>= 1.12),
+    igraph (>= 1.2),
+    Matrix (>= 1.2),    
+    R6 (>= 2.4),
+    Rglpk (>= 0.6)
+Suggests: 
+    testthat (>= 2.1.0)
