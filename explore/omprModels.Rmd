@@ -154,6 +154,7 @@ is.connected(graphOfSolution)
 
 ```{r}
 
+
 allTerminalPairs <- combn( names(terminals), 2) %>% t %>% as.data.table
 setnames(allTerminalPairs, c("T1name","T2name"))
 
