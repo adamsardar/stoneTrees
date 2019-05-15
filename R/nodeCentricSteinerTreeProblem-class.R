@@ -1,11 +1,7 @@
 
 # TODO input validation
 
-#' @import R6
-#' @import data.table
-#' @import igraph
-#' @import Matrix
-#' @import Rglpk
+
 nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
@@ -243,7 +239,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                #A pot to keep the conConstraints in
                                                conConstraints <- list()
 
-                                               # The computationally expensive piece - loop through each of the components and then compute the mimal node seperators based on reachability
+                                               # The computationally expensive piece
                                                for(T1component in unique(terminalPairsInDifferentComponents$T1inComponent) ){
 
                                                  termainPairsWithT1incomponent <- terminalPairsInDifferentComponents[T1inComponent == T1component]
@@ -261,8 +257,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                  # Note that this is the graph LESS the Ci componenet - hence we can't precompute upfront.
                                                  reachabilityMatrix <- distances(searchGraphWithoutComponent,
                                                                                  v = V(searchGraphWithoutComponent)[termainPairsWithT1incomponent$T2nodeID])
+                                                 reachabilityMatrix[is.infinite(reachabilityMatrix)] <- 0
 
-                                                 # A(C_i) - the nodes adjacent to the component, but not actually in the component
+                                                 # A(C_i)
                                                  clusterSurfaceNodes <- clusterSurfacesDT[inComponent == T1component, componentSurfaceNodeID]
                                                  componentSurfaceMatrix <- sparseMatrix( i = rep(1:nrow(reachabilityMatrix), each = length(clusterSurfaceNodes) ) ,
                                                                                          j =  rep(clusterSurfaceNodes, nrow(reachabilityMatrix)),
@@ -270,17 +267,22 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                                                          dims = dim(reachabilityMatrix),
                                                                                          dimnames = dimnames(reachabilityMatrix))
 
-
-                                                 # 𝒩(i,j) = A(C_i) intersect R_j
-                                                 minimumNodeSeperatorsMatrix <- ((reachabilityMatrix < Inf) & componentSurfaceMatrix) + 0 # + 0 ensures that the matrix is numeric
-
                                                  # Add connectivity constraint
                                                  # y(N) ≥ y_i + y_j -1 ∀ i,j ∈ T, i ≠ j  ∀N ∈ 𝒩(i,j)
                                                  # i.e. if you have i then you must have a node seperator to have j included in the result
                                                  # This acts as a way of repairing a disconnected solution in a lazy fashion (there are exponentially many node seperators, hence enumerating them all up front is not feasible)
-                                                 termainPairsWithT1incomponent[, {minimumNodeSeperatorsMatrix[constraintIndex,T1nodeID] <<- -1;
-                                                 minimumNodeSeperatorsMatrix[constraintIndex,T2nodeID] <<- -1;
-                                                 (NA) }, by = .(T1nodeID,T2nodeID)]
+
+                                                 # 𝒩(i,j) = A(C_i) intersect R_j: y(N) above
+                                                 minimumNodeSeperatorsMatrix <- ( (reachabilityMatrix) & componentSurfaceMatrix)
+
+                                                 # These are the -1's: y_i + y_j
+                                                 termianlPairValues <- termainPairsWithT1incomponent[, sparseMatrix( i =  rep(constraintIndex, times = 2) ,
+                                                                                                                     j =  c(T1nodeID,T2nodeID) ,
+                                                                                                                     x =  -1 ,
+                                                                                                                     dims = dim(minimumNodeSeperatorsMatrix),
+                                                                                                                     dimnames = dimnames(minimumNodeSeperatorsMatrix))]
+
+                                                 minimumNodeSeperatorsMatrix <- minimumNodeSeperatorsMatrix + termianlPairValues
 
                                                  conConstraints %<>% c(minimumNodeSeperatorsMatrix)
                                                }
@@ -376,7 +378,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            edgeDT = data.table(),
                                            nodeDT = data.table(),
-                                         solver = character(),
+
+                                           solver = character(),
                                            verbosity = logical()
-                                   )
+                                         )
 )
