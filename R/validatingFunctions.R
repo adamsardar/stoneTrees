@@ -35,6 +35,7 @@ validateSingleInteger <- function(int2evaluate){
 
 
 #' @importFrom ensurer ensure
+#' @importFrom stringr str_c
 validateFlag <- function(flag2validate){
 
   flagName <- deparse(substitute(flag2validate))

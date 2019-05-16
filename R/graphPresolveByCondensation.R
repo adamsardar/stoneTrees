@@ -9,6 +9,7 @@
 #'
 #' @return A graph with neighbouring terminal and potential terminal nodes collapsed to the same node
 #' @seealso uncondenseGraph
+#' @importFrom stringr str_c
 #' @importFrom ensurer ensure
 condenseSearchGraph <- function(graphToCondense, condensedNodeSep = ";"){
 
