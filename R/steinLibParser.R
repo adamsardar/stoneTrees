@@ -6,6 +6,7 @@ globalVariables(c("edgeVerbosity","edgeInfo","rowIndex","terminalVerbosity","ter
 #' @references \url{http://steinlib.zib.de/format.php}
 #' @importFrom stringr str_match str_extract str_split
 #' @importFrom stats na.exclude
+#' @importFrom magrittr add
 parseSTPfile <- function(fileName){
 
   file.connection <- file(fileName,open="r")
@@ -100,6 +101,7 @@ globalVariables(c("edgeType","weight","nodeIndex"))
 #' @return steinerProblem An igraph object with vertex names and a per vertex flag 'isTerminal' which specifies if a node is a terminal or not.
 #'   Note that upon creation of the igraph object, node names (as defined in the STP file) and nodeIDs (as produced by igraph).
 #' @references \url{http://steinlib.zib.de/format.php}
+#' @importFrom magrittr add
 #' @export
 readMStTPgraph <- function(MStTPstpFile){
 
@@ -150,6 +152,7 @@ globalVariables(c("edgeType","weight","nodeIndex","nodeScore","start","end"))
 #' @return steinerProblem An igraph object with vertex names and a per vertex flag 'isTerminal' which specifies if a node is a terminal or not.
 #'   Note that upon creation of the igraph object, node names (as defined in the STP file) and nodeIDs (as produced by igraph).
 #' @references \url{http://steinlib.zib.de/format.php}
+#' @importFrom magrittr add
 #' @export
 readMWCSgraph <- function(MWCSstpFile){
 
