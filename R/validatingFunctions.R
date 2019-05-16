@@ -7,6 +7,9 @@ validateIsNetwork <- function(network2validate){
   network2validate %<>% ensure(is.igraph,
                                err_desc = "Input network must be an igraph object")
 
+  network2validate %<>% ensure(length(decompose(., mode = "weak")) == 1,
+                               err_desc = "Input network must a single connected component")
+
   invisible(network2validate)
 }
 
