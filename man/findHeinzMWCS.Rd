@@ -14,9 +14,9 @@ findHeinzMWCS(searchGraph_igraph, n.threads = 2,
 
 \item{induceSubgraph}{Flag to dictate if you would prefer a tree or the induced subgraph of the solution}
 
-\item{timeLimit}{The maximum number of seconds that the heinz binary should be allowed to run for (default: 600 seconds)}
+\item{verbose}{A flag that specifies if you want information on what the function is doing}
 
-\item{verbosity}{A flag that specifies if you want information on what the function is doing}
+\item{timeLimit}{The maximum number of seconds that the heinz binary should be allowed to run for (default: 600 seconds)}
 }
 \value{
 igraphModule An igraph representation of the solution (with induced edges from the original search graph if requested)
