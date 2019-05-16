@@ -191,7 +191,7 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
   expect_gt(sum(V(lymphoma_MWCS)$nodeScore),70)
   expect_true(is.connected(lymphoma_MWCS))
 
-  expect_equal(graph_attr(lymphoma_MWCS)$SearchNetwork,"lymphoma")
+  expect_equal(graph_attr(lymphoma_MWCS)$SearchNetwork, "lymphomaGraph")
 })
 
 test_that("Trying bespoke MWCS solver against the lymphoma.stp instance in the ACTMOD SteinLib set",{
