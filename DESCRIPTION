@@ -10,6 +10,7 @@ Description: A package aimed at solving Steiner ('stone') tree problems with uni
 License: MPL-2.0 | file LICENSE
 Encoding: UTF-8
 LazyData: true
+Depends: R (>= 3.1)
 Imports:
     data.table (>= 1.12),
     ensurer (>= 1.1),
