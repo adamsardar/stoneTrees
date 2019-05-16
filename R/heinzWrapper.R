@@ -12,7 +12,7 @@ globalVariables(c("score1","nodeA","nodeB","node","V1","V2"))
 #' @references D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics 26:08. 1129-1130 Apr.
 #' @importFrom utils write.table
 #' @export
-findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FALSE, verbosity = 0, timeLimit = 600){
+findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit = 600){
 
   interactomeName <- deparse(substitute(searchGraph_igraph))
 
@@ -29,8 +29,8 @@ findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FA
   edgelist %<>% .[nodeA %in% nodelist$node | nodeB %in% nodelist$node]
   nodelist %<>% .[node %in% edgelist$nodeA | node %in% edgelist$nodeB]
 
-  setnames(edgelist, c('nodeA'),c('#nodeA'))
-  setnames(nodelist, c('node'),c('#node'))
+  setnames(edgelist, c('nodeA'), c('#nodeA'))
+  setnames(nodelist, c('node'), c('#node'))
 
   MWCS.filename <- tempfile(pattern = "MWCSinput")
   MWCS.result <- tempfile(pattern = "MWCSresult")
@@ -38,48 +38,35 @@ findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FA
   nodelist %>% write.table(file = paste(c(MWCS.filename,'nodes'),collapse = '.'), quote = FALSE, row.names = FALSE)
   edgelist %>% unique.data.frame %>% write.table(file = paste(c(MWCS.filename,'edges'),collapse = '.'), quote = FALSE, row.names = FALSE)
 
-  showOutput <- TRUE
-
-  if(verbosity > 0){
-    print(paste0(c("Temp input file stub is: ",MWCS.filename),collapse=''))
-    showOutput <- FALSE
-  }
-
+  if(verbose){ message("Temp input file stub is: ",MWCS.filename) }
 
   system(paste(c("heinz -n ",MWCS.filename,".nodes -e ",MWCS.filename,".edges -m ",n.threads," -v ",verbosity," -o ",MWCS.result," -t ",timeLimit),collapse=''),
-         ignore.stdout = TRUE, ignore.stderr = showOutput)
+         ignore.stdout = TRUE, ignore.stderr = !verbose )
 
-  if(verbosity > 0){
-    print(paste0(c("Temp output file is: ",MWCS.result),collapse=''))
-  }
+  if(verbose){ message("Temp output file is: ",MWCS.result) }
 
   if(! file.exists(MWCS.result)){
     warning("No solution found by heinz within allowed time. Returning empty graph.")
     return(graph.empty())
   }
 
-  cplex.result <- fread(MWCS.result, header = FALSE) %>% .[! V1 %like% '#']
-  MWCS.nodes <- cplex.result[V2 != 'NaN',V1]
+  cplex.result <- fread(MWCS.result, header = FALSE)[! V1 %like% '#']
+  MWCS.nodes <- cplex.result[V2 != 'NaN', V1]
 
   MWCS.module <- induced.subgraph(searchGraph_igraph,vids = MWCS.nodes)
 
-  file.remove(paste(c(MWCS.filename,'nodes'),collapse = '.'))
-  file.remove(paste(c(MWCS.filename,'edges'),collapse = '.'))
+  file.remove(paste(c(MWCS.filename,'nodes'), collapse = '.'))
+  file.remove(paste(c(MWCS.filename,'edges'), collapse = '.'))
   file.remove(MWCS.result)
 
   MWCS.module %<>% set_graph_attr("SearchNetwork",interactomeName)
 
   if(induceSubgraph){
 
-    MWCS.module %<>% set_graph_attr("SamplingMethod","Induced Subgraph Of Maximum-Weight Connected Subgraph")
     return(MWCS.module)
-
   }else{
 
-    minSpanTree <- minimum.spanning.tree(MWCS.module)
-    minSpanTree %<>% set_graph_attr("SamplingMethod","Minimum Spanning Tree Of Maximum-Weight Connected Subgraph")
-
-    return(minSpanTree)
+    return( minimum.spanning.tree(MWCS.module) )
   }
 }
 
@@ -96,28 +83,20 @@ globalVariables("isTerminal")
 #' @references D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics 26:08. 1129-1130 Apr.
 #' @references \url{http://dimacs11.cs.princeton.edu/contest/challenge-results.pdf}
 #' @export
-findHeinzMStTP <- function(searchGraph.igraph, n.threads = 2, induceSubgraph = FALSE, verbosity = 0,timeLimit=600){
+findHeinzMStTP <- function(searchGraph.igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit=600){
 
   interactomeName <- deparse(substitute(searchGraph.igraph))
 
   terminalNodes <- V(searchGraph.igraph)[isTerminal == TRUE]$name
 
   V(searchGraph.igraph)$nodeScore <- -1
-  V(searchGraph.igraph)[name %in% terminalNodes]$nodeScore <- 100
+  V(searchGraph.igraph)[name %in% terminalNodes]$nodeScore <- 1000
 
   #It turns out that converting the problem to the MWCS and solving that is actually better than the dedicated MStTP solver in heinz
   sol_MSTtP <- findHeinzMWCS(searchGraph.igraph,n.threads = n.threads,
                 induceSubgraph = induceSubgraph,
-                verbosity = verbosity,
+                verbose = verbose,
                 timeLimit = timeLimit)
-
-  if(ecount(sol_MSTtP) == (vcount(sol_MSTtP)-1) ){
-
-    sol_MSTtP %<>% set_graph_attr("SamplingMethod","Minimum Spanning Tree")
-  }else{
-
-    sol_MSTtP %<>% set_graph_attr("SamplingMethod","Induced Subgraph Of Minimum Steiner Tree")
-  }
 
   sol_MSTtP %<>% set_graph_attr("SearchNetwork",interactomeName)
 
