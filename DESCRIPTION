@@ -15,8 +15,10 @@ Imports:
     ensurer (>= 1.1),
     igraph (>= 1.2),
     Matrix (>= 1.2),
+    magrittr (>= 1.0),
     R6 (>= 2.4),
-    Rglpk (>= 0.6)
+    Rglpk (>= 0.6),
+    stringr (>= 1.0)
 Suggests: 
     testthat (>= 2.1.0)
 RoxygenNote: 6.1.1
