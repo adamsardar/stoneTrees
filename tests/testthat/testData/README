@@ -1,1 +1,16 @@
 Data taken from DIMACS11 website: http://dimacs11.zib.de/downloads.html
+
+
+Steiner Tree Problems:
+
+GENE: These are Steiner arborescense problems (directed Steiner problems) from a genetic context. For more information see JKCMAKSFB00 . The graphs in these instances are layered (only have forward arcs).
+
+
+Maximum-Weight Connected Subgraph
+In the MWCS problem, the input is a graph with (possibly negative) node weights. The goal is to find a subtree that maximizes the sum of its node weights.
+
+ACTMOD: Instances from integrative biological network analysis, in which the task is to find active modules (sets of connected genes likely involved in a common cellular mechanism). Note that the instances are not necessarily connected. For a detailed description of the problem see Dittrich et al. (2008). These instances were made available for the challenge by Gunnar W. Klau and Mohammed El-Kebir.
+
+JMPALMK: Euclidean instances created by Álvares-Miranda et al. (2013) based on random geometric instances described by Johnson et al. (1999). Instances made available for the challenge by Gunnar W. Klau. (Last updated on November 10, 2014.)
+
+GAM: Instances from network enrichment analysis used to identify active modules, as described in Loboda et al. (2016). Instances made available after the challenge by Alexey A. Sergushichev.
