@@ -2,41 +2,40 @@ context('Testing graph condensation procedures')
 
 test_that("Check presolve on lymphoma",{
 
-  lymphoma_igraph <- readMWCSgraph('./testData/ACTMOD/lymphoma.stp')
-  lymphoma_MWCS <- solveNodeCentricSteinerTreeProblem(lymphoma_igraph,verbosity=0)
+  lymphoma_MWCS <- nodeCentricSteinerTreeProblem$new( lymphomaGraph, verbose = FALSE)$findSingleSteinerSolution()
 
-  condensedGraph <- condenseSearchGraph(lymphoma_igraph)
-  condensed_MWCS <- solveNodeCentricSteinerTreeProblem(condensedGraph,verbosity=0,presolveGraph=FALSE)
+  condensedGraph <- condenseSearchGraph(lymphomaGraph)
+  condensed_MWCS <- nodeCentricSteinerTreeProblem$new( condensedGraph, verbose = FALSE, presolveGraph = FALSE)$findSingleSteinerSolution()
 
-  expect_equal(sum(V(condensed_MWCS)$nodeScore),sum(V(lymphoma_MWCS)$nodeScore))
-  expect_equal(sort(V(condensed_MWCS)$name),sort(V(lymphoma_MWCS)$name))
+  expect_equal(sum(V(condensed_MWCS)$nodeScore), sum(V(lymphoma_MWCS)$nodeScore))
+
+  expect_equal(sort(V(uncondenseGraph(condensed_MWCS))$name), sort(V(lymphoma_MWCS)$name))
 })
 
 test_that("Check presolve on karate graph",{
 
-  data("karateGraph")
-
-  karateGraph_MStP <- solveNodeCentricSteinerTreeProblem(karateGraph,verbosity=0)
+  karateGraph_MStP <- nodeCentricSteinerTreeProblem$new( karateGraph, verbose = FALSE)$findSingleSteinerSolution()
 
   condensedGraph <- condenseSearchGraph(karateGraph)
-  condensed_MStTP <- solveNodeCentricSteinerTreeProblem(condensedGraph,verbosity=0,presolveGraph = FALSE)
+  condensed_MStTP <- nodeCentricSteinerTreeProblem$new( condensedGraph, verbose = FALSE, presolveGraph = FALSE)$findSingleSteinerSolution()
 
   expect_equal(sort(V(condensed_MStTP)[isTerminal]$name),sort(V(karateGraph_MStP)[isTerminal]$name))
-  expect_equal(sort(V(condensed_MStTP)$name),sort(V(karateGraph_MStP)$name))
+
+  expect_equal(sort(V(uncondenseGraph(condensed_MStTP))$name),sort(V(karateGraph_MStP)$name))
 })
 
 
 test_that("Check that a fully connected input graph is dealt with properly",{
-
-  data("karateGraph")
 
   connectedSubNetNodes <- c('q','g','f')
 
   V(karateGraph)$isTerminal <- FALSE
   V(karateGraph)[name %in% connectedSubNetNodes]$isTerminal <- TRUE
 
-  noPresolveRes <- solveNodeCentricSteinerTreeProblem(karateGraph, presolveGraph = FALSE)
-  presolvedRes <- solveNodeCentricSteinerTreeProblem(karateGraph, presolveGraph = TRUE)
+  noPresolveRes <- nodeCentricSteinerTreeProblem$new( karateGraph, verbose = FALSE, presolveGraph = FALSE)$findSingleSteinerSolution()
+  presolvedRes <- nodeCentricSteinerTreeProblem$new( karateGraph, verbose = FALSE, presolveGraph = TRUE)$findSingleSteinerSolution()
+
+  presolveStein <- nodeCentricSteinerTreeProblem$new( karateGraph, verbose = FALSE, presolveGraph = TRUE)
 
   expect_equal(vcount(noPresolveRes),vcount(presolvedRes))
   expect_equal(ecount(noPresolveRes),ecount(presolvedRes))

@@ -6,7 +6,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
 
-                                           initialize = function(network, solverChoice = "GLPK", verbose = TRUE){
+                                           initialize = function(network, solverChoice = "GLPK", verbose = TRUE, presolveGraph = TRUE){
 
 
                                              # TODO validate solver (and that solver is available)
@@ -22,7 +22,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              # TODO incoprorate a presolve step. This can often hugely improve the runtime of a solution
 
                                              if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
-                                             private$searchGraph <- network %>% as.undirected %>% simplify %>% set_graph_attr("SearchNetwork", interactomeName)
+
+                                             inputGraph <- network %>% as.undirected %>% simplify
+                                             if(presolveGraph){inputGraph <- condenseSearchGraph(inputGraph)} #graph condensation is a presolve step
+
+                                             private$searchGraph <-  set_graph_attr(inputGraph, "SearchNetwork", interactomeName)
                                              V(private$searchGraph)$.nodeID <- 1:vcount(private$searchGraph) #Assign a unique node integer to each node
                                              E(private$searchGraph)$.edgeID <- 1:ecount(private$searchGraph)
 
@@ -104,7 +108,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                itrCount %<>% add(1)
                                              }
 
-                                             return( private$solutionGraph )
+                                             return( uncondenseGraph(private$solutionGraph) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
                                            },
 
                                            getNodeDT = function(){ private$nodeDT },
@@ -208,13 +212,13 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              # Break solution into connected components. If only a single component, then we're done
                                              componentsSummaryDT <- private$nodeDT[!is.na(inComponent), .N, by = inComponent]
-                                             terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent)][.nodeID %in% private$potentialTerminalIndices]
+                                             terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent)][.nodeID %in% private$terminalIndices]
 
                                              if(private$verbosity){
 
                                                message(ifelse( self$isSolutionConnected() , "##Solution is connected!##", "##Solution is disconnected!##"))
-                                               message("With ", componentsSummaryDT[,sum(N)]," nodes, ", nrow(terminalsInComponentsDT)," potential terminals and ",
-                                                       terminalsInComponentsDT[isTerminal == TRUE, nrow(.SD)], " fixed terminals across ", nrow(componentsSummaryDT), " components.")
+                                               message("With ", componentsSummaryDT[,sum(N)]," nodes, ", nrow(terminalsInComponentsDT)," potential terminal(s) and ",
+                                                       terminalsInComponentsDT[isTerminal == TRUE, nrow(.SD)], " fixed terminal(s) across ", nrow(componentsSummaryDT), " component(s).")
                                              }
 
                                              # Only add additional constraints if required
@@ -311,14 +315,14 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              if(private$verbosity) message("SOLVING ...")
 
-                                             if(length(private$potentialTerminalIndices) == 1){
+                                             if(length(private$terminalIndices) == 1){
 
-                                               message("Only a single potential termianl - a trivial solution")
-                                               solutionIndices <- private$potentialTerminalIndices
+                                               if(private$verbosity) message("Only a single potential terminal (in the possibly presolved graph) - a trivial solution")
+                                               solutionIndices <- private$terminalIndices
                                              }else{
 
                                                # TODO set timeout
-                                               # TODO incorporate solve independence
+                                               # TODO incorporate solver independence
 
                                                GLPKsolution <- Rglpk_solve_LP(
 

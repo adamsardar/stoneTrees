@@ -28,7 +28,7 @@ condenseSearchGraph <- function(graphToCondense, condensedNodeSep = ";"){
 
   positiveScoringNodeGraph <- induced_subgraph(graphToCondense, V(graphToCondense)[nodeScore > 0 | isTerminal])
 
-  if(vcount(positiveScoringNodeGraph)){stop("No prize terminals in input graph!")}
+  if(vcount(positiveScoringNodeGraph) == 0){stop("No prize terminals in input graph!")}
 
   graphSegments <- decompose.graph(positiveScoringNodeGraph)
   V(graphToCondense)$condensedNode <- FALSE
@@ -43,12 +43,10 @@ condenseSearchGraph <- function(graphToCondense, condensedNodeSep = ";"){
     segmentProperties <- list(name = vertex_attr(graphSegment,name="name") %>% str_c(collapse = condensedNodeSep),
                               condensedNode = TRUE)
 
-    if("isTerminal" %in% veretexAttr){  segmentProperties$isTerminal <- TRUE }
+    segmentProperties$isTerminal <- any(V(graphSegment)$isTerminal)
 
-    if("nodeScore" %in% veretexAttr){
-      totalSegmentScore <- sum(V(graphSegment)$nodeScore)
-      segmentProperties$nodeScore <- totalSegmentScore
-    }
+    totalSegmentScore <- sum(V(graphSegment)$nodeScore)
+    segmentProperties$nodeScore <- totalSegmentScore
 
     #Grab all neighbours of nodes to condense
     neighbouringNodes <- ego(graphToCondense, order=1, nodes = V(graphSegment)$name) %>% unlist %>% unique %>%
