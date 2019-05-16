@@ -316,35 +316,43 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                solutionIndices <- private$terminalIndices
                                              }else{
 
-                                               # TODO set timeout
-                                               # TODO incorporate solver independence
 
-                                               GLPKsolution <- Rglpk_solve_LP(
+                                               functionArgs <- list(
 
-                                                 obj = private$nodeDT[order(.nodeID), nodeScore],
+                                                 cVec = private$nodeDT[order(.nodeID), nodeScore],
 
-                                                 mat = rbind(private$fixedTerminalConstraints$variables,
-                                                             private$nodeDegreeConstraints$variables,
-                                                             private$twoCycleConstraints$variables,
-                                                             private$connectivityConstraints$variables),
+                                                 Amat = rbind(private$fixedTerminalConstraints$variables,
+                                                              private$nodeDegreeConstraints$variables,
+                                                              private$twoCycleConstraints$variables,
+                                                              private$connectivityConstraints$variables),
 
-                                                 dir = c(private$fixedTerminalConstraints$directions,
-                                                         private$nodeDegreeConstraints$directions,
-                                                         private$twoCycleConstraints$directions,
-                                                         private$connectivityConstraints$directions),
+                                                 bVec = c(private$fixedTerminalConstraints$rhs,
+                                                          private$nodeDegreeConstraints$rhs,
+                                                          private$twoCycleConstraints$rhs,
+                                                          private$connectivityConstraints$rhs),
 
-                                                 rhs = c(private$fixedTerminalConstraints$rhs,
-                                                         private$nodeDegreeConstraints$rhs,
-                                                         private$twoCycleConstraints$rhs,
-                                                         private$connectivityConstraints$rhs),
+                                                 vtypeVec = "B",
 
-                                                 max = TRUE,
+                                                 senseVec = c(private$fixedTerminalConstraints$directions,
+                                                              private$nodeDegreeConstraints$directions,
+                                                              private$twoCycleConstraints$directions,
+                                                              private$connectivityConstraints$directions),
 
-                                                 control = list(verbose = private$verbosity),
+                                                 cplexParamList = list(trace = as.integer(private$verbosity),
+                                                                       tilim = 300)
+                                               )
 
-                                                 types = "B")
+                                               MILPsolve <- switch(private$solverMethod,
+                                                                   CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
+                                                                   RCPLEX = do.call("solver_CPLEX", functionArgs),
+                                                                   CPLEX = do.call("solver_CPLEXapi", functionArgs),
+                                                                   LPSOLVE = do.call("solver_LPSOLVE", functionArgs),
+                                                                   GLPK = do.call("solver_GLPK", functionArgs),
+                                                                   SYMPHONY = do.call("solver_SYMPHONY", functionArgs))
 
-                                               solutionIndices <- which(GLPKsolution$solution > 0)
+                                               solVec = round(MILPsolve$solution)
+
+                                               solutionIndices <- which(solVec > 0)
                                              }
 
                                              # Induce subgraph and assign nodes to components
