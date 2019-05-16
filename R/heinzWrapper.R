@@ -11,10 +11,11 @@ globalVariables(c("score1","nodeA","nodeB","node","V1","V2"))
 #' @references M. T. Dittrich, G. W. Klau, A. Rosenwald, T. Dandekar and T. Mueller (2008) Identifying functional modules in protein-protein interaction networks: an integrated exact approach. (ISMB2008) Bioinformatics 24: 13. i223-i231 Jul.
 #' @references D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics 26:08. 1129-1130 Apr.
 #' @importFrom utils write.table
-#' @export
 findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit = 600){
 
   interactomeName <- deparse(substitute(searchGraph_igraph))
+
+  if(!Sys.which("heinz") %like% "heinz"){stop("heinz binary must be on search path!!")}
 
   #Heinz doesn't like undirected graphs - clearly there's some CPLEX constraint that can end up in a loop.
   searchGraph_UndirectedIgraph <- searchGraph_igraph %>% simplify %>% as.undirected
@@ -82,7 +83,6 @@ globalVariables("isTerminal")
 #' @references M. T. Dittrich, G. W. Klau, A. Rosenwald, T. Dandekar and T. Mueller (2008) Identifying functional modules in protein-protein interaction networks: an integrated exact approach. (ISMB2008) Bioinformatics 24: 13. i223-i231 Jul.
 #' @references D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics 26:08. 1129-1130 Apr.
 #' @references \url{http://dimacs11.cs.princeton.edu/contest/challenge-results.pdf}
-#' @export
 findHeinzMStTP <- function(searchGraph.igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit=600){
 
   interactomeName <- deparse(substitute(searchGraph.igraph))
