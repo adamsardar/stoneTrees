@@ -4,7 +4,7 @@ globalVariables(c("score1","nodeA","nodeB","node","V1","V2"))
 #' @param searchGraph_igraph The igraph representation of the graph that we look to search over with the MWCS solver
 #' @param induceSubgraph Flag to dictate if you would prefer a tree or the induced subgraph of the solution
 #' @param n.threads Specifies the maximum number of threads that the heinz binary can use
-#' @param verbosity A flag that specifies if you want information on what the function is doing
+#' @param verbose A flag that specifies if you want information on what the function is doing
 #' @param timeLimit The maximum number of seconds that the heinz binary should be allowed to run for (default: 600 seconds)
 #' @return igraphModule An igraph representation of the solution (with induced edges from the original search graph if requested)
 #' @references An algorithmic framework for the exact solution of the prize-collecting Steiner tree problem. Mathematical Programming, Series B, 105(2-3):427-449, 2006, by I. Ljubic, R. Weiskircher, U. Pferschy, G. Klau, P. Mutzel, and M. Fischetti.
@@ -41,7 +41,7 @@ findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FA
 
   if(verbose){ message("Temp input file stub is: ",MWCS.filename) }
 
-  system(paste(c("heinz -n ",MWCS.filename,".nodes -e ",MWCS.filename,".edges -m ",n.threads," -v ",verbosity," -o ",MWCS.result," -t ",timeLimit),collapse=''),
+  system(paste(c("heinz -n ",MWCS.filename,".nodes -e ",MWCS.filename,".edges -m ",n.threads," -v ",as.integer(verbose)," -o ",MWCS.result," -t ",timeLimit),collapse=''),
          ignore.stdout = TRUE, ignore.stderr = !verbose )
 
   if(verbose){ message("Temp output file is: ",MWCS.result) }
