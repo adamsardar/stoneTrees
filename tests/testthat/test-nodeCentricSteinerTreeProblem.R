@@ -128,12 +128,12 @@ test_that("Ensure that incorrect constructor inputs are not tolerated", {
                info = "Class should fail when a nonsense solver choice is given")
 
   expect_error(nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = "notAboolean"),
-               regexp = "verbose",
+               regexp = "boolean",
                info = "Class should fail when a nonsense verbosity choice is given")
 
   disconnectedGraph <- add.vertices(lymphomaGraph, 1)
 
-  expect_error(nodeCentricSteinerTreeProblem$new(disconnectedGraph, verbose = "notAboolean"),
+  expect_error(nodeCentricSteinerTreeProblem$new(disconnectedGraph),
                regexp = "single connected component",
                info = "Class should fail when a disconnected graph is provided")
 })
@@ -151,7 +151,7 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
 
   karateGraph_MSTP <- nodeCentricSteinerTreeProblem$new(karateGraph, verbose = FALSE)$findSingleSteinerSolution()
   expect_true(is.connected(karateGraph_MSTP))
-  expect_true(vcount(karateGraph_MSTP) == 4) # Within 5% of the known optimum
+  expect_true(vcount(karateGraph_MSTP) == 4)
 
   expect_false(is.null(graph_attr(karateGraph_MSTP)$SearchNetwork))
   expect_equal(graph_attr(karateGraph_MSTP)$SearchNetwork,"karateGraph")
