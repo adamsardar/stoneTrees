@@ -19,7 +19,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              interactomeName <- deparse(substitute(network))
 
-                                             # TODO incoprorate a presolve step. This can often hugely improve the runtime of a solution
+                                             validateIsNetwork(network)
 
                                              if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
 
