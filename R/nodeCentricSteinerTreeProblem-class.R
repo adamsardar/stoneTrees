@@ -8,14 +8,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            initialize = function(network, solverChoice = "GLPK", verbose = TRUE, presolveGraph = TRUE){
 
+                                             private$solver <- solverChoiceValidator(solverChoice)
 
-                                             # TODO validate solver (and that solver is available)
-                                             private$solver <- solverChoice
-
-                                             #TODO validate verbose
-                                             private$verbosity <- verbose
-
-
+                                             private$verbosity <- validateFlag(verbose)
 
                                              interactomeName <- deparse(substitute(network))
 

@@ -47,4 +47,14 @@ validateFlag <- function(flag2validate){
   invisible(flag2validate)
 }
 
+#' @importFrom  ensurer ensure
+solverChoiceValidator <- function(candidateSolverChoice){
+
+  candidateSolverChoice %<>%  ensure(is.character,
+                                     toupper(.) %in% c("CPLEX","GLPK","SYMPHONY","LPSOLVE"),
+                                     err_desc = "At current only CPLEX, GLPK, SYMPHONY and LPSOLVE solvers are supported")
+
+  invisible(toupper(candidateSolverChoice))
+}
+
 is.whole.number <- function(x){ x == as.integer(x)}
