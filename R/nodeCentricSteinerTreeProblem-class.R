@@ -6,7 +6,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
 
-                                           initialize = function(network, solverChoice = "GLPK", verbose = TRUE, presolveGraph = TRUE){
+                                           initialize = function(network, solverChoice = "LPSOLVE", verbose = TRUE, presolveGraph = TRUE){
 
                                              private$solver <- solverChoiceValidator(solverChoice)
 
@@ -342,8 +342,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                                        tilim = 300)
                                                )
 
-                                               MILPsolve <- switch(private$solverMethod,
-                                                                   CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
+                                               MILPsolve <- switch(private$solver ,
+                                                                    # CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                                                                    RCPLEX = do.call("solver_CPLEX", functionArgs),
                                                                    CPLEX = do.call("solver_CPLEXapi", functionArgs),
                                                                    LPSOLVE = do.call("solver_LPSOLVE", functionArgs),

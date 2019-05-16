@@ -15,5 +15,4 @@
 #' @import igraph
 #' @import Matrix
 #' @importFrom magrittr "%<>%"
-#' @import Rglpk
 NULL
