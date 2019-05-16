@@ -10,18 +10,18 @@ inspectNodeCentricSteinerTreeObjectCreation <- function(testGraph){
 
     if(is.directed(testGraph)){
 
-      expect_warning(testSteinObject <- nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE),
+      expect_warning(testSteinObject <- nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE, presolveGraph = FALSE),
                      regexp = "directed",
                      info = "Directed graphs are cast to undirected with a warning")
     }
 
     testGraph <- as.undirected(testGraph)
 
-    expect_message(testSteinObject <- nodeCentricSteinerTreeProblem$new(testGraph, verbose = TRUE),
+    expect_message(testSteinObject <- nodeCentricSteinerTreeProblem$new(testGraph, verbose = TRUE, presolveGraph = FALSE),
                    regexp = "constraints",
                    info = "verbose flag should control diagnostic printing")
 
-    expect_silent(nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE))
+    expect_silent(nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE, presolveGraph = FALSE))
 
     # Inspect fixed terminal constraints
     expect_equal( dim(testSteinObject$getFixedTerminalConstraints()$variables),
@@ -146,8 +146,6 @@ inspectNodeCentricSteinerTreeObjectCreation(lymphomaGraph)
 
 # seed based - medium sized
 inspectNodeCentricSteinerTreeObjectCreation(gene42_igraph)
-
-# TODO - include more Stein Lib examples
 
 test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a small MStTP",{
 
