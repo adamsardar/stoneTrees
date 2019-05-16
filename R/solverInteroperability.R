@@ -16,7 +16,7 @@ solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamL
   MILPsolve <- Rcplex::Rcplex(cvec = cVec,
                         Amat = Amat,
                         bvec = bVec,
-                        sense = senseVec,
+                        sense = unlist(list("<" = "l", "<=" = "L", "==" = "E", ">=" = "G", ">" = "g")[senseVec]),
                         objsense = "max",
                         vtype = vtypeVec,
                         control = cplexParamList,
@@ -32,42 +32,42 @@ solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamL
 #' @importFrom utils installed.packages
 #' @importFrom parallel detectCores
 solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0)){
-  
+
   if(!"cplexAPI" %in% rownames(installed.packages())) stop("cplexAPI must be installed in order to use the CPLEX solver")
-  
+
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
   if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
-  
+
   if(!is.null(cplexParamList$trace)) cplexParamList$trace %<>% as.integer
   if(!is.null(cplexParamList$tilim)) cplexParamList$tilim %<>% as.numeric
   if(!is.null(cplexParamList$nThreads)) cplexParamList$nThreads %<>% as.integer
-  
+
   Acpx <- toCPXMatrix(Amat)
-  
+
   env <- cplexAPI::openEnvCPLEX()
-  
+
   prob <- cplexAPI::initProbCPLEX(env, pname = "RankMatrixDecompostion")
-  
+
   if(cplexParamList$trace > 0){ cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_SCRIND, cplexAPI::CPX_ON) }
   if(!is.null(cplexParamList$tilim)){ cplexAPI::setDblParmCPLEX(env, cplexAPI::CPX_PARAM_TILIM, cplexParamList$tilim) }
-  
+
   if(!is.null(cplexParamList$nThreads)){
-    
-    cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_THREADS, cplexParamList$nThreads) 
+
+    cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_THREADS, cplexParamList$nThreads)
   }else{
-    
+
     cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_THREADS, as.integer( max(c(detectCores() - 4,1, na.rm = TRUE))) )
   }
 
-  cplexAPI::copyLpCPLEX(env = env, 
-                        lp = prob, 
-                        nCols = ncol(Amat), 
+  cplexAPI::copyLpCPLEX(env = env,
+                        lp = prob,
+                        nCols = ncol(Amat),
                         nRows = nrow(Amat),
-                        lpdir = cplexAPI::CPX_MAX, 
+                        lpdir = cplexAPI::CPX_MAX,
                         objf = unname(cVec),
                         rhs = bVec,
-                        sense = senseVec,
+                        sense = unlist(list("<" = "l", "<=" = "L", "==" = "E", ">=" = "G", ">" = "g")[senseVec]),
                         matbeg = Acpx$matbeg,
                         matcnt = Acpx$matcnt,
                         matind = Acpx$matind,
@@ -75,21 +75,21 @@ solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPar
                         lb = rep(0,length(cVec)) ,
                         ub = rep(1,length(cVec)),
                         rngval = NULL)
-  
+
   cplexAPI::copyColTypeCPLEX(env = env,
                    lp = prob,
                    xctype = vtypeVec)
-  
+
   cplexAPI::mipoptCPLEX(env, prob)
-  
+
   MILPsolve <- cplexAPI::solutionCPLEX(env, prob)
-  
+
   cplexAPI::delProbCPLEX(env, prob)
-  
+
   cplexAPI::closeEnvCPLEX(env)
-  
+
   MILPsolve$solution <- MILPsolve$x
-  
+
   return(MILPsolve)
 }
 
@@ -109,11 +109,11 @@ solver_GLPK <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLi
   MILPsolve <- Rglpk::Rglpk_solve_LP(obj = cVec,
                                mat = Amat,
                                rhs = bVec,
-                               dir = unlist(list(l = "<", L = "<=", E = "==", G = ">=", g = ">")[senseVec]),
+                               dir = sesneVec,
                                max = TRUE,
                                types = vtypeVec,
                                control = glpkParamList)
-  
+
   return(MILPsolve)
 }
 
@@ -128,7 +128,7 @@ solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPa
   MILPsolve <- lpsymphony_solve_LP(obj = cVec,
                              mat = as.simple_triplet_matrix(Amat),
                              rhs = bVec,
-                             dir = unlist(list(l = "<", L = "<=", E = "==", G = ">=", g = ">")[senseVec]),
+                             dir = senseVec,
                              max = TRUE,
                              types = vtypeVec,
                              time_limit = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
