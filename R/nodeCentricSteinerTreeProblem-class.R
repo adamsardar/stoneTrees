@@ -8,16 +8,21 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            initialize = function(network, solverChoice = "GLPK", verbose = TRUE){
 
+
                                              # TODO validate solver (and that solver is available)
                                              private$solver <- solverChoice
 
                                              #TODO validate verbose
                                              private$verbosity <- verbose
 
+
+
+                                             interactomeName <- deparse(substitute(network))
+
                                              # TODO incoprorate a presolve step. This can often hugely improve the runtime of a solution
-                                             # TODO check network (particularly that it is named)
+
                                              if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
-                                             private$searchGraph <- network %>% as.undirected %>% simplify
+                                             private$searchGraph <- network %>% as.undirected %>% simplify %>% set_graph_attr("SearchNetwork", interactomeName)
                                              V(private$searchGraph)$.nodeID <- 1:vcount(private$searchGraph) #Assign a unique node integer to each node
                                              E(private$searchGraph)$.edgeID <- 1:ecount(private$searchGraph)
 
