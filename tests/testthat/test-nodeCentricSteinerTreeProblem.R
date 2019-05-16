@@ -148,3 +148,59 @@ inspectNodeCentricSteinerTreeObjectCreation(lymphomaGraph)
 inspectNodeCentricSteinerTreeObjectCreation(gene42_igraph)
 
 # TODO - include more Stein Lib examples
+
+test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a small MStTP",{
+
+  karateGraph_MSTP <- nodeCentricSteinerTreeProblem$new(karateGraph, verbose = FALSE)$findSingleSteinerSolution()
+  expect_true(is.connected(karateGraph_MSTP))
+  expect_true(vcount(karateGraph_MSTP) == 4) # Within 5% of the known optimum
+
+  expect_false(is.null(graph_attr(karateGraph_MSTP)$SearchNetwork))
+  expect_equal(graph_attr(karateGraph_MSTP)$SearchNetwork,"karateGraph")
+})
+
+test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a medium MStTP",{
+
+    if(!"RCplex" %in% .packages(all.available = TRUE)){skip("SteinLib test takes too long using GLPK")}
+
+    gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
+    expect_true(is.connected(gene42_MSTP))
+    expect_true(vcount(gene42_MSTP) <= 1.05*126) # Within 5% of the known optimum
+
+    expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
+    expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"gene42_igraph")
+})
+
+test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a medium MStTP",{
+
+  if(!"RCplex" %in% .packages(all.available = TRUE)){skip("SteinLib test takes too long using GLPK")}
+
+  gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
+  expect_true(is.connected(gene42_MSTP))
+  expect_true(vcount(gene42_MSTP) <= 1.05*126) # Within 5% of the known optimum
+
+  expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
+  expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"gene42_igraph")
+})
+
+test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against an easy MWCS",{
+
+  lymphoma_MWCS <- nodeCentricSteinerTreeProblem$new( lymphomaGraph, verbose = FALSE)$findSingleSteinerSolution()
+
+  expect_equal(vcount(lymphoma_MWCS),46)
+  expect_gt(sum(V(lymphoma_MWCS)$nodeScore),70)
+  expect_true(is.connected(lymphoma_MWCS))
+
+  expect_equal(graph_attr(lymphoma_MWCS)$SearchNetwork,"lymphoma")
+})
+
+test_that("Trying bespoke MWCS solver against the lymphoma.stp instance in the ACTMOD SteinLib set",{
+
+  skip("SteinLib drosophila test takes too long even using CPLEX - although it does pass!")
+
+  drosophila001_igraph <- readMWCSgraph('./testData/ACTMOD/drosophila001.stp')
+
+  #2 hour time out
+  #drosophila001_MWCS <- solveNodeCentricSteinerTreeProblem(drosophila001_igraph, timeOut = 7200,verbosity = verb)
+})
+
