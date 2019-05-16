@@ -130,6 +130,12 @@ test_that("Ensure that incorrect constructor inputs are not tolerated", {
   expect_error(nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = "notAboolean"),
                regexp = "verbose",
                info = "Class should fail when a nonsense verbosity choice is given")
+
+  disconnectedGraph <- add.vertices(lymphomaGraph, 1)
+
+  expect_error(nodeCentricSteinerTreeProblem$new(disconnectedGraph, verbose = "notAboolean"),
+               regexp = "single connected component",
+               info = "Class should fail when a disconnected graph is provided")
 })
 
 # Seed based - small
