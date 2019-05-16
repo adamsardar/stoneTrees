@@ -14,8 +14,9 @@ image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
 etxR-stable:
     stage: test
     script:
-      - export _R_CHECK_FORCE_SUGGESTS_=0 
+      - export _R_CHECK_FORCE_SUGGESTS_=0
       - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
+      - R -q -e 'install.packages("lpSolve")'
       - R -q -e 'devtools::install_deps(".",dependencies = c("Imports"))'
       - R CMD build .
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
@@ -34,8 +35,9 @@ etxR-bleed:
     stage: test
     allow_failure: true
     script:
-      - export _R_CHECK_FORCE_SUGGESTS_=0 
+      - export _R_CHECK_FORCE_SUGGESTS_=0
       - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
+      - R -q -e 'install.packages("lpSolve")'
       - R -q -e 'devtools::install_deps(".",dependencies = c("Imports"))'
       - R CMD build . --no-build-vignettes --no-manual
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
@@ -48,7 +50,7 @@ etxR-bleed:
       - ./*.Rcheck
     only:
       - master
-      
+
 deploy_artifactory:
     stage: deploy
     when: manual
@@ -59,7 +61,7 @@ deploy_artifactory:
        - jfrog rt config -url "${ARTIFACTORY_URL}" --apikey "${APIKEY}"
        - mkdir etxCRAN
        - echo $PKG_FILE_NAME
-       - Rscript -e  'pkgs <- miniCRAN::pkgAvail("http://artifactory.etx.local/artifactory/etxCRAN/"); suppressWarnings(miniCRAN::makeRepo(row.names(pkgs), path="./etxCRAN", repos="http://artifactory.etx.local/artifactory/etxCRAN/", type=c("source", "win.binary","mac.binary")));'  
+       - Rscript -e  'pkgs <- miniCRAN::pkgAvail("http://artifactory.etx.local/artifactory/etxCRAN/"); suppressWarnings(miniCRAN::makeRepo(row.names(pkgs), path="./etxCRAN", repos="http://artifactory.etx.local/artifactory/etxCRAN/", type=c("source", "win.binary","mac.binary")));'
        - Rscript -e  'drat::insertPackage(Sys.getenv("PKG_FILE_NAME"), repodir = "./etxCRAN", action="archive")'
        - cd etxCRAN/
        - jfrog rt del --quiet=true "etxCRAN/src/contrib/$PKG_STUB*"
