@@ -143,7 +143,7 @@ solver_LPSOLVE <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPara
 
 solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0)){
 
-  if(! all( c("Rglpk","slam") %in% .packages(all.available = TRUE)) ) stop("Rglpk and slam must both be installed in order to use the GLPK solver")
+  if(! all( c("lpsymphony","slam") %in% .packages(all.available = TRUE)) ) stop("lpsymphony and slam must both be installed in order to use the GLPK solver")
 
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
