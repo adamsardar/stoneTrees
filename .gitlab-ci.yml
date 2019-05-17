@@ -73,6 +73,27 @@ etxR-bleed-lpSolve:
     only:
       - master
 
+# Explore graalvm build
+graalvm-stable-lpSolve:
+    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:fastr
+    stage: test
+    script:
+      - export _R_CHECK_FORCE_SUGGESTS_=0
+      - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
+      - R -q -e 'install.packages( c("lpSolve") )'
+      - R -q -e 'devtools::install_deps(".",dependencies = c("Imports"))'
+      - R CMD build .
+      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+      - R CMD check "${PKG_FILE_NAME}"
+      - R -q -e 'if(any(grepl("WARNING",list.files("/builds/",pattern = "00check.log", recursive = TRUE, full.names=TRUE)))) stop("R CMD check must not report any WARNINGS in order for a build to be considered successful")'
+    artifacts:
+      expire_in: 1 weeks
+      when: always
+      paths:
+      - ./*.Rcheck
+      only:
+      - master
+
 deploy_artifactory:
     stage: deploy
     when: manual
