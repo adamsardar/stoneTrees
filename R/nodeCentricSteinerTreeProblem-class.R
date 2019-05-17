@@ -14,6 +14,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              validateIsNetwork(network)
                                              if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
 
+
+                                             private$graphPresolved <- validateFlag(presolveGraph)
                                              inputGraph <- network %>% as.undirected %>% simplify
                                              if(presolveGraph){inputGraph <- condenseSearchGraph(inputGraph)} #graph condensation is a presolve step
 
@@ -50,9 +52,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              private$fixedTerminalIndices <- private$nodeDT[isTerminal == TRUE, .nodeID] # Fixed terminals must be included in a solution
                                              private$potentialTerminalIndices <- private$nodeDT[nodeScore > 0, .nodeID] # potential terminals are those with nodeScore greater than 0
 
-                                             private$terminalIndices <- unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))
-                                             # Check that there are *some* potential terminals, otherwise error
-                                             if(length(private$terminalIndices) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScore and/or isTerminal vertex attributes!")
+                                             # Check that there are *some* terminals, otherwise error
+                                             if(length( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScore and/or isTerminal vertex attributes!")
 
                                              # edgeDT - both directions for each arc
                                              private$edgeDT <- get.data.frame(as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>% data.table %>% unique
@@ -82,7 +83,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              return(list(fixedTerminals = private$fixedTerminalIndices,
                                                          potentialTerminals = private$potentialTerminalIndices,
-                                                         terminals = private$terminalIndices))
+                                                         terminals = unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)) ))
                                            },
 
                                            findSingleSteinerSolution = function(maxItr = 20){
@@ -142,7 +143,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              nodeDegreeInequalities_variables <- get.adjacency(private$searchGraph, sparse = TRUE)
                                              diag(nodeDegreeInequalities_variables) <- -2
-                                             diag(nodeDegreeInequalities_variables)[ private$terminalIndices ] <- -1
+                                             diag(nodeDegreeInequalities_variables)[unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))] <- -1
 
                                              private$nodeDegreeConstraints <- list(
                                                variables = nodeDegreeInequalities_variables,
@@ -205,7 +206,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              # Break solution into connected components. If only a single component, then we're done
                                              componentsSummaryDT <- private$nodeDT[!is.na(inComponent), .N, by = inComponent]
-                                             terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent)][.nodeID %in% private$terminalIndices]
+                                             terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent)][.nodeID %in% unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))]
 
                                              if(private$verbosity){
 
@@ -219,7 +220,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                                # Create terminal pairs
                                                # Filter for terminal pairs in different components
-                                               allTerminalPairs <- combn( private$terminalIndices, 2) %>% t %>% as.data.table
+                                               allTerminalPairs <- combn( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)), 2) %>% t %>% as.data.table
                                                setnames(allTerminalPairs, c("T1nodeID","T2nodeID")) # Note that we are working by node indicies here to avoid using node names
 
                                                allTerminalPairs[private$nodeDT, "T1inComponent" := inComponent, on = .(T1nodeID = .nodeID)]
@@ -308,10 +309,10 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              if(private$verbosity) message("SOLVING ...")
 
-                                             if(length(private$terminalIndices) == 1){
+                                             if(length(unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)) ) == 1){
 
                                                if(private$verbosity) message("Only a single terminal (in the possibly presolved graph) - a trivial solution")
-                                               solutionIndices <- private$terminalIndices
+                                               solutionIndices <- unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))
                                              }else{
 
 
@@ -374,8 +375,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            solutionGraph = graph.empty(),
 
-                                              # Work with integers rather than names
-                                           terminalIndices = integer(),
+                                           # Work with integers rather than names
                                            fixedTerminalIndices = integer(),
                                            potentialTerminalIndices = integer(),
 
@@ -391,6 +391,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                            solver = character(),
                                            solverTimeLimit = integer(),
 
+                                           graphPresolved = logical(),
                                            verbosity = logical()
                                          )
 )
