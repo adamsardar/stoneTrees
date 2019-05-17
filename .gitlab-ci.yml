@@ -16,7 +16,7 @@ etxR-stable:
     script:
       - export _R_CHECK_FORCE_SUGGESTS_=0
       - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
-      - R -q -e 'install.packages("lpSolve")'
+      - R -q -e 'install.packages( c("lpSolve","slam") )'
       - R -q -e 'devtools::install_deps(".",dependencies = c("Imports"))'
       - R CMD build .
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
