@@ -1,12 +1,9 @@
 
-# TODO input validation
-
-
 nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
 
-                                           initialize = function(network, solverChoice = "LPSOLVE", verbose = TRUE, presolveGraph = TRUE){
+                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE){
 
                                              private$solver <- solverChoiceValidator(solverChoice)
 
@@ -343,12 +340,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                )
 
                                                MILPsolve <- switch(private$solver ,
-                                                                    # CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                                                                    RCPLEX = do.call("solver_CPLEX", functionArgs),
-                                                                   CPLEX = do.call("solver_CPLEXapi", functionArgs),
+                                                                   CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                                                                    LPSOLVE = do.call("solver_LPSOLVE", functionArgs),
-                                                                   GLPK = do.call("solver_GLPK", functionArgs),
-                                                                   SYMPHONY = do.call("solver_SYMPHONY", functionArgs))
+                                                                   RGLPK = do.call("solver_GLPK", functionArgs),
+                                                                   LPSYMPHONY = do.call("solver_SYMPHONY", functionArgs))
 
                                                solVec = round(MILPsolve$solution)
 

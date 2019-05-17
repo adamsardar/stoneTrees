@@ -1,5 +1,12 @@
 globalVariables(c("."))
 
+chooseSolver <- function(){
+
+  solvers <- c("Rcplex", "cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony")
+
+  return( toupper(solvers[solvers %in% .packages(all.available = "TRUE")][1]) )
+}
+
 # Note that Rcplex can segfault when solving for large decomposition problems
 solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
 

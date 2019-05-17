@@ -44,7 +44,7 @@ test_that("Compare Rglpk result", {
 
   if("Rglpk" %in% .packages(all.available = TRUE)){
 
-    steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, presolve = FALSE, verbose = FALSE, solverChoice = "GLPK")
+    steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, presolve = FALSE, verbose = FALSE, solverChoice = "RGLPK")
     glpkSolution <- steinObject$findSingleSteinerSolution()
 
     expect_equal(vcount(lpSolveSolution), vcount(glpkSolution))
@@ -58,7 +58,7 @@ test_that("Compare lpsymphony result", {
 
   if(!"lpsymphony" %in% .packages(all.available = TRUE)) skip("Rcplex not installed")
 
-    steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = FALSE, presolve = FALSE, solverChoice = "SYMPHONY")
+    steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = FALSE, presolve = FALSE, solverChoice = "LPSYMPHONY")
     symphonySolution <- steinObject$findSingleSteinerSolution()
 
     expect_equal(vcount(lpSolveSolution), vcount(symphonySolution))
