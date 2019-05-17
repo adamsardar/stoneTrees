@@ -309,7 +309,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              if(length(private$terminalIndices) == 1){
 
-                                               if(private$verbosity) message("Only a single potential terminal (in the possibly presolved graph) - a trivial solution")
+                                               if(private$verbosity) message("Only a single terminal (in the possibly presolved graph) - a trivial solution")
                                                solutionIndices <- private$terminalIndices
                                              }else{
 
