@@ -74,10 +74,12 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            isSolutionConnected = function(){
 
-                                             if(vcount(private$solutionGraph) == 0){ return(FALSE) }
+                                             if(length(private$currentSolutionIndices) == 0){ return(FALSE) }
 
-                                             return(is.connected(private$solutionGraph))
+                                             return(is.connected( self$getSolutionGraph() ))
                                            },
+
+                                           getSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ]) ) },
 
                                            getTerminals = function(){
 
@@ -102,7 +104,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              if(itrCount == maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
 
-                                             return( uncondenseGraph(private$solutionGraph) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
+                                             return( uncondenseGraph( self$getSolutionGraph() ) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
                                            },
 
                                            getNodeDT = function(){ private$nodeDT },
@@ -312,7 +314,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              if(length(unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)) ) == 1){
 
                                                if(private$verbosity) message("Only a single terminal (in the possibly presolved graph) - a trivial solution")
-                                               solutionIndices <- unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))
+                                               private$currentSolutionIndices <- unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))
                                              }else{
 
 
@@ -348,16 +350,12 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                                    RGLPK = do.call("solver_GLPK", functionArgs),
                                                                    LPSYMPHONY = do.call("solver_SYMPHONY", functionArgs))
 
-                                               solVec = round(MILPsolve$solution)
+                                               solVec <- round(MILPsolve$solution)
 
-                                               solutionIndices <- which(solVec > 0)
+                                               private$currentSolutionIndices <- which(solVec > 0)
                                              }
 
-                                             # Induce subgraph and assign nodes to components
-                                             private$solutionGraph <- induced_subgraph(private$searchGraph,
-                                                                                       V(private$searchGraph)[solutionIndices])
-
-                                             disconnectedComponentList <- decompose(private$solutionGraph)
+                                             disconnectedComponentList <- decompose( self$getSolutionGraph() )
 
                                              # The nodeDT table and inComponent variable keeps track of which node is where
                                              private$nodeDT[,inComponent := NA_integer_]
@@ -373,7 +371,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            searchGraph = graph.empty(),
 
-                                           solutionGraph = graph.empty(),
+                                           currentSolutionIndices = integer(),
 
                                            # Work with integers rather than names
                                            fixedTerminalIndices = integer(),
