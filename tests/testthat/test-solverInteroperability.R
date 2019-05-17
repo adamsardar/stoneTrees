@@ -56,7 +56,7 @@ test_that("Compare Rglpk result", {
 
 test_that("Compare lpsymphony result", {
 
-  if(!"lpsymphony" %in% .packages(all.available = TRUE)) skip("Rcplex not installed")
+  if(!"lpsymphony" %in% .packages(all.available = TRUE)) skip("lpsymphony not installed")
 
     steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = FALSE, presolve = FALSE, solverChoice = "LPSYMPHONY")
     symphonySolution <- steinObject$findSingleSteinerSolution()
