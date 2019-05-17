@@ -11,7 +11,7 @@
 #' @name stoneTrees
 #' @author Adam Sardar
 #' @import R6
-#' @import data.table
+#' @importFrom data.table ".__T__[<-:base" ".__T__$<-:base" ".__T__[:base"  rbindlist data.table ":=" %like% fread setkey setnames
 #' @import igraph
 #' @import Matrix
 #' @importFrom magrittr "%<>%"
