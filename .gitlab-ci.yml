@@ -70,7 +70,7 @@ etxR-bleed-lpSolve:
       when: always
       paths:
       - ./*.Rcheck
-    only:
+      only:
       - master
 
 # Explore graalvm build
