@@ -51,7 +51,7 @@ validateFlag <- function(flag2validate){
 }
 
 #' @importFrom  ensurer ensure
-solverChoiceValidator <- function(candidateSolverChoice){
+validateSolverChoice <- function(candidateSolverChoice){
 
   candidateSolverChoice %<>%  ensure(is.character,
                                      toupper(.) %in% c("RCPLEX","CPLEXAPI","RGLPK","LPSYMPHONY","LPSOLVE"),

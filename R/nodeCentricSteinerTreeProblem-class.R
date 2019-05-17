@@ -3,16 +3,15 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
 
-                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE){
+                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 600){
 
-                                             private$solver <- solverChoiceValidator(solverChoice)
-
+                                             private$solver <- validateSolverChoice(solverChoice)
+                                             private$solverTimeLimit <- validateSingleInteger(solverTimeLimit)
                                              private$verbosity <- validateFlag(verbose)
 
                                              interactomeName <- deparse(substitute(network))
 
                                              validateIsNetwork(network)
-
                                              if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
 
                                              inputGraph <- network %>% as.undirected %>% simplify
@@ -99,6 +98,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                                itrCount %<>% add(1)
                                              }
+
+                                             if(itrCount == maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
 
                                              return( uncondenseGraph(private$solutionGraph) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
                                            },
@@ -336,7 +337,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                               private$connectivityConstraints$directions),
 
                                                  cplexParamList = list(trace = as.integer(private$verbosity),
-                                                                       tilim = 300)
+                                                                       tilim = private$timsolverTLimit)
                                                )
 
                                                MILPsolve <- switch(private$solver ,
@@ -372,6 +373,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                            searchGraph = graph.empty(),
 
                                            solutionGraph = graph.empty(),
+
+                                           timsolverTLimit = integer(),
 
                                            # Work with integers rather than names
                                            terminalIndices = integer(),
