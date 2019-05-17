@@ -28,7 +28,7 @@ test_that("Compare Rcplex result", {
 
 test_that("Compare cplexAPI result", {
 
-  if(!"cplexAPI" %in% .packages(all.available = TRUE)) skip("Rcplex not installed")
+  if(!"cplexAPI" %in% .packages(all.available = TRUE)) skip("cplexAPI not installed")
 
     steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = FALSE, presolve = FALSE, solverChoice = "CPLEXAPI")
     cplexapiSolution <- steinObject$findSingleSteinerSolution()
@@ -42,7 +42,8 @@ test_that("Compare cplexAPI result", {
 
 test_that("Compare Rglpk result", {
 
-  if("Rglpk" %in% .packages(all.available = TRUE)){
+
+  if(!"Rglpk" %in% .packages(all.available = TRUE)) skip("Rglpk not installed")
 
     steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, presolve = FALSE, verbose = FALSE, solverChoice = "RGLPK")
     glpkSolution <- steinObject$findSingleSteinerSolution()
@@ -50,7 +51,6 @@ test_that("Compare Rglpk result", {
     expect_equal(vcount(lpSolveSolution), vcount(glpkSolution))
     expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(glpkSolution)$nodeScore))
     expect_true(is.connected(glpkSolution))
-  }
 
 })
 
