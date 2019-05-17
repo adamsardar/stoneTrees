@@ -1,10 +1,11 @@
 
 
+#' @importFrom sets set set_union
 nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                            inherit = nodeCentricSteinerTreeProblem,
                                            public = list(
 
-
+                                             #Overide
                                              initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 600){
 
                                                super$initialize(network,
@@ -18,49 +19,57 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                                return(invisible(self))
                                              },
 
-
                                              sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 100){
 
                                                # solve normal steiner tree - this produces a bunch of connectivity constraints and
                                                # will also likely ensure that the solution is connected
                                                self$findSingleSteinerSolution()
-                                               private$solutionPool %<>% c( list(private$solutionGraph) )
+                                               private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
 
                                                for(i in 1:nBootstraps){
 
                                                  private$resampleFixedTerminals()
-                                                 private$solutionPool %<>% c( list(private$solutionGraph) )
 
                                                  super$solve()
 
                                                  #add solution graph if connected, else add connectivity constraints and resolve
-
-                                                 if(is.connected(private$solutionGraph)){
+                                                 if( super$isSolutionConnected() ){
 
                                                    # TODO keep a solution pool and test for a convergence in solutions
-                                                   private$solutionPool %<>% c( list(private$solutionGraph) )
+                                                   private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
                                                  }else{
 
-                                                   private$addConnectivityConstraints()
+                                                   super$addConnectivityConstraints()
                                                  }
                                                }
-
 
                                                return(invisible(self))
                                              },
 
                                              getSolutionPool = function(){
 
-                                               return(private$solutionPool)
+                                               return(private$solutionIndciesPool)
                                              },
 
-                                             #TODO have a dedicated addToSolutionPool method which checks previous solutions by hash
+                                             #Overide
+                                             getSolutionGraph = function(collapseSols = TRUE){
 
-                                             #This overides the parent classes method and freshly regenerates the Steiner solution afresh each time
+                                               if(collapseSols){
+
+                                                 return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist(self$getSolutionPool()))]))
+                                               }else{
+
+                                                 return(self$getSolutionPool() %>%
+                                                   as.list %>%
+                                                   lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) )
+                                               }
+                                             },
+
+                                             #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time
                                              findSingleSteinerSolution = function(maxItr = 20){
 
                                                private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .nodeID]
-                                               private$solutionGraph <- graph.empty()
+                                               private$currentSolutionIndices <- integer()
 
                                                return(super$findSingleSteinerSolution(maxItr = maxItr))
                                              }
@@ -87,8 +96,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                                return(invisible(self))
                                              },
 
-
-                                             solutionPool = list()
-
+                                             #This will be a set of integer sets
+                                             solutionIndciesPool = sets::set()
                                            )
 )
