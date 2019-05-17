@@ -192,13 +192,13 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
   expect_equal(graph_attr(lymphoma_MWCS)$SearchNetwork, "lymphomaGraph")
 })
 
-test_that("Trying bespoke MWCS solver against the lymphoma.stp instance in the ACTMOD SteinLib set",{
+test_that("Trying MWCS solver against the lymphoma.stp instance in the ACTMOD SteinLib set",{
 
   skip("SteinLib drosophila test takes too long even using CPLEX - although it does pass!")
 
   drosophila001_igraph <- readMWCSgraph('./testData/ACTMOD/drosophila001.stp')
 
-  #2 hour time out
-  #drosophila001_MWCS <- solveNodeCentricSteinerTreeProblem(drosophila001_igraph, timeOut = 7200,verbosity = verb)
+  # Takes around five minutes with CPLEX
+  #drosophila001_MWCS <- solveNodeCentricSteinerTreeProblem(drosophila001_igraph, timeOut = 7200,verbosity = TRUE, solverChoice = "RCPLEX")
 })
 

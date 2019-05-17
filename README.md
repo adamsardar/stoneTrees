@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlab.etx.local/rpackages/stonetrees/badges/master/pipeline.svg)](https://gitlab.etx.local/rpackages/stonetrees/commits/master) 
+[![coverage report](https://gitlab.etx.local/rpackages/stonetrees/badges/master/coverage.svg)](https://gitlab.etx.local/rpackages/stonetrees/commits/master)
+
 ## stoneTrees - an R package for solving Stiener-tree problems
 
 A package dedicated to finding minimum Steiner trees in networks. Particularly biological ones, which tend to be very sparse and on the easier end of the spectrum. This package is particularly interested in Minimum Steiner Tree (MStT), Maximum-Weight Connected Subgraph (MWCS) and Prize-Collecting Steiner Tree (PCST) problems.

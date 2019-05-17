@@ -8,7 +8,7 @@ validateIsNetwork <- function(network2validate){
                                err_desc = "Input network must be an igraph object")
 
   network2validate %<>% ensure(length(decompose(., mode = "weak")) == 1,
-                               err_desc = "Input network must a single connected component")
+                               err_desc = "Input network must a single connected component (consider using igraph::decompose?)")
 
   invisible(network2validate)
 }
@@ -54,8 +54,8 @@ validateFlag <- function(flag2validate){
 solverChoiceValidator <- function(candidateSolverChoice){
 
   candidateSolverChoice %<>%  ensure(is.character,
-                                     toupper(.) %in% c("CPLEX","GLPK","SYMPHONY","LPSOLVE"),
-                                     err_desc = "At current only CPLEX, GLPK, SYMPHONY and LPSOLVE solvers are supported")
+                                     toupper(.) %in% c("RCPLEX","CPLEXAPI","RGLPK","LPSYMPHONY","LPSOLVE"),
+                                     err_desc = "At current only RCPLEX, CPLEXAPI, RGLPK, LPSYMPHONY and LPSOLVE solvers are supported")
 
   invisible(toupper(candidateSolverChoice))
 }
