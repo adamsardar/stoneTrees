@@ -337,7 +337,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                               private$connectivityConstraints$directions),
 
                                                  cplexParamList = list(trace = as.integer(private$verbosity),
-                                                                       tilim = private$timsolverTLimit)
+                                                                       tilim = private$solverTimeLimit)
                                                )
 
                                                MILPsolve <- switch(private$solver ,
@@ -374,9 +374,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            solutionGraph = graph.empty(),
 
-                                           timsolverTLimit = integer(),
-
-                                           # Work with integers rather than names
+                                              # Work with integers rather than names
                                            terminalIndices = integer(),
                                            fixedTerminalIndices = integer(),
                                            potentialTerminalIndices = integer(),
@@ -391,6 +389,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                            nodeDT = data.table(),
 
                                            solver = character(),
+                                           solverTimeLimit = integer(),
+
                                            verbosity = logical()
                                          )
 )
