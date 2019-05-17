@@ -1,6 +1,3 @@
-# General R-package YML for use at ETX. The idea is to build the artifact but have a manual deployment step.
-# Note, so as to prevent an accumulation of hundreds of artifacts there is a 4 week expiry on tar balls. This has the ever-so slight chance of causing a deploy step to fail if one attempts to deploy and old artifact - regenerate if so.
-
 stages:
   - test
   - deploy
@@ -9,9 +6,9 @@ variables:
   ARTIFACTORY_URL: http://artifactory.etx.local/artifactory/
   APIKEY: AKCp2VoRZYQH6r1uVnU1A4SuKHxuyfKBEaDyRHdp6jyAL5upicPFCzDQCdjdjE8H9wi2sEbF8
 
-image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
-
+#Check that the vanilla package install pases tests
 etxR-stable:
+    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
     stage: test
     script:
       - export _R_CHECK_FORCE_SUGGESTS_=0
@@ -22,9 +19,34 @@ etxR-stable:
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - R CMD check "${PKG_FILE_NAME}"
       - R -q -e 'if(any(grepl("WARNING",list.files("/builds/",pattern = "00check.log", recursive = TRUE, full.names=TRUE)))) stop("R CMD check must not report any WARNINGS in order for a build to be considered successful")'
-      - R -q -e 'covr::package_coverage(type="all")'
     artifacts:
       expire_in: 4 weeks
+      when: always
+      paths:
+      - ./*.tar.gz
+      - ./*.Rcheck
+
+#Test against all supported solvers and report code coverage
+etxR-stable-cplex:
+    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:rcplex1271
+    stage: test
+    before_script:
+      - apt update && apt install -y glpk-utils libglpk-dev
+      - wget https://cran.r-project.org/src/contrib/Rcplex_0.3-3.tar.gz
+      - R CMD INSTALL --configure-args="--with-cplex-include=${CPLEX_INCLUDE_PATH} --with-cplex-cflags=-fPIC --with-cplex-lib='-L${CPLEX_LIB_PATH}/static_pic -lcplex -lm -lpthread'" Rcplex*.tar.gz
+      - wget https://cran.r-project.org/src/contrib/cplexAPI_1.3.3.tar.gz
+      - R CMD INSTALL --configure-args="--with-cplex-dir=${CPLEX_INCLUDE_PATH}/../" cplexAPI*.tar.gz
+    script:
+      - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
+      - R -q -e 'install.packages("lpSolve")'
+      - R -q -e 'devtools::install_deps(".",dependencies = c("Imports","Suggests"))'
+      - R CMD build .
+      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+      - R CMD check "${PKG_FILE_NAME}"
+      - R -q -e 'if(any(grepl("WARNING",list.files("/builds/",pattern = "00check.log", recursive = TRUE, full.names=TRUE)))) stop("R CMD check must not report any WARNINGS in order for a build to be considered successful")'
+      - R -q -e 'covr::package_coverage(type="all")'
+    artifacts:
+      expire_in: 1 weeks
       when: always
       paths:
       - ./*.tar.gz
