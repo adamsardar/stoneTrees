@@ -1,5 +1,6 @@
 globalVariables(c("."))
 
+# Choose the best solver from those available
 chooseSolver <- function(){
 
   solvers <- c("Rcplex", "cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony")
@@ -36,7 +37,7 @@ solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamL
 # This function uses the lower-level cplexAPI package, which does not suffer from the segfault bug in Rcplex for larger matricies
 # The use of cplexAPI:: so as to acess the namespace is horrid, but necessary for a clean build process without CPLEX being available
 #' @importFrom parallel detectCores
-solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0)){
+solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
 
   if(!"cplexAPI" %in% .packages(all.available = TRUE) ) stop("cplexAPI must be installed in order to use the CPLEX solver")
 
@@ -98,7 +99,7 @@ solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPar
   return(MILPsolve)
 }
 
-solver_GLPK <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0)){
+solver_GLPK <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
 
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
@@ -141,7 +142,7 @@ solver_LPSOLVE <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPara
   return(MILPsolve)
 }
 
-solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0)){
+solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
 
   if(! all( c("lpsymphony","slam") %in% .packages(all.available = TRUE)) ) stop("lpsymphony and slam must both be installed in order to use the GLPK solver")
 
