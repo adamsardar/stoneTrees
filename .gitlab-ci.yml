@@ -7,7 +7,7 @@ variables:
   APIKEY: AKCp2VoRZYQH6r1uVnU1A4SuKHxuyfKBEaDyRHdp6jyAL5upicPFCzDQCdjdjE8H9wi2sEbF8
 
 #Check that the vanilla package install pases tests
-etxR-stable:
+etxR-stable-lpSolve:
     image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
     stage: test
     script:
@@ -23,7 +23,6 @@ etxR-stable:
       expire_in: 4 weeks
       when: always
       paths:
-      - ./*.tar.gz
       - ./*.Rcheck
 
 #Test against all supported solvers and report code coverage
@@ -31,6 +30,7 @@ etxR-stable-cplex:
     image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:rcplex1271
     stage: test
     before_script:
+      - R -q -e 'install.packages("slam")'
       - apt update && apt install -y glpk-utils libglpk-dev
       - wget https://cran.r-project.org/src/contrib/Rcplex_0.3-3.tar.gz
       - R CMD INSTALL --configure-args="--with-cplex-include=${CPLEX_INCLUDE_PATH} --with-cplex-cflags=-fPIC --with-cplex-lib='-L${CPLEX_LIB_PATH}/static_pic -lcplex -lm -lpthread'" Rcplex*.tar.gz
@@ -52,7 +52,7 @@ etxR-stable-cplex:
       - ./*.tar.gz
       - ./*.Rcheck
 
-etxR-bleed:
+etxR-bleed-lpSolve:
     image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:bleed
     stage: test
     allow_failure: true
