@@ -76,10 +76,10 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              if(length(private$currentSolutionIndices) == 0){ return(FALSE) }
 
-                                             return(is.connected( self$getSolutionGraph() ))
+                                             return(is.connected( self$getCurrentSolutionGraph() ))
                                            },
 
-                                           getSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ]) ) },
+                                           getCurrentSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ]) ) },
 
                                            getTerminals = function(){
 
@@ -104,7 +104,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              if(itrCount == maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
 
-                                             return( uncondenseGraph( self$getSolutionGraph() ) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
+                                             return( uncondenseGraph( self$getCurrentSolutionGraph() ) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
                                            },
 
                                            getNodeDT = function(){ private$nodeDT },
@@ -355,9 +355,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                                private$currentSolutionIndices <- which(solVec > 0)
                                              }
 
-                                             disconnectedComponentList <- decompose( self$getSolutionGraph() )
-
-                                             # The nodeDT table and inComponent variable keeps track of which node is where
+                                             disconnectedComponentList <- decompose( self$getCurrentSolutionGraph() )
+                                            # The nodeDT table and inComponent variable keeps track of which node is where
                                              private$nodeDT[,inComponent := NA_integer_]
 
                                              for(i in 1:length(disconnectedComponentList)){
