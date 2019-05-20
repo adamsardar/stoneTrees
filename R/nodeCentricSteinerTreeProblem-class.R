@@ -61,10 +61,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              private$edgeDT[private$nodeDT, fromNodeID := .nodeID, on = .(from = name)]
                                              private$edgeDT[private$nodeDT, toNodeID := .nodeID, on = .(to = name)]
 
-                                             # Set terminal constraints
-                                             # What if no fixed terminals? Skip
                                              private$addFixedTerminalConstraints()
-
                                              private$addNodeDegreeInequalities()
                                              private$addTwoCycleInequalities()
                                              private$addConnectivityConstraints() #These will be empty at this stage
@@ -79,7 +76,10 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              return(is.connected( self$getCurrentSolutionGraph() ))
                                            },
 
-                                           getCurrentSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ]) ) },
+                                           # Allow the user to inspect the graph (presolved, of course)
+                                           getCurrentSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ])) },
+
+                                           getCurrentSolutionScore = function(){ return( sum(V(self$getCurrentSolutionGraph())$nodeScore) ) },
 
                                            getTerminals = function(){
 
@@ -322,26 +322,18 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                                  cVec = private$nodeDT[order(.nodeID), nodeScore],
 
-                                                 Amat = rbind(private$fixedTerminalConstraints$variables,
-                                                              private$nodeDegreeConstraints$variables,
-                                                              private$twoCycleConstraints$variables,
-                                                              private$connectivityConstraints$variables),
+                                                 Amat = private$generateConstraintMatrix(),
 
-                                                 bVec = c(private$fixedTerminalConstraints$rhs,
-                                                          private$nodeDegreeConstraints$rhs,
-                                                          private$twoCycleConstraints$rhs,
-                                                          private$connectivityConstraints$rhs),
+                                                 senseVec = private$generateConstraintDirections(),
+
+                                                 bVec = private$generateConstraintRHS(),
 
                                                  vtypeVec = "B",
 
-                                                 senseVec = c(private$fixedTerminalConstraints$directions,
-                                                              private$nodeDegreeConstraints$directions,
-                                                              private$twoCycleConstraints$directions,
-                                                              private$connectivityConstraints$directions),
-
                                                  cplexParamList = list(trace = as.integer(private$verbosity),
-                                                                       tilim = private$solverTimeLimit)
-                                               )
+                                                                       tilim = private$solverTimeLimit),
+
+                                                 nSols = 1)
 
                                                MILPsolve <- switch(private$solver ,
                                                                    RCPLEX = do.call("solver_CPLEX", functionArgs),
@@ -367,6 +359,32 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                              return(invisible(self))
                                            },
+
+
+                                           generateConstraintMatrix = function(){
+
+                                            return(rbind(private$fixedTerminalConstraints$variables,
+                                                   private$nodeDegreeConstraints$variables,
+                                                   private$twoCycleConstraints$variables,
+                                                   private$connectivityConstraints$variables))
+                                           },
+
+                                           generateConstraintRHS = function(){
+
+                                            return(c(private$fixedTerminalConstraints$rhs,
+                                               private$nodeDegreeConstraints$rhs,
+                                               private$twoCycleConstraints$rhs,
+                                               private$connectivityConstraints$rhs))
+                                           },
+
+                                           generateConstraintDirections = function(){
+
+                                             return(c(private$fixedTerminalConstraints$directions,
+                                                      private$nodeDegreeConstraints$directions,
+                                                      private$twoCycleConstraints$directions,
+                                                      private$connectivityConstraints$directions))
+                                           },
+
 
                                            searchGraph = graph.empty(),
 
