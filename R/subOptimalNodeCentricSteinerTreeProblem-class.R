@@ -4,6 +4,20 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                            inherit = nodeCentricSteinerTreeProblem,
                                            public = list(
 
+                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 600, solutionTolerance = 0){
+
+                                                private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(solutionTolerance)
+
+                                                super$initialize(network = network,
+                                                          solverChoice = solverChoice,
+                                                          verbose = verbose,
+                                                          presolveGraph = TRUE,
+                                                          solverTimeLimit = 600)
+
+                                                private$setNoveltyConstraints()
+
+                                                return(invisible(self))
+                                             },
 
                                              getSolutionPool = function(){
 
@@ -15,14 +29,58 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                                if(collapseSols){
 
                                                  #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
-                                                 return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getSolutionPool()))]))
+                                                 return( uncondenseGraph(induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getSolutionPool()))])) )
                                                }else{
 
                                                  return( self$getSolutionPool() %>%
                                                            as.list %>%
-                                                           lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) )
+                                                           lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) ) %>%
+                                                           lapply(uncondenseGraph)
                                                }
                                              },
+
+                                             getOptimumScore = function(){
+
+                                               return(self$getSolutionPoolGraphs(collapseSols = FALSE) %>%
+                                                        sapply(function(g){ sum(V(g)$nodeScore) }) %>%
+                                                        c(-Inf) %>%
+                                                        max(na.rm = TRUE))
+                                             },
+
+                                             getNoveltyConstraints = function(){return( private$novelSolutionsConstraint )},
+
+                                             identifyMultipleSteinerSolutions = function(maxItr = 10){
+
+                                               self$findSingleSteinerSolution()
+                                               private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+
+                                               for(i in 1:maxItr){
+
+                                                 private$setNoveltyConstraints()
+
+                                                 super$solve()
+
+                                                 #add solution graph if connected, else add connectivity constraints and resolve
+                                                 if( super$isSolutionConnected() ){
+
+                                                   #If the absolute difference between scores is within tolerance, then add to pool
+                                                   if( sqrt( abs(super$getCurrentSolutionScore()^2 - self$getOptimumScore()^2) ) <= (private$tolerance) ){
+
+                                                     private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+                                                   }else{
+
+                                                     message("Next feasible solution is outside of solution tolerance!")
+                                                     break()
+                                                   }
+
+                                                  }else{
+
+                                                   super$addConnectivityConstraints()
+                                                 }
+                                               }
+
+                                               return( invisible(self) )
+                                             }
 
                                            ),
 
@@ -31,30 +89,30 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                              # Overide the superclass
                                              generateConstraintMatrix = function(){
 
-                                               return(rbind(super$fixedTerminalConstraints$variables,
-                                                            super$nodeDegreeConstraints$variables,
-                                                            super$twoCycleConstraints$variables,
-                                                            super$connectivityConstraints$variables,
+                                               return(rbind(private$fixedTerminalConstraints$variables,
+                                                            private$nodeDegreeConstraints$variables,
+                                                            private$twoCycleConstraints$variables,
+                                                            private$connectivityConstraints$variables,
                                                             private$novelSolutionsConstraint$variables) )
                                              },
 
                                              # Overide the superclass
                                              generateConstraintRHS = function(){
 
-                                               return(c(super$fixedTerminalConstraints$rhs,
-                                                        super$nodeDegreeConstraints$rhs,
-                                                        super$twoCycleConstraints$rhs,
-                                                        super$connectivityConstraints$rhs,
+                                               return(c(private$fixedTerminalConstraints$rhs,
+                                                        private$nodeDegreeConstraints$rhs,
+                                                        private$twoCycleConstraints$rhs,
+                                                        private$connectivityConstraints$rhs,
                                                         private$novelSolutionsConstraint$rhs))
                                              },
 
                                              # Overide the superclass
                                              generateConstraintDirections = function(){
 
-                                               return(c(super$fixedTerminalConstraints$directions,
-                                                        super$nodeDegreeConstraints$directions,
-                                                        super$twoCycleConstraints$directions,
-                                                        super$connectivityConstraints$directions,
+                                               return(c(private$fixedTerminalConstraints$directions,
+                                                        private$nodeDegreeConstraints$directions,
+                                                        private$twoCycleConstraints$directions,
+                                                        private$connectivityConstraints$directions,
                                                         private$novelSolutionsConstraint$directions))
                                              },
 
@@ -64,30 +122,31 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                              # For each solution, sum_i y_i > 0 for i !in a solution
                                              setNoveltyConstraints = function(){
 
-                                               if(length(private$solutionPool) == 0){
-
-                                                 return(Matrix(nrow = 0,
-                                                               ncol = vcount(super$searchGraph),
-                                                               dimnames = list(NULL, V(super$searchGraph)$name)) ) }
-
-
-                                               onesMat <- Matrix(1, nrow = 1, ncol = vcount(super$searchGraph))
-
-                                               noveltyConstraintsList <- private$solutionPool %>%
-                                                                     as.list %>%
+                                               noveltyConstraintsList <-
+                                                 private$solutionIndciesPool %>%
+                                                 as.list %>%
                                                  lapply(function(solIndices){
-                                                   noveltyConstraint <- onesMat
+                                                   noveltyConstraint <- Matrix(1, nrow = 1, ncol = vcount(private$searchGraph), sparse = TRUE)
                                                    noveltyConstraint[solIndices] <- 0
                                                    return(noveltyConstraint)})
 
+                                               if(private$verbosity) message("Adding ", length(noveltyConstraintsList)," novelty constraint(s) ...")
+
+                                               #Deal with empty solution pools - add a matrix with no rows but the correct columns
+                                               noveltyConstraintsList %<>% c(list(Matrix(nrow = 0, ncol = vcount(private$searchGraph))))
+
+                                               noveltyConstraintsMatrix <- Reduce(rbind, noveltyConstraintsList)
+
                                                private$novelSolutionsConstraint <- list(
-                                                  variables = Reduce(rbind, noveltyConstraintsList),
-                                                  direction = ">",
-                                                  rhs = 0)
+                                                  variables = noveltyConstraintsMatrix,
+                                                  directions = rep(">=",nrow(noveltyConstraintsMatrix)) ,
+                                                  rhs = rep(1,nrow(noveltyConstraintsMatrix)))
                                              },
 
-                                             solutionPool = sets::set(),
+                                             solutionIndciesPool = sets::set(),
                                              novelSolutionsConstraint = list(),
+
+                                             tolerance = numeric()
                                            )
 
 )
