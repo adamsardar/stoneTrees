@@ -36,6 +36,16 @@ validateSingleInteger <- function(int2evaluate){
   invisible(int2evaluate)
 }
 
+#' @importFrom  ensurer ensure
+validateSinglePositiveSemiDefiniteNumeric <- function(num2evaluate){
+
+  num2evaluate %<>% ensure(is.numeric,
+                           length(.) == 1,
+                           . >= 0,
+                           err_desc = "Expecting a single positive semi-definite numeric value!")
+
+  invisible(num2evaluate)
+}
 
 #' @importFrom ensurer ensure
 #' @importFrom stringr str_c
