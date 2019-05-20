@@ -13,6 +13,8 @@ solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamL
 
   if(!"Rcplex" %in% .packages(all.available = TRUE) ) stop("Rcplex must be installed in order to use the CPLEX solver")
 
+  validateSingleInteger(nSols)
+
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
   if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
@@ -20,10 +22,12 @@ solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamL
   if(!is.null(cplexParamList$trace)) cplexParamList$trace %<>% as.integer
   if(!is.null(cplexParamList$tilim)) cplexParamList$tilim %<>% as.integer
 
+  if(any(senseVec == "<") | any(senseVec == ">")) stop("Rcplex only supprts <=, == or >= constraints. Modify your rhs?")
+
   MILPsolve <- Rcplex::Rcplex(cvec = cVec,
                               Amat = Amat,
                               bvec = bVec,
-                              sense = unlist(list("<" = "l", "<=" = "L", "==" = "E", ">=" = "G", ">" = "g")[senseVec]),
+                              sense = unlist(list("<=" = "L", "==" = "E", ">=" = "G")[senseVec]),
                               objsense = "max",
                               vtype = vtypeVec,
                               control = cplexParamList,
@@ -130,6 +134,8 @@ solver_LPSOLVE <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPara
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
 
   if(!"lpSolve" %in% .packages(all.available = TRUE) ) stop("lpSolve must be installed in order to use the GLPK solver")
+
+  validateSingleInteger(nSols)
 
   MILPsolve <- lpSolve::lp(objective.in = cVec,
                            const.mat = as.matrix(Amat),
