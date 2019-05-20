@@ -1,18 +1,20 @@
 
 #' @importFrom sets set set_union
 subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
+
                                            inherit = nodeCentricSteinerTreeProblem,
+
                                            public = list(
 
-                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 600, solutionTolerance = 0){
+                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solutionTolerance = 0){
 
-                                                private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(solutionTolerance)
+                                                private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(solutionTolerance) + 1E-8 # Add epsilon
 
                                                 super$initialize(network = network,
                                                           solverChoice = solverChoice,
                                                           verbose = verbose,
-                                                          presolveGraph = TRUE,
-                                                          solverTimeLimit = 600)
+                                                          presolveGraph = presolveGraph,
+                                                          solverTimeLimit = solverTimeLimit)
 
                                                 private$setNoveltyConstraints()
 
@@ -39,13 +41,15 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                                }
                                              },
 
-                                             getOptimumScore = function(){
+                                             getSolutionPoolScores = function(){
 
-                                               return(self$getSolutionPoolGraphs(collapseSols = FALSE) %>%
-                                                        sapply(function(g){ sum(V(g)$nodeScore) }) %>%
-                                                        c(-Inf) %>%
-                                                        max(na.rm = TRUE))
+                                               return( self$getSolutionPool() %>%
+                                                 as.list %>%
+                                                 sapply( function(indices){ super$getNodeDT()[.nodeID %in% indices, sum(nodeScore)] }) %>%
+                                                 unlist )
                                              },
+
+                                             getOptimumScore = function(){ return( max( self$getSolutionPoolScores(), na.rm = TRUE) ) },
 
                                              getNoveltyConstraints = function(){return( private$novelSolutionsConstraint )},
 
@@ -63,20 +67,17 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                                  #add solution graph if connected, else add connectivity constraints and resolve
                                                  if( super$isSolutionConnected() ){
 
-                                                   #If the absolute difference between scores is within tolerance, then add to pool
-                                                   if( sqrt( abs(super$getCurrentSolutionScore()^2 - self$getOptimumScore()^2) ) <= (private$tolerance) ){
+                                                    #If the absolute difference between scores is within tolerance, then add to pool
+                                                    if(  abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <= private$tolerance ){
 
                                                      private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
-                                                   }else{
+                                                    }else{
 
-                                                     message("Next feasible solution is outside of solution tolerance!")
-                                                     break()
-                                                   }
+                                                      message("Next feasible solution is outside of solution tolerance!")
+                                                      break()
+                                                    }
 
-                                                  }else{
-
-                                                   super$addConnectivityConstraints()
-                                                 }
+                                                  }else{ super$addConnectivityConstraints() }
                                                }
 
                                                return( invisible(self) )
@@ -144,6 +145,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                              },
 
                                              solutionIndciesPool = sets::set(),
+
                                              novelSolutionsConstraint = list(),
 
                                              tolerance = numeric()
