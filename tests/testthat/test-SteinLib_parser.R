@@ -55,13 +55,11 @@ test_that("Checking the MWCS STP file format reader on SteinLib for ACTMOD probl
 
 test_that("Checking the MWCS STP file format from SteinLib for GENE problem gene gene42.stp",{
 
-  gene42_igraph <- readMStTPgraph('./testData/GENE/gene42.stp')
-  gene42_igraph %>% writeMStTPfile_heinzFormat('/tmp/gene42_igraph.stp')
+  gene42_in <- readMStTPgraph('./testData/GENE/gene42.stp')
+  writeMStTPfile_heinzFormat(gene42_in, '/tmp/gene42_igraph.stp')
   gene42_igraph_alt <- readMWCSgraph('/tmp/gene42_igraph.stp')
 
-  expect_identical(vcount(gene42_igraph),vcount(gene42_igraph_alt))
-  expect_identical(ecount(gene42_igraph),ecount(gene42_igraph_alt))
-  expect_identical(length( V(gene42_igraph)[isTerminal == TRUE]$name ),length(V(gene42_igraph_alt)[nodeScore > 0]$name))
+  expect_identical(vcount(gene42_in),vcount(gene42_igraph_alt))
+  expect_identical(ecount(gene42_in),ecount(gene42_igraph_alt))
+  expect_identical(length( V(gene42_in)[isTerminal == TRUE]$name ),length(V(gene42_igraph_alt)[nodeScore > 0]$name))
 })
-
-#TODO Add PCSTP tests when you come to implement the solver

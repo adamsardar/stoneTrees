@@ -278,6 +278,6 @@ writeMStTPfile_heinzFormat <-function(network.igraph,file.name, remark ='Nothing
   cat("EOF\n")
   sink()
 
-  return(node2ID[,.(node,index,terminalPrize)])
+  return( invisible(node2ID[,.(node,index,terminalPrize)]) )
 }
 
