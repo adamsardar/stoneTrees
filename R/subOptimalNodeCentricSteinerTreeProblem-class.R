@@ -64,11 +64,14 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                                self$findSingleSteinerSolution()
                                                private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
 
-                                               for(i in 1:maxItr){
+                                               multiSteinerItr <- 1
+
+                                               while(multiSteinerItr <= maxItr){
 
                                                  private$setNoveltyConstraints()
 
                                                  super$solve()
+                                                 multiSteinerItr %<>% add(1)
 
                                                  #add solution graph if connected, else add connectivity constraints and resolve
                                                  if( super$isSolutionConnected() ){
