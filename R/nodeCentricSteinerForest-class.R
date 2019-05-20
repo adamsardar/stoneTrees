@@ -51,15 +51,15 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                                return(private$solutionIndciesPool)
                                              },
 
-                                             #Overide
-                                             getSolutionGraph = function(collapseSols = TRUE){
+                                             getSolutionPoolGraphs = function(collapseSols = TRUE){
 
                                                if(collapseSols){
 
-                                                 return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist(self$getSolutionPool()))]))
+                                                 #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
+                                                 return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getSolutionPool()))]))
                                                }else{
 
-                                                 return(self$getSolutionPool() %>%
+                                                 return( self$getSolutionPool() %>%
                                                    as.list %>%
                                                    lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) )
                                                }
