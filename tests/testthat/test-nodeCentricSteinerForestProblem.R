@@ -25,7 +25,7 @@ test_that("Run a small Steiner forest routine and check the results", {
 
   simpleTreeSol <- steinFor$findSingleSteinerSolution()
 
-  expect_silent( steinFor$sampleMultipleBootstrapSteinerSolutions(10))
+  expect_silent( steinFor$sampleMultipleBootstrapSteinerSolutions(5))
   expect_false( set_is_empty(steinFor$getSolutionPool()), label = "Once populated, pool must be empty")
 
   expect_gte(vcount(steinFor$getSolutionPoolGraphs(collapseSols = TRUE)), vcount(simpleTreeSol), label = "Forest must be larger than tree by definition")
@@ -41,7 +41,7 @@ test_that("Run a small Steiner forest routine and check the results", {
 
 test_that("Checking ability to find many k-steiner trees in the karate graph",{
 
-  karateGraph_MSTP_kStein <- nodeCentricSteinerForestProblem$new(karateGraph, verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(10)
+  karateGraph_MSTP_kStein <- nodeCentricSteinerForestProblem$new(karateGraph, verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(5)
 
   expect_true( is.igraph(karateGraph_MSTP_kStein$getSolutionPoolGraphs(collapseSols = TRUE)), label = "Collapsed solution should be an igraph")
 
