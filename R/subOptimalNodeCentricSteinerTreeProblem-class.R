@@ -8,17 +8,17 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
                                              initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solutionTolerance = 0){
 
-                                                private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(solutionTolerance) + 1E-8 # Add epsilon
-
                                                 super$initialize(network = network,
                                                           solverChoice = solverChoice,
                                                           verbose = verbose,
                                                           presolveGraph = presolveGraph,
                                                           solverTimeLimit = solverTimeLimit)
 
-                                                private$setNoveltyConstraints()
+                                               self$setSolutionTolerance(solutionTolerance + 1E-8)  # Add epsilon
 
-                                                return(invisible(self))
+                                               private$setNoveltyConstraints()
+
+                                               return(invisible(self))
                                              },
 
                                              getSolutionPool = function(){
@@ -53,6 +53,10 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
                                              getNoveltyConstraints = function(){return( private$novelSolutionsConstraint )},
 
+                                             getSolutionTolerance = function(){return(private$tolerance)},
+
+                                             setSolutionTolerance = function(x){ private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(x) ; return(invisible(self))},
+
                                              identifyMultipleSteinerSolutions = function(maxItr = 10){
 
                                                validateSingleInteger(maxItr)
@@ -75,7 +79,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                                                      private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
                                                     }else{
 
-                                                      message("Next feasible solution is outside of solution tolerance!")
+                                                      message("Next feasible solution is outside of solution tolerance! Consider increasing it with $setSolutionTolerance(x) method?")
                                                       break()
                                                     }
 
