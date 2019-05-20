@@ -3,7 +3,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
 
-                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 600){
+                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300){
 
                                              private$solver <- validateSolverChoice(solverChoice)
                                              private$solverTimeLimit <- validateSingleInteger(solverTimeLimit)

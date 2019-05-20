@@ -6,7 +6,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                            public = list(
 
                                              #Overide
-                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 600){
+                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300){
 
                                                super$initialize(network,
                                                                 solverChoice = solverChoice,
