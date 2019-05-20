@@ -19,14 +19,18 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                                return(invisible(self))
                                              },
 
-                                             sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 100){
+                                             sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 10){
+
+                                               validateSingleInteger(nBootstraps)
 
                                                # solve normal steiner tree - this produces a bunch of connectivity constraints and
-                                               # will also likely ensure that the solution is connected
+                                               # will also ensure that the solution is connected
                                                self$findSingleSteinerSolution()
                                                private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
 
-                                               for(i in 1:nBootstraps){
+                                               i <- 1
+
+                                               while(i <= nBootstraps){
 
                                                  private$resampleFixedTerminals()
 
@@ -37,7 +41,9 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
 
                                                    # TODO keep a solution pool and test for a convergence in solutions
                                                    private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
-                                                 }else{
+                                                   i <- i+1
+
+                                                  }else{
 
                                                    super$addConnectivityConstraints()
                                                  }
