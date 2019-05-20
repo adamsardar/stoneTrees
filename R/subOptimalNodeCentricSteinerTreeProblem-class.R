@@ -55,6 +55,8 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
                                              identifyMultipleSteinerSolutions = function(maxItr = 10){
 
+                                               validateSingleInteger(maxItr)
+
                                                self$findSingleSteinerSolution()
                                                private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
 
