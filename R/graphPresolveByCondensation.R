@@ -1,3 +1,5 @@
+globalVariables(c("condensedNode","potentialTerminal","segmentID",".vertexID"))
+
 #' Collapse neighbouring terminal and potential terminal nodes together
 #'
 #' Part of the Steiner Tree solving method involves enumerating all vs all node separators of nodes in differing
@@ -65,14 +67,10 @@ condenseSearchGraph <- function(graphToCondense, condensedNodeSep = ";"){
   return(condensedGraph)
 }
 
-globalVariables(c("condensedNode"))
 #' Decondense a graph following a procedure to group together prize nodes. If the input was not condensed, then we
 #' just return it back
 #'
-#' @param condensedGraph An igraph representation of the condensed graph (where prize nodes )
-#' @param originalGraph (optional) The original graph that the condensation procedure was run on. Should probably be left
-#' empty as the function will evaluate and draw in the original network
-#' @param nodeNameSep (optional) If a different node-name separator was used in the graph condensation step
+#' @param condensedGraph An igraph representation of the condensed graph (where prize nodes). The result of calling 'condenseGraph()'
 #'
 #' @return uncondensed graph
 #' @seealso condenseSearchGraph

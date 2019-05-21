@@ -8,12 +8,7 @@ just return it back}
 uncondenseGraph(condensedGraph)
 }
 \arguments{
-\item{condensedGraph}{An igraph representation of the condensed graph (where prize nodes )}
-
-\item{originalGraph}{(optional) The original graph that the condensation procedure was run on. Should probably be left
-empty as the function will evaluate and draw in the original network}
-
-\item{nodeNameSep}{(optional) If a different node-name separator was used in the graph condensation step}
+\item{condensedGraph}{An igraph representation of the condensed graph (where prize nodes). The result of calling 'condenseGraph()'}
 }
 \value{
 uncondensed graph
