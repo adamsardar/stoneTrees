@@ -2,16 +2,17 @@
 
 #' @importFrom sets set set_union
 nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
-                                           inherit = nodeCentricSteinerTreeProblem,
+                                           inherit = subOptimalSteinerProblem,
                                            public = list(
 
                                              #Overide
-                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 600){
+                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300, solutionTolerance = 0){
 
                                                super$initialize(network,
                                                                 solverChoice = solverChoice,
                                                                 verbose = verbose,
                                                                 presolveGraph = FALSE,
+                                                                solutionTolerance = solutionTolerance,
                                                                 solverTimeLimit = solverTimeLimit)
 
                                                if(super$getNodeDT()[isTerminal == TRUE, nrow(.SD)] <= 2) stop("Steiner Forest routines require at least 3 fixed terminals (preferably many more!)")
@@ -19,56 +20,68 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                                return(invisible(self))
                                              },
 
-                                             sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 10){
+                                             sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5){
 
                                                validateSingleInteger(nBootstraps)
+                                               validateSingleInteger(maxItr)
+                                               validateSinglePositiveSemiDefiniteNumeric(resamplingProbability)
 
                                                # solve normal steiner tree - this produces a bunch of connectivity constraints and
                                                # will also ensure that the solution is connected
                                                self$findSingleSteinerSolution()
-                                               private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+                                               private$metaSolutionIndciesPool <- set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
 
-                                               i <- 1
+                                               bootItr <- 1
 
-                                               while(i <= nBootstraps){
+                                               while(bootItr <= nBootstraps){
 
-                                                 private$resampleFixedTerminals()
+                                                 private$resampleFixedTerminals(resamplingProbability)
 
-                                                 super$solve()
+                                                 #Find up to ten degenerate solutions as you can
+                                                 super$identifyMultipleSteinerSolutions(maxItr)
 
-                                                 #add solution graph if connected, else add connectivity constraints and resolve
-                                                 if( super$isSolutionConnected() ){
+                                                 private$metaSolutionIndciesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
 
-                                                   # TODO keep a solution pool and test for a convergence in solutions
-                                                   private$solutionIndciesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
-                                                   i <- i+1
+                                                 #Flush the parent solution pool as we're about to research for solutions
+                                                 private$solutionIndciesPool <- sets::set()
 
-                                                  }else{
-
-                                                   super$addConnectivityConstraints()
-                                                 }
+                                                 bootItr %<>% add(1)
                                                }
 
                                                return(invisible(self))
                                              },
 
-                                             getSolutionPool = function(){
+                                             getBootstrapSolutionPool = function(){
 
-                                               return(private$solutionIndciesPool)
+                                               return(private$metaSolutionIndciesPool)
                                              },
 
-                                             getSolutionPoolGraphs = function(collapseSols = TRUE){
+                                             #Overide
+                                             getSolutionPool = function(){
+
+                                               if(identical(parent.frame(), globalenv())) warning("During the Steiner forest process the solution pool constantly being flushed - it is likely to be empty. Use $getBootstrapSolutionPool() for Steiner forest problems.")
+                                               return(super$getSolutionPool())
+                                             },
+
+                                             getBootstrapSolutionPoolGraphs = function(collapseSols = TRUE){
 
                                                if(collapseSols){
 
                                                  #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
-                                                 return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getSolutionPool()))]))
+                                                 return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getBootstrapSolutionPool()))]))
                                                }else{
 
-                                                 return( self$getSolutionPool() %>%
-                                                   as.list %>%
-                                                   lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) )
+                                                 return( self$getBootstrapSolutionPool() %>%
+                                                           as.list %>%
+                                                           lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) )
                                                }
+                                             },
+
+                                             #Overide
+                                             getSolutionPoolGraphs = function(){
+
+                                               if(identical(parent.frame(), globalenv())) warning("During the Steiner forest process the solution pool constantly being flushed - it is likely to be empty. Use $getBootstrapSolutionPoolGraphs() for Steiner forest problems.")
+                                               return(super$getSolutionPoolGraphs())
                                              },
 
                                              #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time
@@ -102,7 +115,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                                return(invisible(self))
                                              },
 
-                                             #This will be a set of integer sets
-                                             solutionIndciesPool = sets::set()
+                                             #This will be a set of integer sets - the parent class has a solution pool - here we aggrgate it!
+                                             metaSolutionIndciesPool = sets::set()
                                            )
 )
