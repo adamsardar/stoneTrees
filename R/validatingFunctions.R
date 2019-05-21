@@ -2,6 +2,7 @@
 globalVariables(c("."))
 
 #' @importFrom  ensurer ensure
+#' @import igraph
 validateIsNetwork <- function(network2validate){
 
   network2validate %<>% ensure(is.igraph,
@@ -9,6 +10,20 @@ validateIsNetwork <- function(network2validate){
 
   network2validate %<>% ensure(length(decompose(., mode = "weak")) == 1,
                                err_desc = "Input network must a single connected component (consider using igraph::decompose?)")
+
+  if("nodeScore" %in% vertex.attributes(network2validate)){
+
+    V(network2validate)$nodeScore %>% ensure(is.numeric,
+                                             all(!is.na(.)),
+                                             err_desc = "nodeScore values for input graph must be numeric vectors with no NA entries")
+  }
+
+  if("isTerminal" %in% vertex.attributes(network2validate)){
+
+    V(network2validate)$isTerminal %>% ensure(is.logical,
+                                             all(!is.na(.)),
+                                             err_desc = "isTerminal values for input graph must be logical vectors without NA entries")
+  }
 
   invisible(network2validate)
 }
