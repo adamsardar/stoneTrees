@@ -5,8 +5,7 @@
 \title{Decondense a graph following a procedure to group together prize nodes. If the input was not condensed, then we
 just return it back}
 \usage{
-uncondenseGraph(condensedGraph, originalGraph = NULL,
-  nodeNameSep = ";")
+uncondenseGraph(condensedGraph)
 }
 \arguments{
 \item{condensedGraph}{An igraph representation of the condensed graph (where prize nodes )}

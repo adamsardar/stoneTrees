@@ -3,22 +3,33 @@ globalVariables(c("."))
 
 #' @importFrom  ensurer ensure
 #' @import igraph
-validateIsNetwork <- function(network2validate){
+validateIsNetwork <- function(network2validate, singleWeakComponent = TRUE, isDirected = NULL){
 
   network2validate %<>% ensure(is.igraph,
                                err_desc = "Input network must be an igraph object")
 
-  network2validate %<>% ensure(length(decompose(., mode = "weak")) == 1,
-                               err_desc = "Input network must a single connected component (consider using igraph::decompose?)")
+  if(singleWeakComponent){
 
-  if("nodeScore" %in% vertex.attributes(network2validate)){
+    network2validate %<>% ensure(length(decompose(., mode = "weak")) == 1,
+                                 err_desc = "Input network must a single connected component (consider using igraph::decompose?)")
+  }
+
+  if(!is.null(isDirected)){
+
+    validateFlag(isDirected)
+
+    network2validate %>% ensure(is.directed(.) == isDirected,
+                                err_desc = paste0("Expecting is.directed() output of graph to be ",isDirected) )
+  }
+
+  if("nodeScore" %in% vertex_attr_names(network2validate)){
 
     V(network2validate)$nodeScore %>% ensure(is.numeric,
-                                             all(!is.na(.)),
+                                             !any(is.na(.)),
                                              err_desc = "nodeScore values for input graph must be numeric vectors with no NA entries")
   }
 
-  if("isTerminal" %in% vertex.attributes(network2validate)){
+  if("isTerminal" %in% vertex_attr_names(network2validate)){
 
     V(network2validate)$isTerminal %>% ensure(is.logical,
                                              all(!is.na(.)),

@@ -4,6 +4,9 @@
 #' components. This scales very, very badly and for some runs can actually be the major computational bottleneck. It's
 #' also unnecessary as neighbouring prize nodes and terminals will always be in the resultant graph.
 #'
+#' This function groups together potential terminals and adds their relevent node attributes together sensibly. For use
+#' with steiner solvers in the stoneTrees package.
+#'
 #' @param graphToCondense igraph network that we wish to contract
 #' @param condensedNodeSep (optional) Specify the value to separate node names with
 #'
@@ -13,56 +16,53 @@
 #' @importFrom ensurer ensure
 condenseSearchGraph <- function(graphToCondense, condensedNodeSep = ";"){
 
-  validateIsNetwork(graphToCondense)
+  validateIsNetwork(graphToCondense, singleWeakComponent = FALSE, isDirected = FALSE)
 
   condensedNodeSep %<>% ensure(is.character,
                           all(! V(graphToCondense)$name %like% .),
                           err_desc = "nodeNameSep must not be in any node names")
 
-  veretexAttr <- vertex_attr_names(graphToCondense)
+
+
+  V(graphToCondense)$.vertexID <- 1:vcount(graphToCondense)
+
   originalGraph <- graphToCondense
-  graphToCondense %<>% set_graph_attr("originalGraph", originalGraph)
 
-  if(!"isTerminal" %in% veretexAttr){ V(graphToCondense)$isTerminal <- FALSE }
-  if(!"nodeScore" %in% veretexAttr){ V(graphToCondense)$nodeScore <- -1 }
+  if(!"isTerminal" %in% vertex_attr_names(graphToCondense)){ V(graphToCondense)$isTerminal <- FALSE }
+  if(!"nodeScore" %in% vertex_attr_names(graphToCondense)){ V(graphToCondense)$nodeScore <- -1 }
 
-  positiveScoringNodeGraph <- induced_subgraph(graphToCondense, V(graphToCondense)[nodeScore > 0 | isTerminal])
-
-  if(vcount(positiveScoringNodeGraph) == 0){stop("No prize terminals in input graph!")}
-
-  graphSegments <- decompose.graph(positiveScoringNodeGraph)
   V(graphToCondense)$condensedNode <- FALSE
 
-  for(graphSegment in graphSegments){
+  if(length(V(graphToCondense)[nodeScore > 0 | isTerminal]) == 0){stop("No potential terminals in input graph!")}
 
-    if(vcount(graphSegment) == 1){ next}
+  V(graphToCondense)$potentialTerminal <- FALSE
+  V(graphToCondense)[nodeScore > 0 | isTerminal]$potentialTerminal <- TRUE
 
-    nNodes <- vcount(graphToCondense)
-    segmentNodes <- V(graphSegment)
+  #Induce a subgraph of potential terminals, decompose into the connected components and then assign segmentIDs to the blocks
+  potentialTerminalGraph <- induced_subgraph(graphToCondense, V(graphToCondense)[potentialTerminal])
 
-    segmentProperties <- list(name = vertex_attr(graphSegment,name="name") %>% str_c(collapse = condensedNodeSep),
-                              condensedNode = TRUE)
+  nodeDT <- as_data_frame(graphToCondense, what = "vertices") %>% data.table(key = ".vertexID")
+  nodeDT[, segmentID := .vertexID]
 
-    segmentProperties$isTerminal <- any(V(graphSegment)$isTerminal)
+  lapply(decompose(potentialTerminalGraph, mode = "weak", min.vertices = 2),
+         function(g){ nodeDT[V(g)$.vertexID, segmentID := min(segmentID)]; return(invisible(nodeDT[]))})
 
-    totalSegmentScore <- sum(V(graphSegment)$nodeScore)
-    segmentProperties$nodeScore <- totalSegmentScore
+  collapseNodeName <- function(x){return(paste0(x, collapse = condensedNodeSep))}
+  isCollapsed <- function(x){return(length(x) > 1)}
 
-    #Grab all neighbours of nodes to condense
-    neighbouringNodes <- ego(graphToCondense, order=1, nodes = V(graphSegment)$name) %>% unlist %>% unique %>%
-      setdiff( ego(graphToCondense, order=0, nodes = V(graphSegment)$name) %>% unlist)
+  condensedGraph <- contract(graphToCondense,
+                              mapping = nodeDT[V(graphToCondense)$.vertexID, as.integer(as.factor(segmentID)) ], #Create a integer sequence along the segmentID variable
+                              vertex.attr.comb = list(nodeScore = sum,
+                                                      name = collapseNodeName,
+                                                      isTerminal = any,
+                                                      condensedNode = isCollapsed,
+                                                      .vertexID = collapseNodeName,
+                                                      "ignore") )
 
-    graphToCondense %<>% add_vertices(1,attr = segmentProperties)
+  condensedGraph %<>% set_graph_attr("originalGraph", originalGraph) # Keep the original graph present as an attribute. Useful in the uncondensation.
+  condensedGraph %<>% set_graph_attr("nodeNameSep", condensedNodeSep)
 
-    #Create node pairs so as to add as edges
-    neighbourPairs <- rep(nNodes+1,2*length(neighbouringNodes))
-    neighbourPairs[seq(2,2*length(neighbouringNodes),by=2)] <- neighbouringNodes
-
-    graphToCondense %<>% add_edges(neighbourPairs)
-    graphToCondense %<>% delete_vertices(V(graphSegment)$name)
-  }
-
-  return(graphToCondense)
+  return(condensedGraph)
 }
 
 globalVariables(c("condensedNode"))
@@ -77,9 +77,9 @@ globalVariables(c("condensedNode"))
 #' @return uncondensed graph
 #' @seealso condenseSearchGraph
 #' @importFrom ensurer ensure
-uncondenseGraph <- function(condensedGraph,originalGraph = NULL,nodeNameSep = ";"){
+uncondenseGraph <- function(condensedGraph){
 
-  if(! 'condensedNode' %in% list.vertex.attributes(condensedGraph)){
+  if(! 'condensedNode' %in% vertex_attr_names(condensedGraph)){
     #No condensation occured, so we'll just return the original graph
     return(condensedGraph)
   }
@@ -89,27 +89,26 @@ uncondenseGraph <- function(condensedGraph,originalGraph = NULL,nodeNameSep = ";
                       ensure(
                           'condensedNode' %in% list.vertex.attributes(.),
                           'originalGraph' %in% list.graph.attributes(.),
+                          'nodeNameSep' %in% list.graph.attributes(.),
                           all(is.logical(V(.)$condensedNode)),
                           err_desc = "condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'")
 
-  nodeNameSep %<>% ensure(is.character,
-                          all(V(condensedGraph)[condensedNode == TRUE]$name %like% .),
-                          all(! V(condensedGraph)[condensedNode == FALSE]$name %like% .),
-                          err_desc = "nodeNameSep must be only in condensed node names and not in any other node")
 
-  if(is.null(originalGraph)){
-    originalGraph <- graph_attr(condensedGraph,"originalGraph")
-  }
+  nodeNameSep <- graph_attr(condensedGraph)$nodeNameSep
 
-  condensedGraphNodeNames <- V(condensedGraph)[condensedNode == TRUE]$name %>%
+  originalGraph <- graph_attr(condensedGraph,"originalGraph")
+
+  condensedGraphVertexIDs <- V(condensedGraph)[condensedNode == TRUE]$.vertexID %>%
     str_split(nodeNameSep) %>%
     unlist %>%
-    c(V(condensedGraph)[condensedNode == FALSE]$name)
+    c(V(condensedGraph)[condensedNode == FALSE]$.vertexID) %>%
+    as.integer
 
   condensedGraph %<>% delete_graph_attr("originalGraph")
+
   graph_attr(originalGraph) <- graph_attr(condensedGraph)
 
-  returnGraph <- induced_subgraph(originalGraph,V(originalGraph)[name %in% condensedGraphNodeNames])
+  returnGraph <- induced_subgraph(originalGraph,V(originalGraph)[.vertexID %in% condensedGraphVertexIDs])
 
-  return(returnGraph)
+  return(  delete_vertex_attr(returnGraph, ".vertexID"))
 }
