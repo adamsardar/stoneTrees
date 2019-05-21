@@ -1,6 +1,6 @@
 #' gene42 example from SteinLib
-#' 
-#' A directed graph representing a Steiner arborescence problem (directed Steiner problems) from a genetic context. This corresponds to gene42
+#'
+#' A directed graph representing a Steiner arborescence problem (directed Steiner problems) from a genetic context. This corresponds to gene42 from the steinLib dataset.
 #'
 #' @docType data
 #' @usage data(gene42_igraph)

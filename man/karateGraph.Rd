@@ -16,7 +16,7 @@
 data(karateGraph)
 }
 \description{
-An undirected graph describing a social network of friendships between 34 members of a karate club at a US university in the 1970's
+An undirected graph describing a social network of friendships between 34 members of a karate club at a US university in the 1970's. It serves as a small graph to test and demonstrate Steiner tree problems.
 }
 \references{
 W. W. Zachary, An information flow model for conflict and fission in small groups, Journal of Anthropological Research 33, 452-473 (1977)

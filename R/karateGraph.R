@@ -1,7 +1,7 @@
 #' Zachary's famous karate graph
-#' 
-#' An undirected graph describing a social network of friendships between 34 members of a karate club at a US university in the 1970's
-#' 
+#'
+#' An undirected graph describing a social network of friendships between 34 members of a karate club at a US university in the 1970's. It serves as a small graph to test and demonstrate Steiner tree problems.
+#'
 #' @docType data
 #' @usage data(karateGraph)
 #'
