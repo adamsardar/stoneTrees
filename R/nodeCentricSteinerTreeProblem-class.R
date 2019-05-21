@@ -20,9 +20,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              inputGraph <- network %>% as.undirected %>% simplify
                                              if(presolveGraph){inputGraph <- condenseSearchGraph(inputGraph)} #graph condensation is a presolve step
 
+                                             V(inputGraph)$.nodeID <- 1:vcount(inputGraph)
+
                                              private$searchGraph <-  set_graph_attr(inputGraph, "SearchNetwork", interactomeName)
-                                             V(private$searchGraph)$.nodeID <- 1:vcount(private$searchGraph) #Assign a unique node integer to each node
-                                             E(private$searchGraph)$.edgeID <- 1:ecount(private$searchGraph)
 
                                              if(length(decompose(private$searchGraph)) != 1) stop("Search network must only have a single connected component.")
 
@@ -56,8 +56,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              # Check that there are *some* terminals, otherwise error
                                              if(length( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScore and/or isTerminal vertex attributes!")
 
-                                             # edgeDT - both directions for each arc
-                                             private$edgeDT <- get.data.frame(as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>% data.table %>% unique
+                                             private$edgeDT <- get.data.frame( as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>%
+                                                                  data.table(.edgeID = as.integer(E(private$searchGraph))) #a very fast way to create .edgeID
 
                                              private$edgeDT[private$nodeDT, fromNodeID := .nodeID, on = .(from = name)]
                                              private$edgeDT[private$nodeDT, toNodeID := .nodeID, on = .(to = name)]
@@ -255,7 +255,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                                  #Crucially the nodes are still present from the original component
                                                  searchGraphWithoutComponent <- delete.edges(private$searchGraph,
-                                                                                             E(private$searchGraph)[.edgeID %in% clusterEdgeIDs ] )
+                                                                                             E(private$searchGraph)[ clusterEdgeIDs ] )
 
                                                  # For each terminal pair i,j; compute R_j (reachable set from R_j in graph ommiting C_i) and compute the minimum node-seperator set 𝒩(i,j) = A(C_i) intersect R_j
 
