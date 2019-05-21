@@ -56,8 +56,10 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                                              # Check that there are *some* terminals, otherwise error
                                              if(length( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScore and/or isTerminal vertex attributes!")
 
-                                             private$edgeDT <- get.data.frame( as.directed(private$searchGraph, mode = "mutual"), what = "edges") %>%
-                                                                  data.table(.edgeID = as.integer(E(private$searchGraph))) #a very fast way to create .edgeID
+                                             eDT <- get.data.frame( private$searchGraph, what = "edges") %>% data.table
+                                             eDT[,.edgeID := .I]
+
+                                             private$edgeDT <- rbind(eDT[,.(from,to,.edgeID)], eDT[,.(to = from,from = to,.edgeID)])
 
                                              private$edgeDT[private$nodeDT, fromNodeID := .nodeID, on = .(from = name)]
                                              private$edgeDT[private$nodeDT, toNodeID := .nodeID, on = .(to = name)]
