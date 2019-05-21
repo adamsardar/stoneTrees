@@ -6,13 +6,14 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
                                            public = list(
 
                                              #Overide
-                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300, solutionTolerance = 0){
+                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300, solutionTolerance = 0, solverTrace = as.integer(verbose)){
 
                                                super$initialize(network,
                                                                 solverChoice = solverChoice,
                                                                 verbose = verbose,
                                                                 presolveGraph = FALSE,
                                                                 solutionTolerance = solutionTolerance,
+                                                                solverTrace = solverTrace,
                                                                 solverTimeLimit = solverTimeLimit)
 
                                                if(super$getNodeDT()[isTerminal == TRUE, nrow(.SD)] <= 2) stop("Steiner Forest routines require at least 3 fixed terminals (preferably many more!)")

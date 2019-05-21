@@ -3,11 +3,12 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
 
-                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300){
+                                           initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose)){
 
                                              private$solver <- validateSolverChoice(solverChoice)
                                              private$solverTimeLimit <- validateSingleInteger(solverTimeLimit)
                                              private$verbosity <- validateFlag(verbose)
+                                             private$solverTrace <- validateSingleInteger(solverTrace)
 
                                              interactomeName <- deparse(substitute(network))
 
@@ -330,7 +331,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                                  vtypeVec = "B",
 
-                                                 cplexParamList = list(trace = as.integer(private$verbosity),
+                                                 cplexParamList = list(trace = private$solverTrace,
                                                                        tilim = private$solverTimeLimit),
 
                                                  nSols = 1)
@@ -405,6 +406,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                            solver = character(),
                                            solverTimeLimit = integer(),
+                                           solverTrace = integer(),
 
                                            graphPresolved = logical(),
                                            verbosity = logical()

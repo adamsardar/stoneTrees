@@ -6,12 +6,13 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
                                            public = list(
 
-                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solutionTolerance = 0){
+                                             initialize = function(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solutionTolerance = 0, solverTrace = as.integer(verbose)){
 
                                                 super$initialize(network = network,
                                                           solverChoice = solverChoice,
                                                           verbose = verbose,
                                                           presolveGraph = presolveGraph,
+                                                          solverTrace = solverTrace,
                                                           solverTimeLimit = solverTimeLimit)
 
                                                self$setSolutionTolerance(solutionTolerance + 1E-8)  # Add epsilon
