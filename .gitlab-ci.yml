@@ -75,6 +75,7 @@ etxR-bleed-lpSolve:
 
 deploy_artifactory:
     stage: deploy
+    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
     when: manual
     script:
        - export PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
