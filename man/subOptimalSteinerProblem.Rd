@@ -60,7 +60,8 @@ Beisser D, Klau GW, Dandekar T, Müller T, Dittrich MT. BioNet: An R-Package for
 \seealso{
 nodeCentricSteinerTreeProblem
 
-Other SteinerProblemSolver: \code{\link{nodeCentricSteinerTreeProblem}}
+Other SteinerProblemSolver: \code{\link{nodeCentricSteinerForestProblem}},
+  \code{\link{nodeCentricSteinerTreeProblem}}
 }
 \concept{SteinerProblemSolver}
 \keyword{datasets}
