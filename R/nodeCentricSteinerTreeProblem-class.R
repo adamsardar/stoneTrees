@@ -1,4 +1,4 @@
-#' Solve Stiener problems (MStTP or MWCS) with uniform or no edge weights.
+#' Solve Steiner problems (MStTP or MWCS) with uniform or no edge weights.
 #'
 #' The base stoneTrees class for solving Steiner Tree problems. Each object constructed represents a single Steiner problem
 #' and the associated methods allow for modifications, solution generation etc. See *examples* below.
@@ -7,9 +7,11 @@
 #' and/or node costs or prizes for inclusion ($nodeScore).
 #'
 #' @docType class
-#' @format \code{\link{R6Class}} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions
+#' @format R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions
 #'
-#' @section methods:
+#' @usage See examples.
+#'
+#' @section Methods:
 #' \describe{
 #'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?Rcpelx::Rcplex) as desired to prevent output.}
 #'    \item{\code{findSingleSteinerSolution()}}{Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.}

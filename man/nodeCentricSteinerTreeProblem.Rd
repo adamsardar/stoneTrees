@@ -3,10 +3,10 @@
 \docType{class}
 \name{nodeCentricSteinerTreeProblem}
 \alias{nodeCentricSteinerTreeProblem}
-\title{Solve Stiener problems (MStTP or MWCS) with uniform or no edge weights.}
-\format{\code{\link{R6Class}} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions}
+\title{Solve Steiner problems (MStTP or MWCS) with uniform or no edge weights.}
+\format{R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions}
 \usage{
-nodeCentricSteinerTreeProblem
+See examples.
 }
 \description{
 The base stoneTrees class for solving Steiner Tree problems. Each object constructed represents a single Steiner problem
@@ -16,7 +16,7 @@ and the associated methods allow for modifications, solution generation etc. See
 Input networks must be singel component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
 and/or node costs or prizes for inclusion ($nodeScore).
 }
-\section{methods}{
+\section{Methods}{
 
 \describe{
    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?Rcpelx::Rcplex) as desired to prevent output.}
@@ -64,6 +64,9 @@ Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thin
 Beisser D, Klau GW, Dandekar T, Müller T, Dittrich MT. BioNet: An R-Package for the functional analysis of biological networks. Bioinformatics. 2010;26: 1129–1130.
 
 \url{https://en.wikipedia.org/wiki/Steiner_tree_problem}
+}
+\seealso{
+Other SteinerProblemSolver: \code{\link{subOptimalSteinerProblem}}
 }
 \concept{SteinerProblemSolver}
 \keyword{datasets}
