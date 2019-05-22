@@ -2,6 +2,8 @@
 #'
 #' A directed graph representing a Steiner arborescence problem (directed Steiner problems) from a genetic context. This corresponds to gene42 from the steinLib dataset.
 #'
+#' Note: it is only advised to use this, rather difficult, Steiner tree problem in conjunction with an advanced MILP solver like CPLEX.
+#'
 #' @docType data
 #' @usage data(gene42_igraph)
 #'
