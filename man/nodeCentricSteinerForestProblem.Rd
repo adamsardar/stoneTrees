@@ -21,13 +21,12 @@ is flushed and the process re-rerun. In the end, all of the boostrap solutions a
 }
 \section{methods}{
 
-
 Alongisde those for *nodeCentricSteinerTreeProblem* and *subOptimalSteinerProblem*
 \describe{
    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the nodeCentricSteinerForestProblem class. Note the loss of 'presolveGraph'; the repeated resampling of fixed terminal nodes prevents this.}
    \item{\code{sampleMultipleBootstrapSteinerSolutions(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5)}}{Run the bootstrap procedure nBootstraps times, each time resampling seeds with pSuccess = resamplingProbability, collecting degenerate or suboptimal solutions for maxItr times.}
    \item{\code{getBootstrapSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerence (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
-   \item{\code{...}{other methods are of minimal interest to a general user} }
+   \item{...}{Other methods are self explanatory and likely uninteresting to a general user}
 ' }
 }
 
