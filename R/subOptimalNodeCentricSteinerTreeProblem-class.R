@@ -1,5 +1,54 @@
-
+#' Collect degenerate and sub-optimal solutions to Steiner problems (MStTP or MWCS) with uniform or no edge weights.
+#'
+#' Rather than find just a single solution to a MStTP/MWCS, one can populate a solution pool with multiple degenerate/tolerable solutions.
+#'
+#' This class is derived from *nodeCentricSteinerTreeProblem*: all methods available in the superclass are available here. The difference is that after
+#' each acceptable solution is found, the solution is a.) stored in a solution pool and b.) used to generate a 'novelty' constraint on future solutions.
+#'
+#' @docType class
+#' @format R6Class \code{subOptimalSteinerProblem} Construct an object representation of a multiple-solution Steiner tree/minimum weight connected subgraph (MWCS) problem
+#'
+#' @usage See examples.
+#'
+#' @section methods:
+#'
+#' Alongisde those for *nodeCentricSteinerTreeProblem*
+#' \describe{
+#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the subOptimalSteinerProblem class. Alongside the arguments for the super-class constructor, there is also 'solutionTolerence', which instructs the object as to the gap between optimal and observed solution that is acceptable.}
+#'    \item{\code{identifyMultipleSteinerSolutions(maxItr = 10)}}{Add solutions to the solution pool. maxItr is an argument dictating the number of runs through the obtimsation procedure.}
+#'    \item{\code{getSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerence (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
+#'    \item{\code{getSolutionPoolScores()}}{Compute the scores of the solutions in the solution pool. These are in the same order as the list of graphs returned by $getSolutionPoolGraphs(FALSE)}
+#'    \item{\code{getOptimumScore()}}{Returns the optimum score from solutions in the solution pool}
+#'    \item{\code{getSolutionTolerance()}}{Retreive the tolerence that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
+#'    \item{\code{setSolutionTolerance(x)}}{Alter the tolerence that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
+#' }
+#'
+#' @examples
+#' library(igraph)
+#'
+#'  # Maximum-Weight Connected Subgraph (MWCS) - find sub-optimal solutions
+#'
+#'  ## Vertex attribute details node costs/prizes
+#'  head(V(lymphomaGraph)$nodeScore)
+#'
+#'  lymphoma_multiMWCS <- subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 0.5)
+#'
+#'  #Populate the solution pool with multiple solutions - notice the
+#'  lymphoma_multiMWCS$identifyMultipleSteinerSolutions()
+#'
+#'  lymphoma_multiMWCS$getSolutionPoolGraphs(collapseSols = FALSE)
+#'
+#'  lymphoma_multiMWCS$getSolutionPoolScores()
+#'
+#'  #All solution scores are within tolerance
+#'  diff(range(lymphoma_multiMWCS$getSolutionPoolScores()))
+#' @references Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comput. dimacs11.cs.princeton.edu; 2017;9: 203–229.
+#' @references Beisser D, Klau GW, Dandekar T, Müller T, Dittrich MT. BioNet: An R-Package for the functional analysis of biological networks. Bioinformatics. 2010;26: 1129–1130.
+#' @references \url{https://en.wikipedia.org/wiki/Steiner_tree_problem}
+#' @family SteinerProblemSolver
+#' @seealso nodeCentricSteinerTreeProblem
 #' @importFrom sets set set_union
+#' @export
 subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
                                            inherit = nodeCentricSteinerTreeProblem,
