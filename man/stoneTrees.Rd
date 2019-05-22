@@ -4,15 +4,17 @@
 \name{stoneTrees}
 \alias{stoneTrees}
 \alias{stoneTrees-package}
-\title{R implementation of Steiner Tree solver}
+\title{Solve Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph Problems Using Integer Linear Programming}
 \description{
 A package dedicated to finding minimum Steiner trees in networks. Particularly biological ones,
-which tend to be very sparse and on the easier end of the spectrum. This package is particularly
-interested in Minimum Steiner Tree (MStT), Maximum-Weight Connected Subgraph (MWCS) and
-Prize-Collecting Steiner Tree (PCST) problems.
+which tend to be very sparse and on the easier end of the spectrum. This package is especially
+interested in Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems.
 }
 \details{
-This package serves as a faithful implementation of "Thinning out Steiner Trees".
+This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides).
+}
+\references{
+Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comput. dimacs11.cs.princeton.edu; 2017
 }
 \author{
 Adam Sardar
