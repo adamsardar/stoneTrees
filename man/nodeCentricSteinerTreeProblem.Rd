@@ -66,7 +66,8 @@ Beisser D, Klau GW, Dandekar T, Müller T, Dittrich MT. BioNet: An R-Package for
 \url{https://en.wikipedia.org/wiki/Steiner_tree_problem}
 }
 \seealso{
-Other SteinerProblemSolver: \code{\link{subOptimalSteinerProblem}}
+Other SteinerProblemSolver: \code{\link{nodeCentricSteinerForestProblem}},
+  \code{\link{subOptimalSteinerProblem}}
 }
 \concept{SteinerProblemSolver}
 \keyword{datasets}
