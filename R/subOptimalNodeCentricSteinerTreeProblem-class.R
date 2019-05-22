@@ -8,8 +8,6 @@
 #' @docType class
 #' @format R6Class \code{subOptimalSteinerProblem} Construct an object representation of a multiple-solution Steiner tree/minimum weight connected subgraph (MWCS) problem
 #'
-#' @usage See examples.
-#'
 #' @section methods:
 #'
 #' Alongisde those for *nodeCentricSteinerTreeProblem*

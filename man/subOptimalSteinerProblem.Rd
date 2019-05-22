@@ -6,7 +6,7 @@
 \title{Collect degenerate and sub-optimal solutions to Steiner problems (MStTP or MWCS) with uniform or no edge weights.}
 \format{R6Class \code{subOptimalSteinerProblem} Construct an object representation of a multiple-solution Steiner tree/minimum weight connected subgraph (MWCS) problem}
 \usage{
-See examples.
+subOptimalSteinerProblem
 }
 \description{
 Rather than find just a single solution to a MStTP/MWCS, one can populate a solution pool with multiple degenerate/tolerable solutions.

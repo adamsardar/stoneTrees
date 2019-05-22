@@ -6,7 +6,7 @@
 \title{Solve Steiner problems (MStTP or MWCS) with uniform or no edge weights.}
 \format{R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions}
 \usage{
-See examples.
+nodeCentricSteinerTreeProblem
 }
 \description{
 The base stoneTrees class for solving Steiner Tree problems. Each object constructed represents a single Steiner problem
