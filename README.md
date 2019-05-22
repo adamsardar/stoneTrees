@@ -23,7 +23,15 @@ The default solver in the package is `lpSolve`. However, empirical observation l
 
 Problems are constructed using the $new method of the appropriate instatialisation and then a collector method is called. For the base Steiner tree or MWCS problem (or a blend of the two), this is nodeCentricSteinerTreeProblem$new() followed by $findSingleSteinerSolution():
 
-Using a test dataset that comes with the package: `lymphomaGraph`, which is a MWCS problem.
+Using a test dataset that comes with the package: `lymphomaGraph`, which is a MWCS problem. It has a node score attribute detailing prizes/costs of node inclusion:
+
+```
+library(igraph)
+library(ggplot2)
+qplot(V(lymphomaGraph)$nodeScore)
+```
+
+Most nodes have negative weights (costs) - the MWCS looks to group as many positive weights (prizes) together.
 
 ```
 >  lymphomaMWCS <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
@@ -67,9 +75,10 @@ IGRAPH 53c01e2 UN-- 5 7 -- Zachary
 [1] o--G w--G E--G o--H w--H E--H G--H
 ```
 
-Notice above the chaining of methods together.
+Notice the chaining of methods together.
 
 # References:
+
 D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics.
 
-Fischetti, M. et al. (2015). Thinning Out Steiner Trees. DIMACS11
+Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comput. dimacs11.cs.princeton.edu; 2017
