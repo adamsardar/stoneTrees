@@ -1,4 +1,58 @@
-
+#' Solve Stiener problems (MStTP or MWCS) with uniform or no edge weights.
+#'
+#' The base stoneTrees class for solving Steiner Tree problems. Each object constructed represents a single Steiner problem
+#' and the associated methods allow for modifications, solution generation etc. See *examples* below.
+#'
+#' Input networks must be singel component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
+#' and/or node costs or prizes for inclusion ($nodeScore).
+#'
+#' @docType class
+#' @format \code{\link{R6Class}} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions
+#'
+#' @section methods:
+#' \describe{
+#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?Rcpelx::Rcplex) as desired to prevent output.}
+#'    \item{\code{findSingleSteinerSolution()}}{Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.}
+#'    \item{\code{getCurrentSolutionGraph()}}{Retrieve the current solution graph (could be disconnected)}
+#'    \item{\code{get*Constraints()}}{Extract relevant constraints }
+#'    \item{\code{getCurrentSolutionScore()}}{Compute the objective value of the current solution.}
+#'    \item{...}{Other methods are self explanatory and likely uninteresting to a general user}
+#' }
+#'
+#' @examples
+#' library(igraph)
+#'
+#'  # Minimum Steiner tree problem
+#'
+#'  ## Boolean flags on vertices mark out 'seeds' (nodes that *must* be included)
+#'  unique(V(karateGraph)$isTerminal)
+#'  V(karateGraph)[isTerminal]
+#'
+#'  karateMStTP <- nodeCentricSteinerTreeProblem$new(karateGraph)
+#'  karateMStTP$findSingleSteinerSolution()
+#'
+#'  # Maximum-Weight Connected Subgraph (MWCS)
+#'
+#'  ## Vertex attribute details node costs/prizes
+#'  head(V(lymphomaGraph)$nodeScore)
+#'
+#'  lymphomaMWCS <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
+#'  lymphomaMWCS$findSingleSteinerSolution()
+#'
+#'  # A blend of the two approaches
+#'
+#'  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, but otherwise node inclusion should follow node scores
+#'  ## Choose some random nodes to be seeds
+#'  V(lymphomaGraph)$isTerminal <- FALSE
+#'  V(lymphomaGraph)[name %in% c("4","8","15","16","23","42")]$isTerminal <- TRUE
+#'
+#'  hybridSteinProb <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
+#'  hybridSteinProb$findSingleSteinerSolution()
+#' @references Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comput. dimacs11.cs.princeton.edu; 2017;9: 203–229.
+#' @references Beisser D, Klau GW, Dandekar T, Müller T, Dittrich MT. BioNet: An R-Package for the functional analysis of biological networks. Bioinformatics. 2010;26: 1129–1130.
+#' @references \url{https://en.wikipedia.org/wiki/Steiner_tree_problem}
+#' @family SteinerProblemSolver
+#' @export
 nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
 
                                          public = list(
