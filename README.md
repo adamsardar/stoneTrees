@@ -5,6 +5,7 @@
 
 A package dedicated to finding minimum Steiner trees in networks. Particularly biological networks; which tend to be very sparse and on the easier end of the spectrum of problems. This package is particularly interested in Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems.
 
+This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides), which is the algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/).
 
 ## Installation
 
