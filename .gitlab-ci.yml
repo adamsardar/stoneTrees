@@ -1,29 +1,7 @@
-stages:
-  - test
-  - deploy
+include:
+    - project: 'rpackages/r-configuration'
+      file: 'gitlab-ci-Rimage-ImportsLinkingTo-template.yml'
 
-variables:
-  ARTIFACTORY_URL: http://artifactory.etx.local/artifactory/
-  APIKEY: AKCp2VoRZYQH6r1uVnU1A4SuKHxuyfKBEaDyRHdp6jyAL5upicPFCzDQCdjdjE8H9wi2sEbF8
-
-#Check that the vanilla package install pases tests
-etxR-stable-lpSolve:
-    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
-    stage: test
-    script:
-      - export _R_CHECK_FORCE_SUGGESTS_=0
-      - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
-      - R -q -e 'install.packages( c("lpSolve","slam","sets") )'
-      - R -q -e 'devtools::install_deps(".",dependencies = c("Imports"))'
-      - R CMD build .
-      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-      - R CMD check "${PKG_FILE_NAME}"
-      - R -q -e 'if(any(grepl("WARNING",list.files("/builds/",pattern = "00check.log", recursive = TRUE, full.names=TRUE)))) stop("R CMD check must not report any WARNINGS in order for a build to be considered successful")'
-    artifacts:
-      expire_in: 4 weeks
-      when: always
-      paths:
-      - ./*.Rcheck
 
 #Test against all supported solvers and report code coverage
 etxR-stable-cplex:
@@ -51,48 +29,3 @@ etxR-stable-cplex:
       paths:
       - ./*.tar.gz
       - ./*.Rcheck
-
-etxR-bleed-lpSolve:
-    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:bleed
-    stage: test
-    allow_failure: true
-    script:
-      - export _R_CHECK_FORCE_SUGGESTS_=0
-      - perl -p -i -e 'if($_ ~~ m/Version:/){s/(\d+\.?\d*)\.?\d*/$1\.$ENV{'CI_PIPELINE_ID'}/}' DESCRIPTION
-      - R -q -e 'install.packages( c("lpSolve","slam","sets") )'
-      - R -q -e 'devtools::install_deps(".",dependencies = c("Imports"))'
-      - R CMD build . --no-build-vignettes --no-manual
-      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-      - R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual
-      - R -q -e 'if(any(grepl("WARNING",list.files("/builds/",pattern = "00check.log", recursive = TRUE, full.names=TRUE)))) stop("R CMD check must not report any WARNINGS for a build to be considered successful")'
-    artifacts:
-      expire_in: 1 weeks
-      when: always
-      paths:
-      - ./*.Rcheck
-    only:
-     - master
-
-deploy_artifactory:
-    stage: deploy
-    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:stable
-    when: manual
-    script:
-       - export PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-       - export PKG_STUB=`echo $PKG_FILE_NAME | perl -pe 's/_\d*\.?\d*\.?\d*\.tar\.gz//'`
-       - Rscript -e 'install.packages(c("miniCRAN","drat"))'
-       - jfrog rt config -url "${ARTIFACTORY_URL}" --apikey "${APIKEY}"
-       - mkdir etxCRAN
-       - echo $PKG_FILE_NAME
-       - Rscript -e  'pkgs <- miniCRAN::pkgAvail("http://artifactory.etx.local/artifactory/etxCRAN/"); suppressWarnings(miniCRAN::makeRepo(row.names(pkgs), path="./etxCRAN", repos="http://artifactory.etx.local/artifactory/etxCRAN/", type=c("source", "win.binary","mac.binary")));'
-       - Rscript -e  'drat::insertPackage(Sys.getenv("PKG_FILE_NAME"), repodir = "./etxCRAN", action="archive")'
-       - cd etxCRAN/
-       - jfrog rt del --quiet=true "etxCRAN/src/contrib/$PKG_STUB*"
-       - jfrog rt u --flat=false ./ etxCRAN/
-       - cd ..
-       - rm -rf ./etxCRAN
-    environment:
-      name: artifactory
-      url: http://artifactory.etx.local/artifactory/
-    only:
-      - master
