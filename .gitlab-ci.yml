@@ -5,15 +5,15 @@ include:
       file: 'gitlab-ci-artifactoryDeployment.yml'
 
 before_script:
-  - R -q -e 'install.packages("slam", "Rglpk")'
+  - R -q -e 'install.packages( c("slam", "Rglpk") )'
 
 #Test against all supported solvers and report code coverage
 etxR-stable-cplex:
-    image: registry.gitlab.etx.local/etherapeutics/etxdockerfiles/rimage:rcplex1271
+    image: registry.gitlab.etx.local/rpackages/r-docker-images/rimage:rcplex1271
     stage: test
     before_script:
       - apt update && apt install -y glpk-utils libglpk-dev
-      - R -q -e  'install.packages("slam", "Rglpk")'
+      - R -q -e  'install.packages( c("slam", "Rglpk") )'
       - wget https://cran.r-project.org/src/contrib/Rcplex_0.3-3.tar.gz
       - R CMD INSTALL --configure-args="--with-cplex-include=${CPLEX_INCLUDE_PATH} --with-cplex-cflags=-fPIC --with-cplex-lib='-L${CPLEX_LIB_PATH}/static_pic -lcplex -lm -lpthread'" Rcplex*.tar.gz
       - wget https://cran.r-project.org/src/contrib/cplexAPI_1.3.3.tar.gz
