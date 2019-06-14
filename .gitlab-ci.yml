@@ -1,6 +1,8 @@
 include:
     - project: 'rpackages/r-configuration'
       file: 'gitlab-ci-Rimage-ImportsLinkingTo-template.yml'
+    - project: 'rpackages/r-configuration'
+      file: 'gitlab-ci-artifactoryDeployment.yml'
 
 
 #Test against all supported solvers and report code coverage
@@ -21,8 +23,6 @@ etxR-stable-cplex:
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - R CMD check "${PKG_FILE_NAME}"
       - R -q -e 'if(any(grepl("WARNING",list.files("/builds/",pattern = "00check.log", recursive = TRUE, full.names=TRUE)))) stop("R CMD check must not report any WARNINGS in order for a build to be considered successful")'
-      - export COVR_COVRIGNORE="R/heinzWrapper.R" #Not even exported. Pure utility for benchmarking
-      - R -q -e 'covr::package_coverage(type="all")'
     artifacts:
       expire_in: 1 weeks
       when: always
