@@ -53,6 +53,8 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
   expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = FALSE))
 >>>>>>> 7a0d6b3... Fix broken test logic
 
+  expect_message(testKarate$identifyMultipleSteinerSolutions(), "solution tolerance")
+
   expect_equal(vcount(testKarate$getSolutionPoolGraphs()), 5, label = "visual inspection of the graph shows that there are two 4 node solutions")
 
   expect_equal( nrow(testKarate$getNoveltyConstraints()$variables), length(testKarate$getSolutionPoolScores()), label = "There should be an equal number of novelty constraints as solutions in pool")
