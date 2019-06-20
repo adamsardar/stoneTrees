@@ -2,7 +2,7 @@ include:
     - project: 'rpackages/r-configuration'
       file: 'gitlab-ci-Rimage-ImportsLinkingTo-template.yml'
     - project: 'rpackages/r-configuration'
-      file: 'gitlab-ci-artifactoryDeployment.yml'
+      file: 'gitlab-ci-nexusDeployment.yml'
 
 before_script:
     - apt update && apt install -y glpk-utils libglpk-dev 
