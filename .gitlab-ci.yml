@@ -5,6 +5,7 @@ include:
       file: 'gitlab-ci-artifactoryDeployment.yml'
 
 before_script:
+    - apt update && apt install -y glpk-utils libglpk-dev 
   - R -q -e 'install.packages( c("slam", "Rglpk") )'
 
 #Test against all supported solvers and report code coverage
