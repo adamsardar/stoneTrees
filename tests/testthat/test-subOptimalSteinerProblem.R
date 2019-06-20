@@ -8,7 +8,7 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
   expect_error(subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = -1, verbose = FALSE), regexp = "positive", label = "negative tolerences are not allowed")
 
-  expect_silent(testLymphoma <- subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 0.5, verbose = TRUE))
+  expect_silent(testLymphoma <- subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 0.5, verbose = FALSE))
 
   expect_equal(testLymphoma$getSolutionPoolGraphs(collapseSols = FALSE), list(), label = "Before calling identifyMultipleSteinerSolutions() there should be no solutions in pool")
   expect_true( is.null(testLymphoma$getSolutionPoolScores()), label = "Before populating the solution pool, the solution scores must be null")
@@ -45,9 +45,13 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
 test_that("Inspect sub-optimal solution searcher construction and answers found for MStP (without nodeScores)",{
 
+<<<<<<< HEAD
   expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = TRUE))
 
   expect_message(testKarate$identifyMultipleSteinerSolutions(), "solution tolerance")
+=======
+  expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = FALSE))
+>>>>>>> 7a0d6b3... Fix broken test logic
 
   expect_equal(vcount(testKarate$getSolutionPoolGraphs()), 5, label = "visual inspection of the graph shows that there are two 4 node solutions")
 
