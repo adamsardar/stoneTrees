@@ -42,6 +42,7 @@
 #'  # A blend of the two approaches
 #'
 #'  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, 
+#'  
 #'  # but otherwise node inclusion should follow node scores
 #'  V(lymphomaGraph)$isTerminal <- FALSE
 #'  ## Choose some random nodes to be seeds
@@ -156,13 +157,22 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         
         private$solve()
         
+                                               #Stop loop if solver couldn't find a solution at all (Most probably the solver will run for nothing after that)
+                                                if(vcount(self$getCurrentSolutionGraph()) == 0){ 
+                                                 message("STOP iteration : No Solution was found, most probably the solver run out of time. Try CPLEX (if you didn't)")
+                                                 break()
+                                                 
+                                                 }else{
+                                                 
         #Add connectivity constraints
         private$addConnectivityConstraints()
+                                               }
         
         itrCount %<>% add(1)
       }
       
-      if(itrCount == maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
+                                          
+                                             if(itrCount >= maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
       
       return( uncondenseGraph( self$getCurrentSolutionGraph() ) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
     },
@@ -353,7 +363,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
           
           allConnectivityConstraints <- Reduce(rbind, conConstraints)
           
-          if(private$verbosity) message("Adding ",nrow(allConnectivityConstraints)," connectivity constraints based on node-seperators ...")
+                                               if(private$verbosity) message("Adding ",nrow(allConnectivityConstraints)," connectivity constraints based on node-separators ...")
           
           # Append connectivity constraints matrix to existing variables, building up a pool of constraints that dictate connectivity
           private$connectivityConstraints <- list( variables = rbind(private$connectivityConstraints$variables, allConnectivityConstraints) )
@@ -406,15 +416,15 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
           private$currentSolutionIndices <- which(solVec > 0)
         }
         
-        disconnectedComponentList <- decompose( self$getCurrentSolutionGraph() )
-        # The nodeDT table and inComponent variable keeps track of which node is where
+                                             disconnectedComponentList <- decompose( self$getCurrentSolutionGraph())# The nodeDT table and inComponent variable keeps track of which node is where
         private$nodeDT[,inComponent := NA_integer_]
         
+                                             if(vcount(self$getCurrentSolutionGraph()) == 0) { message("No Solution was found, most probably the solver run out of time. Try CPLEX (if you didn't)")}else{
         for(i in 1:length(disconnectedComponentList)){
           
           # Using nodeIDs to track membership
           private$nodeDT[.nodeID %in% V(disconnectedComponentList[[i]])$.nodeID, inComponent := i]
-        }
+                                             } }
         
         return(invisible(self))
       },
