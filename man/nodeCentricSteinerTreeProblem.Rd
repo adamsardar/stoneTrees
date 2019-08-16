@@ -51,6 +51,7 @@ library(igraph)
  # A blend of the two approaches
 
  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, 
+ 
  # but otherwise node inclusion should follow node scores
  V(lymphomaGraph)$isTerminal <- FALSE
  ## Choose some random nodes to be seeds
