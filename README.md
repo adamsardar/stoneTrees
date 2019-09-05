@@ -1,3 +1,4 @@
+
 # stoneTrees - an R package for solving Stiener-tree problems
 
 A package dedicated to finding minimum Steiner trees in networks. Particularly biological networks; which tend to be very sparse and on the easier end of the spectrum of problems. This package is particularly interested in Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems.
@@ -7,13 +8,13 @@ This package serves as a faithful implementation of "Thinning out Steiner Trees"
 ## Installation
 
 ```
-> devtools::install_github("adamsardar/stoneTrees")
+> devtools::install_github("adamsardar/stoneTrees") 
 > library(stoneTrees)
 ```
 
-The default solver in the package is `lpSolve`. However, empirical observation leads to the suggestion of using [Rglpk](https://cran.r-project.org/web/packages/Rglpk/index.html) or, better yet, [Rcplex](https://cran.r-project.org/web/packages/Rcplex/index.html). The installation of these last two packages, whilst relatively simple, are sufficiently complex on Windows to affect the solver reccomendation.
+The default solver in the package is `lpSolve`. However, empirical observation leads to the suggestion of using [Rglpk](https://cran.r-project.org/web/packages/Rglpk/index.html) or, better yet, [Rcplex](https://cran.r-project.org/web/packages/Rcplex/index.html). The installation of these last two packages, whilst relatively simple, are sufficiently complex to affect the solver reccomendation.
 
-`Rglpk` can be easily installed. On linux search for the the glpk-dev package (`apt install libglpk-dev` for Debian flavoured distros); on mac you can use port (`port install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `> install.packages("Rglpk")` should proceed smoothly.
+`Rglpk` can be easily installed. On linux install the glpk-dev package (`apt install libglpk-dev`); on mac you can use port (`port install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `> install.packages("Rglpk")` should work.
 
 ## Usage
 
