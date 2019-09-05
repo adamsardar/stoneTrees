@@ -1,5 +1,6 @@
   <!-- badges: start -->
   [![Travis build status](https://travis-ci.org/adamsardar/stoneTrees.svg?branch=master)](https://travis-ci.org/adamsardar/stoneTrees)
+  [![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/branch/master/graph/badge.svg)](https://codecov.io/gh/adamsardar/stoneTrees?branch=master)
   <!-- badges: end -->
   
 # stoneTrees - an R package for solving Stiener-tree problems

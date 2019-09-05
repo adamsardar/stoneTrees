@@ -28,5 +28,6 @@ Suggests:
     cplexAPI (>= 1.3.3),
     lpsymphony (>= 1.1),
     Rglpk (>= 0.6),
-    slam (>= 0.1)
+    slam (>= 0.1),
+    covr
 RoxygenNote: 6.1.1

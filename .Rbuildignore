@@ -6,3 +6,4 @@
 ^\.Rproj\.user$
 .gitlab-ci.yml
 ^\.travis\.yml$
+^codecov\.yml$

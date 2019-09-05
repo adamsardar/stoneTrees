@@ -1,16 +1,20 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-os: linux
+os: 
+  - linux
+  - osx
 
 cache: packages
 
 language: R
 r:
   - release
-  - devel
 
 apt_packages:
   - libglpk-dev
+  
+brew_packages:
+  - glpk
 
 r_packages:
   - Rglpk
@@ -20,9 +24,8 @@ bioc_packages:
   - lpsymphony # Builds from source
 
 after_success:
-  - test $TRAVIS_OS_NAME == "linux" &&
-    travis_wait Rscript -e 'library(covr); codecov()'
+  - test $TRAVIS_OS_NAME == "linux" && travis_wait Rscript -e 'covr::codecov()' # Only produce coverage on linux builds
   
 env:
   global:
-    - _R_CHECK_FORCE_SUGGESTS_=false
+    - _R_CHECK_FORCE_SUGGESTS_=false # Rcplex is not available for testing
