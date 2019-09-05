@@ -1,4 +1,7 @@
-
+  <!-- badges: start -->
+  [![Travis build status](https://travis-ci.org/adamsardar/stoneTrees.svg?branch=master)](https://travis-ci.org/adamsardar/stoneTrees)
+  <!-- badges: end -->
+  
 # stoneTrees - an R package for solving Stiener-tree problems
 
 A package dedicated to finding minimum Steiner trees in networks. Particularly biological networks; which tend to be very sparse and on the easier end of the spectrum of problems. This package is particularly interested in Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems.

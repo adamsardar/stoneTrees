@@ -1,0 +1,28 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+os: linux
+
+cache: packages
+
+language: R
+r:
+  - release
+  - devel
+
+apt_packages:
+  - libglpk-dev
+
+r_packages:
+  - Rglpk
+  - covr  #code coverage tool  
+  
+bioc_packages:
+  - lpsymphony # Builds from source
+
+after_success:
+  - test $TRAVIS_OS_NAME == "linux" &&
+    travis_wait Rscript -e 'library(covr); codecov()'
+  
+env:
+  global:
+    - _R_CHECK_FORCE_SUGGESTS_=false
