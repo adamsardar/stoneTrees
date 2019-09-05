@@ -1,6 +1,7 @@
   <!-- badges: start -->
   [![Travis build status](https://travis-ci.org/adamsardar/stoneTrees.svg?branch=master)](https://travis-ci.org/adamsardar/stoneTrees)
   [![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/branch/master/graph/badge.svg)](https://codecov.io/gh/adamsardar/stoneTrees?branch=master)
+  [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/adamsardar/stoneTrees?branch=master&svg=true)](https://ci.appveyor.com/project/adamsardar/stoneTrees)
   <!-- badges: end -->
   
 # stoneTrees - an R package for solving Steiner tree problems
