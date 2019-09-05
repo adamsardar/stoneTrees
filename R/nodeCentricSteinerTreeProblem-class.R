@@ -41,9 +41,10 @@
 #'
 #'  # A blend of the two approaches
 #'
-#'  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, but otherwise node inclusion should follow node scores
-#'  ## Choose some random nodes to be seeds
+#'  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, 
+#'  # but otherwise node inclusion should follow node scores
 #'  V(lymphomaGraph)$isTerminal <- FALSE
+#'  ## Choose some random nodes to be seeds
 #'  V(lymphomaGraph)[name %in% c("4","8","15","16","23","42")]$isTerminal <- TRUE
 #'
 #'  hybridSteinProb <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)

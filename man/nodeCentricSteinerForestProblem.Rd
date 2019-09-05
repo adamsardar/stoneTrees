@@ -48,7 +48,8 @@ MStTPsingle$findSingleSteinerSolution()
 #Solve multiple bootstrap Steiner Trees (Steiner Forest)
 SteinFor <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph)
 
-#Run two bootstrap routines (resample fixed terminals and solve) and ALSO run the sub-optimal solution searcher thrice
+#Run two bootstrap routines (resample fixed terminals and solve) and 
+#ALSO run the sub-optimal solution searcher thrice
 SteinFor$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 2, maxItr = 3)
 ## Takes around a minute using RGLPK as the solver
 
