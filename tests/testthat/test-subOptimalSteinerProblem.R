@@ -17,7 +17,7 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
   expect_equal(testLymphoma$getSolutionPoolGraphs(collapseSols = FALSE), list(), label = "Before calling identifyMultipleSteinerSolutions() there should be no solutions in pool, even if findSingleSteinerSolution() has been called")
 
-  expect_message(testLymphoma$identifyMultipleSteinerSolutions(), regexp = "outside of solution tolerance")
+  expect_message(testLymphoma$identifyMultipleSteinerSolutions(), "solution tolerance")
 
   expect_gt(vcount(testLymphoma$getSolutionPoolGraphs(collapseSols = TRUE)), vcount(singleSolGraph), label = "More solutions must create a larger graph")
 
@@ -47,7 +47,7 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
   expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = FALSE))
 
-  expect_message(testKarate$identifyMultipleSteinerSolutions(), regexp = "outside of solution tolerance")
+  expect_message(testKarate$identifyMultipleSteinerSolutions(), "solution tolerance")
 
   expect_equal(vcount(testKarate$getSolutionPoolGraphs()), 5, label = "visual inspection of the graph shows that there are two 4 node solutions")
 
