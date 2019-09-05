@@ -3,9 +3,9 @@
   [![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/branch/master/graph/badge.svg)](https://codecov.io/gh/adamsardar/stoneTrees?branch=master)
   <!-- badges: end -->
   
-# stoneTrees - an R package for solving Stiener tree problems
+# stoneTrees - an R package for solving Steiner tree problems
 
-A package dedicated to finding solutions to [Steiner tree problems](https://en.wikipedia.org/wiki/Steiner_tree_problem) in graphs. Motivation stems from a need for solutions to the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems in computational biology. For example, Klau et al. (2008) demonstrated how MWCS is a means by which to combine per-gene expression data with mechanistic protein-protein interaction networks and extract functional modules in a data-driven way. 
+A package dedicated to finding solutions to [Steiner tree problems](https://en.wikipedia.org/wiki/Steiner_tree_problem) in graphs. Motivation stems from a need for solutions to the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Sub-graph (MWCS) problems in computational biology. For example, Dittrich et al. (2008) demonstrated how MWCS is a means by which to combine per-gene expression data with mechanistic protein-protein interaction networks and extract functional modules in a data-driven way. 
 
 This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017), which is the algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/).
 
@@ -16,15 +16,15 @@ This package serves as a faithful implementation of "Thinning out Steiner Trees"
 > library(stoneTrees)
 ```
 
-The default solver in the package is `lpSolve`. However, empirical observation leads to the suggestion of using [Rglpk](https://cran.r-project.org/web/packages/Rglpk/index.html) or, better yet, [Rcplex](https://cran.r-project.org/web/packages/Rcplex/index.html). The installation of these last two packages, whilst relatively simple, are sufficiently complex to affect the solver reccomendation.
+The default solver in the package is `lpSolve`. However, empirical observation leads to the suggestion of using [Rglpk](https://cran.r-project.org/web/packages/Rglpk/index.html) or, better yet, [Rcplex](https://cran.r-project.org/web/packages/Rcplex/index.html). The installation of these last two packages, whilst relatively simple, are sufficiently complex to affect the solver recommendation.
 
-`Rglpk` can be easily installed. On linux install the glpk-dev package (`apt install libglpk-dev`); on mac you can use brew (`brew install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `> install.packages("Rglpk")` should work.
+`Rglpk` can be easily installed. On Linux install the glpk-dev package (`apt install libglpk-dev`); on mac you can use brew (`brew install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `> install.packages("Rglpk")` should work.
 
 ## Usage
 
 Problems are constructed using the $new method of the appropriate problem class and then a collector method is called. For the base Steiner tree or MWCS problem (or a blend of the two), this is nodeCentricSteinerTreeProblem$new() followed by $findSingleSteinerSolution().
 
-By way of exampe, look at the `lymphoma` test dataset that comes with the package. It is a MWCS problem; a graph with node score attributes detailing prizes/costs of node inclusion:
+By way of example, look at the `lymphoma` test dataset that comes with the package. It is a MWCS problem; a graph with node score attributes detailing prizes/costs of node inclusion:
 
 ```
 library(igraph)
@@ -32,7 +32,7 @@ library(ggplot2)
 qplot(V(lymphomaGraph)$nodeScore)
 ```
 
-Most nodes have negative weights (costs) - the MWCS looks to group as many positive weights (prizes) together in a connected subgraph.
+Most nodes have negative weights (costs) - the MWCS looks to group as many positive weights (prizes) together in a connected sub-graph.
 
 ```
 >  lymphomaMWCS <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
@@ -47,7 +47,7 @@ IGRAPH 6674598 UN-- 46 50 --
 [45] 96 --1797 573--1797 96 --1720 543--962  501--1619 675--1879
 ```
 
-If the user is interested in collecting sub-optimal solutions, then a different constructor is used that allows one to specify the solution tolerence parameter. Notice here that there are three stages: build the object (`subOptimalSteinerProblem$new()`), identify solutions and add them to the pool of distinct solutions (`lymphoma_multiMWCS$identifyMultipleSteinerSolutions()`) and finally extract solutions from the pool as graphs (`lymphoma_multiMWCS$getSolutionPoolGraphs()`).
+If the user is interested in collecting sub-optimal solutions, then a different constructor is used that allows one to specify the solution tolerance parameter. Notice here that there are three stages: build the object (`subOptimalSteinerProblem$new()`), identify solutions and add them to the pool of distinct solutions (`lymphoma_multiMWCS$identifyMultipleSteinerSolutions()`) and finally extract solutions from the pool as graphs (`lymphoma_multiMWCS$getSolutionPoolGraphs()`).
 
 ```
 > lymphoma_multiMWCS <- subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 1)
@@ -66,7 +66,7 @@ IGRAPH f0365e4 UN-- 57 84 --
 [78] 96 --1720 543--962  494--1619 501--1619 512--1769 675--1879 757--1987
 ```
 
-If the user is interested in the bootstrapped Steiner Tree problem (aka the Steiner Forest problem), whereby intial seeds randomly sub-sampled and the resultant Steiner problem solved, then a third class is used. This is a seed/terminal-based routine, so a graph with terminals must be used: one included in the package is the `karateGraph` problem. The methods used are: `nodeCentricSteinerForestProblem$new()`, `$sampleMultipleBootstrapSteinerSolutions()` which populates a solution pool with random draws from the Steiner forest problem and `$getBootstrapSolutionPoolGraphs()` which returns the aggregated result.
+If the user is interested in the bootstrapped Steiner Tree problem (aka the Steiner Forest problem), whereby initial seeds randomly sub-sampled and the resultant Steiner problem solved, then a third class is used. This is a seed/terminal-based routine, so a graph with terminals must be used: one included in the package is the `karateGraph` problem. The methods used are: `nodeCentricSteinerForestProblem$new()`, `$sampleMultipleBootstrapSteinerSolutions()` which populates a solution pool with random draws from the Steiner forest problem and `$getBootstrapSolutionPoolGraphs()` which returns the aggregated result.
 
 ```
 > nodeCentricSteinerForestProblem$new(karateGraph)$sampleMultipleBootstrapSteinerSolutions()$getBootstrapSolutionPoolGraphs()
