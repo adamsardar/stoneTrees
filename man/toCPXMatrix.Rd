@@ -13,7 +13,7 @@ toCPXMatrix(Amat)
 A list compatible with the copyLpCPLEX in cplexAPI
 }
 \description{
-This function is copied wholesale from Rcplex: See Rcplex:::toCPXMatrix. However, Rcplex is a difficult package
+This function is heavily influences by Rcplex: See Rcplex:::toCPXMatrix. However, Rcplex is a difficult package
 to include as a dependency as it requires explicit compilation with links to proprietry header/library files.
 }
 \seealso{
