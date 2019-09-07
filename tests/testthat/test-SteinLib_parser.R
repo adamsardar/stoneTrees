@@ -56,10 +56,15 @@ test_that("Checking the MWCS STP file format reader on SteinLib for ACTMOD probl
 test_that("Checking the MWCS STP file format from SteinLib for GENE problem gene gene42.stp",{
 
   gene42_in <- readMStTPgraph('./testData/GENE/gene42.stp')
-  writeMStTPfile_heinzFormat(gene42_in, '/tmp/gene42_igraph.stp')
-  gene42_igraph_alt <- readMWCSgraph('/tmp/gene42_igraph.stp')
+  
+  temp_file_gene42 <- tempfile(pattern = "gene42")
+  writeMStTPfile_heinzFormat(gene42_in, temp_file_gene42)
+  
+  gene42_igraph_alt <- readMWCSgraph(temp_file_gene42)
 
   expect_identical(vcount(gene42_in),vcount(gene42_igraph_alt))
   expect_identical(ecount(gene42_in),ecount(gene42_igraph_alt))
-  expect_identical(length( V(gene42_in)[isTerminal == TRUE]$name ),length(V(gene42_igraph_alt)[nodeScore > 0]$name))
+  
+  expect_identical(length( V(gene42_in)[isTerminal == TRUE]$name ), 
+                   length(V(gene42_igraph_alt)[nodeScore > 0]$name))
 })
