@@ -147,36 +147,14 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
   private = list(
     
     # Overide the superclass
-    generateConstraintMatrix = function(){
+    gatherConstraintObjects = function(){
       
-      return(rbind(private$fixedTerminalConstraints$variables,
-                   private$nodeDegreeConstraints$variables,
-                   private$twoCycleConstraints$variables,
-                   private$connectivityConstraints$variables,
-                   private$novelSolutionsConstraint$variables) )
-    },
-    
-    # Overide the superclass
-    generateConstraintRHS = function(){
-      
-      return(c(private$fixedTerminalConstraints$rhs,
-               private$nodeDegreeConstraints$rhs,
-               private$twoCycleConstraints$rhs,
-               private$connectivityConstraints$rhs,
-               private$novelSolutionsConstraint$rhs))
-    },
-    
-    # Overide the superclass
-    generateConstraintDirections = function(){
-      
-      return(c(private$fixedTerminalConstraints$directions,
-               private$nodeDegreeConstraints$directions,
-               private$twoCycleConstraints$directions,
-               private$connectivityConstraints$directions,
-               private$novelSolutionsConstraint$directions))
-    },
-    
-    
+      return(list(private$fixedTerminalConstraints,
+                  private$nodeDegreeConstraints,
+                  private$twoCycleConstraints,
+                  private$connectivityConstraints,
+                  private$novelSolutionsConstraint))  },
+
     # Add a constraint that we cannot have a soluton that we have already seen
     # This constraint is not from the original paper, but it is quite simple
     # For each solution, sum_i y_i > 0 for i !in a solution

@@ -419,31 +419,18 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         return(invisible(self))
       },
       
-      
-      generateConstraintMatrix = function(){
+      # Overidden by the derived classes
+      gatherConstraintObjects = function(){
         
-        return(rbind(private$fixedTerminalConstraints$variables,
-                     private$nodeDegreeConstraints$variables,
-                     private$twoCycleConstraints$variables,
-                     private$connectivityConstraints$variables))
+        return(list(private$fixedTerminalConstraints,
+                     private$nodeDegreeConstraints,
+                     private$twoCycleConstraints,
+                     private$connectivityConstraints))
       },
       
-      generateConstraintRHS = function(){
-        
-        return(c(private$fixedTerminalConstraints$rhs,
-                 private$nodeDegreeConstraints$rhs,
-                 private$twoCycleConstraints$rhs,
-                 private$connectivityConstraints$rhs))
-      },
-      
-      generateConstraintDirections = function(){
-        
-        return(c(private$fixedTerminalConstraints$directions,
-                 private$nodeDegreeConstraints$directions,
-                 private$twoCycleConstraints$directions,
-                 private$connectivityConstraints$directions))
-      },
-      
+      generateConstraintMatrix = function(){ return(do.call(rbind, lapply(private$gatherConstraintObjects(), function(l){l$variables}))) },
+      generateConstraintRHS = function(){ return(do.call(c, lapply(private$gatherConstraintObjects(), function(l){l$rhs}))) },
+      generateConstraintDirections = function(){ return(do.call(c, lapply(private$gatherConstraintObjects(), function(l){l$directions}))) },
       
       searchGraph = graph.empty(),
       
