@@ -8,9 +8,9 @@
 
 A package dedicated to finding solutions to [Steiner tree problems](https://en.wikipedia.org/wiki/Steiner_tree_problem) in graphs using Integer Linear Programming (ILP). Motivation stems from a need for solutions to the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Sub-graph (MWCS) problems in computational biology. For example:
 
-* [Dittrich et al.](https://www.ncbi.nlm.nih.gov/pubmed/18586718) (2008) demonstrate how MWCS is a means by which to combine per-gene expression data with mechanistic protein-protein interaction networks and extract functional modules in a data-driven way. 
-* [Liang et al.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5723949/) (2017) use MStT to infer phylogenies of mutated cancer cells from a dataset of copy-number variation (CNV).
-* [Lam, Alexandersson and Pachter](https://www.liebertpub.com/doi/abs/10.1089/10665270360688156) show that sequence alignment can be mapped to a Steiner tree problem.
+* [Dittrich et al. (2008)](https://www.ncbi.nlm.nih.gov/pubmed/18586718) demonstrate how MWCS is a means by which to combine per-gene expression data with mechanistic protein-protein interaction networks and extract functional modules in a data-driven way. 
+* [Liang et al. (2017)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5723949/) use MStT to infer phylogenies of mutated cancer cells from a dataset of copy-number variation (CNV).
+* [Lam, Alexandersson and Pachter (2004)](https://www.liebertpub.com/doi/abs/10.1089/10665270360688156) show that sequence alignment can be mapped to a Steiner tree problem.
 
 This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017). This algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/). A major advancement of Fischetti et al. is that ILP variables are only intriduced for nodes, rather than edges *as well*, which dramatically decreases the run-time of the process.
 
