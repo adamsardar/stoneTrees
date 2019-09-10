@@ -6,9 +6,13 @@
   
 # stoneTrees - an R package for solving Steiner tree problems
 
-A package dedicated to finding solutions to [Steiner tree problems](https://en.wikipedia.org/wiki/Steiner_tree_problem) in graphs. Motivation stems from a need for solutions to the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Sub-graph (MWCS) problems in computational biology. For example, Dittrich et al. (2008) demonstrated how MWCS is a means by which to combine per-gene expression data with mechanistic protein-protein interaction networks and extract functional modules in a data-driven way. 
+A package dedicated to finding solutions to [Steiner tree problems](https://en.wikipedia.org/wiki/Steiner_tree_problem) in graphs using Integer Linear Programming (ILP). Motivation stems from a need for solutions to the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Sub-graph (MWCS) problems in computational biology. For example:
 
-This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017), which is the algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/).
+* (Dittrich et al.)[https://www.ncbi.nlm.nih.gov/pubmed/18586718] (2008) demonstrate how MWCS is a means by which to combine per-gene expression data with mechanistic protein-protein interaction networks and extract functional modules in a data-driven way. 
+* (Liang et al.)[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5723949/] (2017) use MStT to infer phylogenies of mutated cancer cells from a dataset of copy-number variation (CNV).
+* (Lam, Alexandersson and Pachter)[https://www.liebertpub.com/doi/abs/10.1089/10665270360688156] show that sequence alignment can be mapped to a Steiner tree problem.
+
+This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017). This algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/). A major advancement of Fischetti et al. is that ILP variables are only intriduced for nodes, rather than edges *as well*, which dramatically decreases the run-time of the process.
 
 ## Installation
 
@@ -17,13 +21,15 @@ This package serves as a faithful implementation of "Thinning out Steiner Trees"
 > library(stoneTrees)
 ```
 
-The default solver in the package is `lpSolve`. However, empirical observation leads to the suggestion of using [Rglpk](https://cran.r-project.org/web/packages/Rglpk/index.html) or, better yet, [Rcplex](https://cran.r-project.org/web/packages/Rcplex/index.html). The installation of these last two packages, whilst relatively simple, are sufficiently complex to affect the solver recommendation.
+### ILP Solvers
 
-`Rglpk` can be easily installed. On Linux install the glpk-dev package (`apt install libglpk-dev`); on mac you can use brew (`brew install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `> install.packages("Rglpk")` should work.
+`stoneTrees` aims to be compatible with several ILP solvers; at current a user can chose from [`lpsymphony`](https://www.bioconductor.org/packages/release/bioc/html/lpsymphony.html), [`Rglpk`](https://cran.r-project.org/web/packages/Rglpk/index.html), [`lpSolve`](https://cran.r-project.org/web/packages/lpSolve/index.html) and [`Rcplex`](https://cran.r-project.org/web/packages/Rcplex/index.html) .  The default solver is `lpSolve`. However, there is a strong recommendation of the open-source `Rglpk` solver or, better yet, the proprietary `Rcplex` solver. Installation of these last two packages, whilst relatively straightforward, is complex enough to affect the choice of default.
+
+`Rglpk` can be easily installed. On Linux install the glpk-dev package (`apt install libglpk-dev`); on Mac OSX you can use brew (`brew install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `install.packages("Rglpk")` should work.
 
 ## Usage
 
-Problems are constructed using the $new method of the appropriate problem class and then a collector method is called. For the base Steiner tree or MWCS problem (or a blend of the two), this is nodeCentricSteinerTreeProblem$new() followed by $findSingleSteinerSolution().
+Problems are constructed using the $new method of the appropriate problem class and then a collector method is called. For the base MStT or MWCS problem, this involves calling `nodeCentricSteinerTreeProblem$new()` followed by `$findSingleSteinerSolution()`.
 
 By way of example, look at the `lymphoma` test dataset that comes with the package. It is a MWCS problem; a graph with node score attributes detailing prizes/costs of node inclusion:
 
@@ -48,7 +54,7 @@ IGRAPH 6674598 UN-- 46 50 --
 [45] 96 --1797 573--1797 96 --1720 543--962  501--1619 675--1879
 ```
 
-If the user is interested in collecting sub-optimal solutions, then a different constructor is used that allows one to specify the solution tolerance parameter. Notice here that there are three stages: build the object (`subOptimalSteinerProblem$new()`), identify solutions and add them to the pool of distinct solutions (`lymphoma_multiMWCS$identifyMultipleSteinerSolutions()`) and finally extract solutions from the pool as graphs (`lymphoma_multiMWCS$getSolutionPoolGraphs()`).
+If the user is interested in collecting sub-optimal solutions, then a different constructor is used that allows one to specify the solution tolerance parameter.
 
 ```
 > lymphoma_multiMWCS <- subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 1)
@@ -67,7 +73,9 @@ IGRAPH f0365e4 UN-- 57 84 --
 [78] 96 --1720 543--962  494--1619 501--1619 512--1769 675--1879 757--1987
 ```
 
-If the user is interested in the bootstrapped Steiner Tree problem (aka the Steiner Forest problem), whereby initial seeds randomly sub-sampled and the resultant Steiner problem solved, then a third class is used. This is a seed/terminal-based routine, so a graph with terminals must be used: one included in the package is the `karateGraph` problem. The methods used are: `nodeCentricSteinerForestProblem$new()`, `$sampleMultipleBootstrapSteinerSolutions()` which populates a solution pool with random draws from the Steiner forest problem and `$getBootstrapSolutionPoolGraphs()` which returns the aggregated result.
+Notice here that there are three stages: build the object (`subOptimalSteinerProblem$new()`), identify solutions and add them to the pool of distinct solutions (`lymphoma_multiMWCS$identifyMultipleSteinerSolutions()`) and finally extract solutions from the pool as graphs (`lymphoma_multiMWCS$getSolutionPoolGraphs()`).
+
+If the user is interested in the bootstrapped Steiner Tree problem (aka the Steiner Forest problem), whereby initial seeds are repeatedly sub-sampled and the resultant Steiner problem solved, then a third class is used. This is a seed/terminal-based routine, so a graph with terminals must be used: one included in the package is the `karateGraph` problem. The methods used are: `nodeCentricSteinerForestProblem$new()`, `$sampleMultipleBootstrapSteinerSolutions()` which populates a solution pool with random draws from the Steiner forest problem and `$getBootstrapSolutionPoolGraphs()` which returns the aggregated result.
 
 ```
 > nodeCentricSteinerForestProblem$new(karateGraph)$sampleMultipleBootstrapSteinerSolutions()$getBootstrapSolutionPoolGraphs()
