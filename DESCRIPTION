@@ -3,7 +3,8 @@ Type: Package
 Title: Solve node centric Steiner tree problems
 Version: 1.0
 Date: 20-May-2019
-Authors@R: c( person("Adam", "Sardar", email = "adam@sardar.me.uk", role = c("aut", "cre", "cph")) )
+Authors@R: c( person("Adam", "Sardar", email = "adam@sardar.me.uk", role = c("aut", "cre", "cph")),
+              person("Julie", "Borgel", email = "borgel.julie@gmail.com", role = c("ctb")))
 Description: A package aimed at solving Steiner ('stone') tree problems with uniform edge weights,
     such as the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems. It
     serves as an R implementation of the paper Fischetti M et al., Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comp (2017).
