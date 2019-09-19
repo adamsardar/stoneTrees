@@ -84,7 +84,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       
       if(length(decompose(private$searchGraph)) != 1) stop("Search network must only have a single connected component.")
       
-      # nodeDT with node indicies
+                                             # check for nodeScore: all -1 if absent, validate if present
+                                             if(!"nodeScore" %in% vertex_attr_names( private$searchGraph)){ V(private$searchGraph)$nodeScore <- -1 }
+                                             
+
+                                             # nodeDT with node indices
       private$nodeDT <- get.data.frame(private$searchGraph, what = "vertices") %>% data.table
       
       # Solution status will effectively be provided by the 'inComponent' attribute
@@ -99,7 +103,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         if( ! (is.logical(private$nodeDT$isTerminal) & all(!is.na(private$nodeDT$isTerminal))) ) stop("isTerminal node attributes *must* all be boolean, with no NA's")
       }
       
-      # check for nodeScore: all -1 if absent, validate if present
+                                             # check for nodeScore: all -1 if absent, validate if present (This is redundant now that I have added nodeScore to the searchgraph itself)
       if(! "nodeScore" %in% colnames(private$nodeDT)){
         
         private$nodeDT[, nodeScore := -1]

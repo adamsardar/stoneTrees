@@ -89,6 +89,9 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       
       while(bootItr <= nBootstraps){
         
+                                                 if(private$verbosity) message("Bootstrap ", bootItr)
+                                                 
+
         private$resampleFixedTerminals(resamplingProbability)
         
         #Find up to ten degenerate solutions as you can
