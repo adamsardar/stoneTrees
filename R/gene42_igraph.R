@@ -11,7 +11,7 @@
 #' \describe{
 #'   \item{name}{Unique identifiers for each vertex - note, not an index despite being character numbers}
 #'   \item{isTerminal}{A boolean flag detailing as to whether a vertex is a fixed node or not}
-#'   \item{edgeWeight}{A belief score between 0 and 1 indicated how strong the evidence is for an interaction}
+#'   \item{edgeWeight}{A belief score between 0 and 1 indicating how strong the evidence is for an interaction}
 #' }
 #' @source \url{http://steinlib.zib.de/showset.php?GENE}
 "gene42_igraph"

@@ -6,7 +6,7 @@ globalVariables(c("condensedNode","potentialTerminal","segmentID",".vertexID"))
 #' components. This scales very, very badly and for some runs can actually be the major computational bottleneck. It's
 #' also unnecessary as neighbouring prize nodes and terminals will always be in the resultant graph.
 #'
-#' This function groups together potential terminals and adds their relevent node attributes together sensibly. For use
+#' This function groups together potential terminals and adds their relevant node attributes together sensibly. For use
 #' with steiner solvers in the stoneTrees package.
 #'
 #' @param graphToCondense igraph network that we wish to contract
