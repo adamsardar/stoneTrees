@@ -1,6 +1,6 @@
 globalVariables(names=c(".","name"))
 #' @title create a module of the set of all-pairs shortest paths (APSP)
-#' @description a convenience function for generating APSP for a set of seeds - not that this is ALL paths of the shortest length, not just one
+#' @description a convenience function for generating APSP for a set of seeds - note that this is ALL paths of the shortest length, not just one
 #' @param seeds A set of seen nodes. These should correspond to the 'name' field of the searchGraph
 #' @param searchGraph An igraph object representation of the network within which to search from shortest-path pairs
 #' @param omitNA Logical flag to dictate if NA values should be stripped from input (default: TRUE)
@@ -15,7 +15,7 @@ calculateAPSPmodule <- function(seeds, searchGraph, omitNA = TRUE){
 
   ifelse(omitNA,
          seeds %<>% na.omit(seeds),
-         if(any(is.na(V(searchGraph)$name))) warning("NA nodes found in input seed list but 'omitNA' set to FALSE - this can lead to unstable beahviour") )
+         if(any(is.na(V(searchGraph)$name))) warning("NA nodes found in input seed list but 'omitNA' set to FALSE - this can lead to unstable behaviour") )
 
   seedsNotInGaph <- setdiff(seeds,V(searchGraph)$name)
   seedsInGaph <- intersect(seeds,V(searchGraph)$name)

@@ -3,11 +3,11 @@
 #' The base stoneTrees class for solving Steiner Tree problems. Each object constructed represents a single Steiner problem
 #' and the associated methods allow for modifications, solution generation etc. See *examples* below.
 #'
-#' Input networks must be singel component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
+#' Input networks must be single component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
 #' and/or node costs or prizes for inclusion ($nodeScore).
 #'
 #' @docType class
-#' @format R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions
+#' @format R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/maximum weight connected subgraph (MWCS) problem, with methods to find solutions
 #'
 #' @section Methods:
 #' \describe{
@@ -103,7 +103,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         if( ! (is.logical(private$nodeDT$isTerminal) & all(!is.na(private$nodeDT$isTerminal))) ) stop("isTerminal node attributes *must* all be boolean, with no NA's")
       }
       
-                                             # check for nodeScore: all -1 if absent, validate if present (This is redundant now that I have added nodeScore to the searchgraph itself)
+      # check for nodeScore: all -1 if absent, validate if present (This is redundant now that I have added nodeScore to the searchgraph itself)
       if(! "nodeScore" %in% colnames(private$nodeDT)){
         
         private$nodeDT[, nodeScore := -1]
@@ -161,25 +161,25 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         
         private$solve()
         
-                                               #Stop loop if solver couldn't find a solution at all (Most probably the solver will run for nothing after that)
-                                                if(vcount(self$getCurrentSolutionGraph()) == 0){ 
-                                                 message("STOP iteration : No Solution was found, most probably the solver run out of time. Try CPLEX (if you didn't)")
-                                                 break()
+        #Stop loop if solver couldn't find a solution at all (Most probably the solver will run for nothing after that)
+        if(vcount(self$getCurrentSolutionGraph()) == 0){
+        
+        message("STOP iteration : No Solution was found, most probably the solver run out of time. Try an advanced MILP solver like CPLEX")
+        break()
                                                  
-                                                 }else{
+         }else{
                                                  
         #Add connectivity constraints
-        private$addConnectivityConstraints()
-                                               }
+        private$addConnectivityConstraints() }
         
-        itrCount %<>% add(1)
-      }
+        itrCount %<>% add(1) }
       
                                           
-                                             if(itrCount >= maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
+       if(itrCount >= maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
       
       return( uncondenseGraph( self$getCurrentSolutionGraph() ) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
-    },
+      
+      },
     
     getNodeDT = function(){ private$nodeDT },
     getEdgeDT = function(){ private$edgeDT },
@@ -420,15 +420,21 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
           private$currentSolutionIndices <- which(solVec > 0)
         }
         
-                                             disconnectedComponentList <- decompose( self$getCurrentSolutionGraph())# The nodeDT table and inComponent variable keeps track of which node is where
+        disconnectedComponentList <- decompose( self$getCurrentSolutionGraph())# The nodeDT table and inComponent variable keeps track of which node is where
+        
         private$nodeDT[,inComponent := NA_integer_]
         
-                                             if(vcount(self$getCurrentSolutionGraph()) == 0) { message("No Solution was found, most probably the solver run out of time. Try CPLEX (if you didn't)")}else{
-        for(i in 1:length(disconnectedComponentList)){
+        
+        if(vcount(self$getCurrentSolutionGraph()) == 0){
+          
+          message("No Solution was found, most probably the solver run out of time. Try an advanced MILP solver like CPLEX") 
+          
+          }else{
+        
+            for(i in 1:length(disconnectedComponentList)){
           
           # Using nodeIDs to track membership
-          private$nodeDT[.nodeID %in% V(disconnectedComponentList[[i]])$.nodeID, inComponent := i]
-                                             } }
+          private$nodeDT[.nodeID %in% V(disconnectedComponentList[[i]])$.nodeID, inComponent := i]} }
         
         return(invisible(self))
       },

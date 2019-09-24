@@ -6,19 +6,19 @@
 #' each acceptable solution is found, the solution is a.) stored in a solution pool and b.) used to generate a 'novelty' constraint on future solutions.
 #'
 #' @docType class
-#' @format R6Class \code{subOptimalSteinerProblem} Construct an object representation of a multiple-solution Steiner tree/minimum weight connected subgraph (MWCS) problem
+#' @format R6Class \code{subOptimalSteinerProblem} Construct an object representation of a multiple-solution Steiner tree/maximum weight connected subgraph (MWCS) problem
 #'
 #' @section methods:
 #'
 #' Alongisde those for *nodeCentricSteinerTreeProblem*
 #' \describe{
-#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the subOptimalSteinerProblem class. Alongside the arguments for the super-class constructor, there is also 'solutionTolerence', which instructs the object as to the gap between optimal and observed solution that is acceptable.}
-#'    \item{\code{identifyMultipleSteinerSolutions(maxItr = 10)}}{Add solutions to the solution pool. maxItr is an argument dictating the number of runs through the obtimsation procedure.}
-#'    \item{\code{getSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerence (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
+#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the subOptimalSteinerProblem class. Alongside the arguments for the super-class constructor, there is also 'solutionTolerance', which instructs the object as to the gap between optimal and observed solution that is acceptable.}
+#'    \item{\code{identifyMultipleSteinerSolutions(maxItr = 10)}}{Add solutions to the solution pool. maxItr is an argument dictating the number of runs through the optimsation procedure.}
+#'    \item{\code{getSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerance (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
 #'    \item{\code{getSolutionPoolScores()}}{Compute the scores of the solutions in the solution pool. These are in the same order as the list of graphs returned by $getSolutionPoolGraphs(FALSE)}
 #'    \item{\code{getOptimumScore()}}{Returns the optimum score from solutions in the solution pool}
-#'    \item{\code{getSolutionTolerance()}}{Retreive the tolerence that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
-#'    \item{\code{setSolutionTolerance(x)}}{Alter the tolerence that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
+#'    \item{\code{getSolutionTolerance()}}{Retreive the tolerance that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
+#'    \item{\code{setSolutionTolerance(x)}}{Alter the tolerance that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
 #' }
 #'
 #' @examples
@@ -73,7 +73,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
     getSolutionPool = function(){
       
-                                               return(private$solutionIndicesPool)
+    return(private$solutionIndicesPool)
     },
     
     getSolutionPoolGraphs = function(collapseSols = TRUE){

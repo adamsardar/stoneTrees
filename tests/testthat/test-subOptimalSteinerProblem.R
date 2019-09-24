@@ -45,13 +45,7 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
 test_that("Inspect sub-optimal solution searcher construction and answers found for MStP (without nodeScores)",{
 
-<<<<<<< HEAD
-  expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = TRUE))
-
-  expect_message(testKarate$identifyMultipleSteinerSolutions(), "solution tolerance")
-=======
-  expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = FALSE))
->>>>>>> 7a0d6b3... Fix broken test logic
+  expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = F))
 
   expect_message(testKarate$identifyMultipleSteinerSolutions(), "solution tolerance")
 
