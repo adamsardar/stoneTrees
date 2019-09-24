@@ -17,5 +17,5 @@ calculateAPSPmodule(seeds, searchGraph, omitNA = TRUE)
 An igraph representation of the APSP sampling
 }
 \description{
-a convenience function for generating APSP for a set of seeds - not that this is ALL paths of the shortest length, not just one
+a convenience function for generating APSP for a set of seeds - note that this is ALL paths of the shortest length, not just one
 }
