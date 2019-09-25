@@ -161,7 +161,7 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
 
     if(!"RCplex" %in% .packages(all.available = TRUE)){skip("SteinLib test takes too long using GLPK")}
 
-    gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = T)$findSingleSteinerSolution(40)
+    gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
     expect_true(is.connected(gene42_MSTP))
     expect_true(vcount(gene42_MSTP) <= 1.05*126) # Within 5% of the known optimum
 
@@ -192,7 +192,7 @@ test_that("Trying MWCS solver against the lymphoma.stp instance in the ACTMOD St
 })
 
 
-test_that("Studying nodeCentricSteinerTreeProblem solver for Time limit and max iteration warnings",{
+test_that("nodeCentricSteinerTreeProblem max iteration warning",{
   
   expect_warning(gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), 
                                      verbose = FALSE,
@@ -201,6 +201,6 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for Time limit and max 
   expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
   expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"as.undirected(gene42_igraph)")
  
-  
-  
 })
+ 
+
