@@ -164,7 +164,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         #Stop loop if solver couldn't find a solution at all (Most probably the solver will run for nothing after that)
         if(vcount(self$getCurrentSolutionGraph()) == 0){
         
-        message("STOP iteration : No Solution was found, most probably the solver run out of time. Try an advanced MILP solver like CPLEX")
+        warning("STOP iteration : No Solution was found, most probably the solver run out of time. Try an advanced MILP solver like CPLEX")
         break()
                                                  
          }else{
@@ -427,7 +427,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         
         if(vcount(self$getCurrentSolutionGraph()) == 0){
           
-          message("No Solution was found, most probably the solver run out of time. Try an advanced MILP solver like CPLEX") 
+          warning("No Solution was found, most probably the solver run out of time. Try an advanced MILP solver like CPLEX") 
           
           }else{
         
