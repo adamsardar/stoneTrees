@@ -163,7 +163,9 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       while(length(private$fixedTerminalIndices) == 0){
         
         #Looks complicated, but really it just resamples the isTerminal/fixedTerminal nodeIDs
-        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .SD[sample(c(TRUE,FALSE), length(isTerminal), replace = TRUE, prob = c(pSuccess,1-pSuccess)), .nodeID]]
+        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, 
+                                                          .SD[sample(c(TRUE,FALSE), length(isTerminal), replace = TRUE, prob = c(pSuccess,1-pSuccess)), .nodeID]
+                                                          ] %>% unique()# make sure the fixedTerminal are unique
       }
       
       #Regenerate the fixed terminal constraints now that we have a different set via bootstrap
