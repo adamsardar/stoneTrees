@@ -169,17 +169,6 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
     expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"gene42_igraph")
 })
 
-test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a medium MStTP",{
-
-  if(!"RCplex" %in% .packages(all.available = TRUE)){skip("SteinLib test takes too long using GLPK")}
-
-  gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
-  expect_true(is.connected(gene42_MSTP))
-  expect_true(vcount(gene42_MSTP) <= 1.05*126) # Within 5% of the known optimum
-
-  expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
-  expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"gene42_igraph")
-})
 
 test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against an easy MWCS",{
 
@@ -196,9 +185,22 @@ test_that("Trying MWCS solver against the lymphoma.stp instance in the ACTMOD St
 
   skip("SteinLib drosophila test takes too long even using CPLEX - although it does pass!")
 
-  drosophila001_igraph <- readMWCSgraph('./testData/ACTMOD/drosophila001.stp')
+  #drosophila001_igraph <- readMWCSgraph('./testData/ACTMOD/drosophila001.stp')
 
   # Takes around five minutes with CPLEX
-  #drosophila001_MWCS <- solveNodeCentricSteinerTreeProblem(drosophila001_igraph, timeOut = 7200,verbosity = TRUE, solverChoice = "RCPLEX")
+  #drosophila001_MWCS <- nodeCentricSteinerTreeProblem$new(drosophila001_igraph, verbose = T)$findSingleSteinerSolution(100)
 })
+
+
+test_that("nodeCentricSteinerTreeProblem max iteration warning",{
+  
+  expect_warning(gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), 
+                                     verbose = FALSE,
+                                     solverChoice = "RGLPK")$findSingleSteinerSolution(3), regexp = "Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
+  expect_false(is.connected(gene42_MSTP))
+  expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
+  expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"as.undirected(gene42_igraph)")
+ 
+})
+ 
 

@@ -45,7 +45,7 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
 test_that("Inspect sub-optimal solution searcher construction and answers found for MStP (without nodeScores)",{
 
-  expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = FALSE))
+  expect_silent(testKarate <- subOptimalSteinerProblem$new(karateGraph, solutionTolerance = 0, verbose = F))
 
   expect_message(testKarate$identifyMultipleSteinerSolutions(), "solution tolerance")
 

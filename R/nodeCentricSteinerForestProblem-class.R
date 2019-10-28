@@ -17,7 +17,7 @@
 #' \describe{
 #'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the nodeCentricSteinerForestProblem class. Note the loss of 'presolveGraph'; the repeated resampling of fixed terminal nodes prevents this.}
 #'    \item{\code{sampleMultipleBootstrapSteinerSolutions(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5)}}{Run the bootstrap procedure nBootstraps times, each time resampling seeds with pSuccess = resamplingProbability, collecting degenerate or suboptimal solutions for maxItr times.}
-#'    \item{\code{getBootstrapSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerence (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
+#'    \item{\code{getBootstrapSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerance (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
 #'    \item{...}{Other methods are self explanatory and likely uninteresting to a general user}
 #' ' }
 #'
@@ -83,21 +83,24 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       # solve normal steiner tree - this produces a bunch of connectivity constraints and
       # will also ensure that the solution is connected
       self$findSingleSteinerSolution()
-      private$metaSolutionIndciesPool <- set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
+                                               private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
       
       bootItr <- 1
       
       while(bootItr <= nBootstraps){
         
+                                                 if(private$verbosity) message("Bootstrap ", bootItr)
+                                                 
+
         private$resampleFixedTerminals(resamplingProbability)
         
         #Find up to ten degenerate solutions as you can
         super$identifyMultipleSteinerSolutions(maxItr)
         
-        private$metaSolutionIndciesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
+                                                 private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
         
         #Flush the parent solution pool as we're about to research for solutions
-        private$solutionIndciesPool <- sets::set()
+                                                 private$solutionIndicesPool <- sets::set()
         
         bootItr %<>% add(1)
       }
@@ -107,7 +110,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
     
     getBootstrapSolutionPool = function(){
       
-      return(private$metaSolutionIndciesPool)
+                                               return(private$metasolutionIndicesPool)
     },
     
     #Overide
@@ -160,7 +163,9 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       while(length(private$fixedTerminalIndices) == 0){
         
         #Looks complicated, but really it just resamples the isTerminal/fixedTerminal nodeIDs
-        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .SD[sample(c(TRUE,FALSE), length(isTerminal), replace = TRUE, prob = c(pSuccess,1-pSuccess)), .nodeID]]
+        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, 
+                                                          .SD[sample(c(TRUE,FALSE), length(isTerminal), replace = TRUE, prob = c(pSuccess,1-pSuccess)), .nodeID]
+                                                          ] %>% unique()# make sure the fixedTerminal are unique
       }
       
       #Regenerate the fixed terminal constraints now that we have a different set via bootstrap
@@ -170,6 +175,6 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
     },
     
     #This will be a set of integer sets - the parent class has a solution pool - here we aggrgate it!
-    metaSolutionIndciesPool = sets::set()
+                                             metasolutionIndicesPool = sets::set()
   )
 )

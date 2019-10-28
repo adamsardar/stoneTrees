@@ -4,7 +4,7 @@
 \name{nodeCentricSteinerTreeProblem}
 \alias{nodeCentricSteinerTreeProblem}
 \title{Solve Steiner problems (MStTP or MWCS) with uniform or no edge weights.}
-\format{R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/minimum weight connected subgraph (MWCS) problem, with methods to find solutions}
+\format{R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/maximum weight connected subgraph (MWCS) problem, with methods to find solutions}
 \usage{
 nodeCentricSteinerTreeProblem
 }
@@ -13,7 +13,7 @@ The base stoneTrees class for solving Steiner Tree problems. Each object constru
 and the associated methods allow for modifications, solution generation etc. See *examples* below.
 }
 \details{
-Input networks must be singel component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
+Input networks must be single component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
 and/or node costs or prizes for inclusion ($nodeScore).
 }
 \section{Methods}{
@@ -51,6 +51,7 @@ library(igraph)
  # A blend of the two approaches
 
  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, 
+ 
  # but otherwise node inclusion should follow node scores
  V(lymphomaGraph)$isTerminal <- FALSE
  ## Choose some random nodes to be seeds
