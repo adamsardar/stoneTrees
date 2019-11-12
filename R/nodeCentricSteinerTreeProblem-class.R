@@ -129,7 +129,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       private$addFixedTerminalConstraints()
       private$addNodeDegreeInequalities()
       private$addTwoCycleInequalities()
-      private$addConnectivityConstraints() #These will be empty at this stage
+      private$addConnectivityConstraints() #These will be empty at this stage, but we must still initialise them
       
       return(invisible(self))
     },
@@ -448,9 +448,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                      private$connectivityConstraints))
       },
       
-      generateConstraintMatrix = function(){ return(do.call(rbind, lapply(private$gatherConstraintObjects(), function(l){l$variables}))) },
-      generateConstraintRHS = function(){ return(do.call(c, lapply(private$gatherConstraintObjects(), function(l){l$rhs}))) },
-      generateConstraintDirections = function(){ return(do.call(c, lapply(private$gatherConstraintObjects(), function(l){l$directions}))) },
+      generateConstraintMatrix = function(){ return(Reduce(rbind, lapply(private$gatherConstraintObjects(), function(l){l$variables}))) },
+      generateConstraintRHS = function(){ return(Reduce(c, lapply(private$gatherConstraintObjects(), function(l){l$rhs}))) },
+      generateConstraintDirections = function(){ return(Reduce(c, lapply(private$gatherConstraintObjects(), function(l){l$directions}))) },
       
       searchGraph = graph.empty(),
       
