@@ -1,41 +1,11 @@
 globalVariables(c("."))
 
+stoneTrees_solvers <- c("cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony")
+
 # Choose the best solver from those available
 chooseSolver <- function(){
 
-  solvers <- c("Rcplex", "cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony")
-
-  return( toupper(solvers[solvers %in% .packages(all.available = "TRUE")][1]) )
-}
-
-# Note that Rcplex can segfault when solving for large decomposition problems
-solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
-
-  if(!"Rcplex" %in% .packages(all.available = TRUE) ) stop("Rcplex must be installed in order to use the CPLEX solver")
-
-  validateSingleInteger(nSols)
-
-  if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
-  if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
-  if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
-
-  if(!is.null(cplexParamList$trace)) cplexParamList$trace %<>% as.integer
-  if(!is.null(cplexParamList$tilim)) cplexParamList$tilim %<>% as.integer
-
-  if(any(senseVec == "<") | any(senseVec == ">")) stop("Rcplex only supprts <=, == or >= constraints. Modify your rhs?")
-
-  MILPsolve <- Rcplex::Rcplex(cvec = cVec,
-                              Amat = Amat,
-                              bvec = bVec,
-                              sense = unlist(list("<=" = "L", "==" = "E", ">=" = "G")[senseVec]),
-                              objsense = "max",
-                              vtype = vtypeVec,
-                              control = cplexParamList,
-                              n = nSols)
-
-  MILPsolve$solution <- MILPsolve$xopt
-
-  return(MILPsolve)
+  return( toupper(stoneTrees_solvers[stoneTrees_solvers %in% .packages(all.available = "TRUE")][1]) )
 }
 
 # This function uses the lower-level cplexAPI package, which does not suffer from the segfault bug in Rcplex for larger matricies

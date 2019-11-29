@@ -11,7 +11,7 @@
 #'
 #' @section Methods:
 #' \describe{
-#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?Rcpelx::Rcplex) as desired to prevent output.}
+#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?cplexAPI::CPX_PARAM_SCRIND) as desired to prevent output.}
 #'    \item{\code{findSingleSteinerSolution()}}{Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.}
 #'    \item{\code{getCurrentSolutionGraph()}}{Retrieve the current solution graph (could be disconnected)}
 #'    \item{\code{get*Constraints()}}{Extract relevant constraints }
@@ -409,7 +409,6 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
             nSols = 1)
           
           MILPsolve <- switch(private$solver ,
-                              RCPLEX = do.call("solver_CPLEX", functionArgs),
                               CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                               LPSOLVE = do.call("solver_LPSOLVE", functionArgs),
                               RGLPK = do.call("solver_GLPK", functionArgs),
