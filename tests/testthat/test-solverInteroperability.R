@@ -13,19 +13,6 @@ test_that("Check that lpSolve is producing to correct values (lymphoma graph is 
 })
 
 
-test_that("Compare Rcplex result", {
-
-   if(!"Rcplex" %in% .packages(all.available = TRUE)) skip("Rcplex not installed")
-
-    steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = FALSE, presolve = FALSE, solverChoice = "RCPLEX")
-    rcplexSolution <- steinObject$findSingleSteinerSolution()
-
-    expect_equal(vcount(lpSolveSolution), vcount(rcplexSolution))
-    expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(rcplexSolution)$nodeScore))
-    expect_true(is.connected(rcplexSolution))
-})
-
-
 test_that("Compare cplexAPI result", {
 
   if(!"cplexAPI" %in% .packages(all.available = TRUE)) skip("cplexAPI not installed")
