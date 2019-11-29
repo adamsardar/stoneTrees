@@ -19,7 +19,7 @@ and/or node costs or prizes for inclusion ($nodeScore).
 \section{Methods}{
 
 \describe{
-   \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?Rcpelx::Rcplex) as desired to prevent output.}
+   \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?cplexAPI::CPX_PARAM_SCRIND) as desired to prevent output.}
    \item{\code{findSingleSteinerSolution()}}{Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.}
    \item{\code{getCurrentSolutionGraph()}}{Retrieve the current solution graph (could be disconnected)}
    \item{\code{get*Constraints()}}{Extract relevant constraints }
