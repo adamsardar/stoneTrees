@@ -78,29 +78,28 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       
       validateSingleInteger(nBootstraps)
       validateSingleInteger(maxItr)
-      validateSinglePositiveSemiDefiniteNumeric(resamplingProbability)
+      validateSinglePositiveSemiDefiniteNumeric(resamplingProbability) #TODO This should also validate that it is within [0,1]
       
       # solve normal steiner tree - this produces a bunch of connectivity constraints and
       # will also ensure that the solution is connected
       self$findSingleSteinerSolution()
-                                               private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
+      private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
       
       bootItr <- 1
       
       while(bootItr <= nBootstraps){
         
-                                                 if(private$verbosity) message("Bootstrap ", bootItr)
-                                                 
-
+        if(private$verbosity) message("Bootstrap ", bootItr)
+        
         private$resampleFixedTerminals(resamplingProbability)
         
         #Find up to ten degenerate solutions as you can
         super$identifyMultipleSteinerSolutions(maxItr)
         
-                                                 private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
+        private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
         
         #Flush the parent solution pool as we're about to research for solutions
-                                                 private$solutionIndicesPool <- sets::set()
+        private$solutionIndicesPool <- sets::set()
         
         bootItr %<>% add(1)
       }
@@ -110,7 +109,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
     
     getBootstrapSolutionPool = function(){
       
-                                               return(private$metasolutionIndicesPool)
+      return(private$metasolutionIndicesPool)
     },
     
     #Overide
@@ -141,7 +140,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       return(super$getSolutionPoolGraphs())
     },
     
-    #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time
+    #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time. This is because we resample the seeds repeatedly.
     findSingleSteinerSolution = function(maxItr = 20){
       
       private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .nodeID]
@@ -163,18 +162,19 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       while(length(private$fixedTerminalIndices) == 0){
         
         #Looks complicated, but really it just resamples the isTerminal/fixedTerminal nodeIDs
-        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, 
-                                                          .SD[sample(c(TRUE,FALSE), length(isTerminal), replace = TRUE, prob = c(pSuccess,1-pSuccess)), .nodeID]
-                                                          ] %>% unique()# make sure the fixedTerminal are unique
+        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .SD[runif(n = .N) <= pSuccess, .nodeID] ]
+        
+        if(any(duplicated(private$fixedTerminalIndices))){warning("Duplicated fixed terminals - this shouldn't be possible. Please contact package maintainer!: ",  private$fixedTerminalIndices)}
+        
+        # I am unsure as to why there needs to be a unique call here - there should never be duplicated .nodeID values.
       }
       
-      #Regenerate the fixed terminal constraints now that we have a different set via bootstrap
-      super$addFixedTerminalConstraints()
+      super$addFixedTerminalConstraints() #Regenerate the fixed terminal constraints now that we have a different fixed terminal set via bootstrap
       
       return(invisible(self))
     },
     
-    #This will be a set of integer sets - the parent class has a solution pool - here we aggrgate it!
-                                             metasolutionIndicesPool = sets::set()
+    #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
+    metasolutionIndicesPool = sets::set()
   )
 )
