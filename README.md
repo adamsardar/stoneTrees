@@ -14,7 +14,7 @@ A package dedicated to finding solutions to [Steiner tree problems](https://en.w
 * [Liang et al. (2017)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5723949/) use MStT to infer phylogenies of mutated cancer cells from a dataset of copy-number variation (CNV).
 * [Lam, Alexandersson and Pachter (2004)](https://www.liebertpub.com/doi/abs/10.1089/10665270360688156) show that sequence alignment can be mapped to a Steiner tree problem.
 
-This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017). This algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/). A major advancement of Fischetti et al. is that ILP variables are only intriduced for nodes, rather than edges *as well*, which dramatically decreases the run-time of the process.
+This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017). This algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/). A major advancement of Fischetti et al. is that ILP variables are only introduced for nodes, rather than edges *as well*, which dramatically decreases the run-time of the process.
 
 ## Installation
 
