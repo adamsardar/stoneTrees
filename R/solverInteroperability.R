@@ -1,6 +1,6 @@
 globalVariables(c("."))
 
-stoneTrees_solvers <- c("cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony")
+stoneTrees_solvers <- c("cplexAPI", "Rglpk", "rcbc", "lpSolve" ,"lpsymphony")
 
 # Choose the best solver from those available
 chooseSolver <- function(){
@@ -134,5 +134,57 @@ solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPa
                                                types = vtypeVec,
                                                time_limit = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
                                                verbosity = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace) -2, -2))
+  return(MILPsolve)
+}
+
+
+
+solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
+  
+  if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
+  if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
+  if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
+  
+  if(!"rcbc" %in% .packages(all.available = TRUE) ) stop("rcbc must be installed in order to use the CBC solver")
+  
+  #Prepare the column bounds
+  colUB <- rep.int(Inf, ncol(Amat))
+  colLB <- rep.int(-Inf, ncol(Amat))
+  
+  colUB[vtypeVec == "B"] <- 1L
+  colLB[vtypeVec == "B"] <- 0L
+  
+  # Prepare the row bounds
+  rowUB <- rep.int(Inf, nrow(Amat))
+  rowLB <- rep.int(-Inf, nrow(Amat))
+  
+  rowUB[senseVec == "=="] <- bVec[senseVec == "=="]
+  rowLB[senseVec == "=="] <- bVec[senseVec == "=="]
+  
+  rowUB[senseVec == ">="] <- Inf
+  rowLB[senseVec == ">="] <- bVec[senseVec == ">="]
+
+  rowUB[senseVec == "<="] <- bVec[senseVec == "<="]
+  rowLB[senseVec == "<="] <- -Inf
+  
+  MILPsolve <- rcbc::cbc_solve(
+    obj = cVec,
+    mat = Amat,
+    
+    row_ub = rowUB,
+    row_lb = rowLB,
+    
+    col_ub = colUB,
+    col_lb = colLB,
+    
+    is_integer = (vtypeVec == "B"),
+    
+    max = TRUE,
+    cbc_args = list("sec" = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
+                    "logLevel" = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace), 0) )
+  )
+  
+  MILPsolve$solution <- MILPsolve$column_solution
+  
   return(MILPsolve)
 }

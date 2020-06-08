@@ -411,6 +411,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
           MILPsolve <- switch(private$solver ,
                               CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                               LPSOLVE = do.call("solver_LPSOLVE", functionArgs),
+                              RCBC = do.call("solver_CBC", functionArgs),
                               RGLPK = do.call("solver_GLPK", functionArgs),
                               LPSYMPHONY = do.call("solver_SYMPHONY", functionArgs))
           

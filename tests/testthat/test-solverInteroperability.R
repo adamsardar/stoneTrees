@@ -26,6 +26,21 @@ test_that("Compare cplexAPI result", {
 
 })
 
+test_that("Compare Rcbc result", {
+  
+  
+  if(!"rcbc" %in% .packages(all.available = TRUE)) skip("rcbc not installed")
+  
+  steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, presolve = FALSE, verbose = FALSE, solverChoice = "RCBC")
+  cbcSolution <- steinObject$findSingleSteinerSolution()
+  
+  expect_equal(vcount(lpSolveSolution), vcount(cbcSolution))
+  expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(cbcSolution)$nodeScore))
+  expect_true(is.connected(cbcSolution))
+  
+})
+
+
 
 test_that("Compare Rglpk result", {
 
