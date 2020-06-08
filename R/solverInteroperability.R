@@ -1,6 +1,6 @@
 globalVariables(c("."))
 
-stoneTrees_solvers <- c("cplexAPI", "Rglpk", "rcbc", "lpSolve" ,"lpsymphony")
+stoneTrees_solvers <- c("cplexAPI", "rcbc", "Rglpk", "lpSolve" ,"lpsymphony")
 
 # Choose the best solver from those available
 chooseSolver <- function(){
@@ -27,7 +27,7 @@ solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPar
 
   env <- cplexAPI::openEnvCPLEX()
 
-  prob <- cplexAPI::initProbCPLEX(env, pname = "RankMatrixDecompostion")
+  prob <- cplexAPI::initProbCPLEX(env, pname = "steiner")
 
   if(cplexParamList$trace > 0){ cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_SCRIND, cplexAPI::CPX_ON) }
   if(!is.null(cplexParamList$tilim)){ cplexAPI::setDblParmCPLEX(env, cplexAPI::CPX_PARAM_TILIM, cplexParamList$tilim) }
@@ -144,6 +144,7 @@ solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLis
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
   if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
+  if(!is.null(cplexParamList$nThreads)){ cplexParamList$nThreads %<>% as.integer}else{ cplexParamList$nThreads <- as.integer( max(c(detectCores() - 2,1, na.rm = TRUE))) }
   
   if(!"rcbc" %in% .packages(all.available = TRUE) ) stop("rcbc must be installed in order to use the CBC solver")
   
@@ -181,7 +182,8 @@ solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLis
     
     max = TRUE,
     cbc_args = list("sec" = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
-                    "logLevel" = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace), 0) )
+                    "logLevel" = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace), 0),
+                    "threads" = cplexParamList$nThreads )
   )
   
   MILPsolve$solution <- MILPsolve$column_solution
