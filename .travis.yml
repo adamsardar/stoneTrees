@@ -12,13 +12,19 @@ r:
 
 apt_packages:
   - libglpk-dev
+  - coinor-libcbc-dev 
+  - coinor-libclp-dev
   
 brew_packages:
   - glpk
+  - coin-or-tools/coinor/cbc
 
 r_packages:
   - Rglpk
   - covr  #code coverage tool  
+  
+r_github_packages:
+  - dirkschumacher/rcbc # No CRAN version yet
   
 bioc_packages:
   - lpsymphony # Builds from source
