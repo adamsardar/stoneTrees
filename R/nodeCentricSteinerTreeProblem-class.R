@@ -258,6 +258,19 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         invisible(self)
       },
       
+      
+      # A utility function - forget all of the exisiting connectivity constraints
+      flushConnectivityConstraints = function(){
+        
+        private$connectivityConstraints <- list( variables = Matrix(0, sparse = TRUE, nrow = 0,
+                                                                    ncol = vcount(private$searchGraph),
+                                                                    dimnames = list(NULL, V(private$searchGraph)$name)),
+                                                 directions = character(),
+                                                 rhs = numeric() )
+        
+        return(self)
+      },
+      
       # Constraint 2.) Aims to endorce connections (via minimal node seperators) for pairs of terminals that are disconnected
       # This is the only really complicated constraint set in the function - study of it should be in conjunction with the paper Fischetti et al.
       # Only applied over terminal pairs in seperate components
@@ -267,12 +280,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         # Using a dedicated column in private$nodeDT for cluster membership
         if(private$nodeDT[,all(is.na(inComponent))]){
           #i.e no nodes in any clusters - solver has to be called.
-          
-          private$connectivityConstraints <- list( variables = Matrix(0, sparse = TRUE, nrow = 0,
-                                                                      ncol = vcount(private$searchGraph),
-                                                                      dimnames = list(NULL, V(private$searchGraph)$name)),
-                                                   directions = character(),
-                                                   rhs = numeric() )
+          private$flushConnectivityConstraints()
           
           if(private$verbosity) message("No connectivity constraints to add at this stage ...")
           

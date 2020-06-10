@@ -171,6 +171,10 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       
       super$addFixedTerminalConstraints() #Regenerate the fixed terminal constraints now that we have a different fixed terminal set via bootstrap
       
+      #The connectivity constraints relate to a different set of terminals (and therefore a different problem) - flush them
+      if(private$verbosity) message("Flush existing connectivity constraints now that we have new fixed terminals")
+      super$flushConnectivityConstraints()
+      
       return(invisible(self))
     },
     
