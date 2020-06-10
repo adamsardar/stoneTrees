@@ -1,6 +1,6 @@
 globalVariables(c("."))
 
-stoneTrees_solvers <- c("cplexAPI", "rcbc", "Rglpk", "lpSolve" ,"lpsymphony")
+stoneTrees_solvers <- c("cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony", "rcbc")
 
 # Choose the best solver from those available
 chooseSolver <- function(){
@@ -183,7 +183,7 @@ solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLis
     max = TRUE,
     cbc_args = list("sec" = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
                     "logLevel" = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace), 0),
-                    "threads" = cplexParamList$nThreads )
+                    "threads" = 0)
   )
   
   MILPsolve$solution <- MILPsolve$column_solution
