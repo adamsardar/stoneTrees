@@ -1,6 +1,6 @@
 globalVariables(c("."))
 
-stoneTrees_solvers <- c("cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony", "rcbc")
+stoneTrees_solvers <- c("cplexAPI", "rcbc", "Rglpk", "lpSolve" ,"lpsymphony")
 
 # Choose the best solver from those available
 chooseSolver <- function(){
