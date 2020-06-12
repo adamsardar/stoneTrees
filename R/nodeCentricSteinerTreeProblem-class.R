@@ -11,7 +11,7 @@
 #'
 #' @section Methods:
 #' \describe{
-#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?Rcpelx::Rcplex) as desired to prevent output.}
+#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?cplexAPI::CPX_PARAM_SCRIND) as desired to prevent output.}
 #'    \item{\code{findSingleSteinerSolution()}}{Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.}
 #'    \item{\code{getCurrentSolutionGraph()}}{Retrieve the current solution graph (could be disconnected)}
 #'    \item{\code{get*Constraints()}}{Extract relevant constraints }
@@ -258,6 +258,19 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         invisible(self)
       },
       
+      
+      # A utility function - forget all of the exisiting connectivity constraints
+      flushConnectivityConstraints = function(){
+        
+        private$connectivityConstraints <- list( variables = Matrix(0, sparse = TRUE, nrow = 0,
+                                                                    ncol = vcount(private$searchGraph),
+                                                                    dimnames = list(NULL, V(private$searchGraph)$name)),
+                                                 directions = character(),
+                                                 rhs = numeric() )
+        
+        return(self)
+      },
+      
       # Constraint 2.) Aims to endorce connections (via minimal node seperators) for pairs of terminals that are disconnected
       # This is the only really complicated constraint set in the function - study of it should be in conjunction with the paper Fischetti et al.
       # Only applied over terminal pairs in seperate components
@@ -267,12 +280,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         # Using a dedicated column in private$nodeDT for cluster membership
         if(private$nodeDT[,all(is.na(inComponent))]){
           #i.e no nodes in any clusters - solver has to be called.
-          
-          private$connectivityConstraints <- list( variables = Matrix(0, sparse = TRUE, nrow = 0,
-                                                                      ncol = vcount(private$searchGraph),
-                                                                      dimnames = list(NULL, V(private$searchGraph)$name)),
-                                                   directions = character(),
-                                                   rhs = numeric() )
+          private$flushConnectivityConstraints()
           
           if(private$verbosity) message("No connectivity constraints to add at this stage ...")
           
@@ -409,9 +417,9 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
             nSols = 1)
           
           MILPsolve <- switch(private$solver ,
-                              RCPLEX = do.call("solver_CPLEX", functionArgs),
                               CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                               LPSOLVE = do.call("solver_LPSOLVE", functionArgs),
+                              RCBC = do.call("solver_CBC", functionArgs),
                               RGLPK = do.call("solver_GLPK", functionArgs),
                               LPSYMPHONY = do.call("solver_SYMPHONY", functionArgs))
           

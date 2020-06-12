@@ -64,7 +64,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
                        solverTrace = solverTrace,
                        solverTimeLimit = solverTimeLimit)
       
-      self$setSolutionTolerance(solutionTolerance + 1E-10)  # Add epsilon
+      self$setSolutionTolerance(solutionTolerance + 1E-10)  # Add epsilon to handle small fluctuations
       
       private$setNoveltyConstraints()
       
@@ -73,7 +73,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
     getSolutionPool = function(){
       
-    return(private$solutionIndicesPool)
+      return(private$solutionIndicesPool)
     },
     
     getSolutionPoolGraphs = function(collapseSols = TRUE){
@@ -112,7 +112,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
       validateSingleInteger(maxItr)
       
       self$findSingleSteinerSolution()
-                                               private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+      private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
       
       multiSteinerItr <- 1
       
@@ -123,8 +123,6 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
         super$solve()
         multiSteinerItr %<>% add(1)
         
-
-
         if(vcount(super$getCurrentSolutionGraph()) == 0) { 
         
         message("STOP iteration, solution not found. No more novelty constraint added")
@@ -139,7 +137,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
           #If the absolute difference between scores is within tolerance, then add to pool
           if(  abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <= private$tolerance ){
             
-                                                     private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+            private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
           }else{
             
             message("Next feasible solution is outside of solution tolerance! Consider increasing it with $setSolutionTolerance(x) method?")
@@ -160,11 +158,11 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
     # Overide the superclass
     gatherConstraintObjects = function(){
       
-      return(list(private$fixedTerminalConstraints,
-                  private$nodeDegreeConstraints,
-                  private$twoCycleConstraints,
-                  private$connectivityConstraints,
-                  private$novelSolutionsConstraint))  },
+      return( list(private$fixedTerminalConstraints,
+                   private$nodeDegreeConstraints,
+                   private$twoCycleConstraints,
+                   private$connectivityConstraints,
+                   private$novelSolutionsConstraint) ) },
 
     # Add a constraint that we cannot have a solution that we have already seen
     # This constraint is not from the original paper, but it is quite simple

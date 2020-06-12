@@ -1,8 +1,8 @@
 Package: stoneTrees
 Type: Package
 Title: Solve node centric Steiner tree problems
-Version: 1.0
-Date: 20-May-2019
+Version: 1.2
+Date: 11-June-2020
 Authors@R: c( person("Adam", "Sardar", email = "adam@sardar.me.uk", role = c("aut", "cre", "cph")),
               person("Julie", "Borgel", email = "borgel.julie@gmail.com", role = c("ctb")))
 Description: A package aimed at solving Steiner ('stone') tree problems with uniform edge weights,
@@ -25,9 +25,9 @@ Imports:
     stringr (>= 1.0)
 Suggests: 
     testthat (>= 2.1.0),
-    Rcplex (>= 0.3),
     cplexAPI (>= 1.3.3),
     lpsymphony (>= 1.1),
+    rcbc (>= 0.1),
     Rglpk (>= 0.6),
     slam (>= 0.1),
     covr

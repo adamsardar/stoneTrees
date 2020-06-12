@@ -13,19 +13,6 @@ test_that("Check that lpSolve is producing to correct values (lymphoma graph is 
 })
 
 
-test_that("Compare Rcplex result", {
-
-   if(!"Rcplex" %in% .packages(all.available = TRUE)) skip("Rcplex not installed")
-
-    steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, verbose = FALSE, presolve = FALSE, solverChoice = "RCPLEX")
-    rcplexSolution <- steinObject$findSingleSteinerSolution()
-
-    expect_equal(vcount(lpSolveSolution), vcount(rcplexSolution))
-    expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(rcplexSolution)$nodeScore))
-    expect_true(is.connected(rcplexSolution))
-})
-
-
 test_that("Compare cplexAPI result", {
 
   if(!"cplexAPI" %in% .packages(all.available = TRUE)) skip("cplexAPI not installed")
@@ -38,6 +25,21 @@ test_that("Compare cplexAPI result", {
     expect_true(is.connected(cplexapiSolution))
 
 })
+
+test_that("Compare Rcbc result", {
+  
+  
+  if(!"rcbc" %in% .packages(all.available = TRUE)) skip("rcbc not installed")
+  
+  steinObject <- nodeCentricSteinerTreeProblem$new(lymphomaGraph, presolve = FALSE, verbose = FALSE, solverChoice = "RCBC")
+  cbcSolution <- steinObject$findSingleSteinerSolution()
+  
+  expect_equal(vcount(lpSolveSolution), vcount(cbcSolution))
+  expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(cbcSolution)$nodeScore))
+  expect_true(is.connected(cbcSolution))
+  
+})
+
 
 
 test_that("Compare Rglpk result", {

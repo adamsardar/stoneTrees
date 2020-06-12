@@ -1,41 +1,11 @@
 globalVariables(c("."))
 
+stoneTrees_solvers <- c("cplexAPI", "rcbc", "Rglpk", "lpSolve" ,"lpsymphony")
+
 # Choose the best solver from those available
 chooseSolver <- function(){
 
-  solvers <- c("Rcplex", "cplexAPI", "Rglpk", "lpSolve" ,"lpsymphony")
-
-  return( toupper(solvers[solvers %in% .packages(all.available = "TRUE")][1]) )
-}
-
-# Note that Rcplex can segfault when solving for large decomposition problems
-solver_CPLEX <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
-
-  if(!"Rcplex" %in% .packages(all.available = TRUE) ) stop("Rcplex must be installed in order to use the CPLEX solver")
-
-  validateSingleInteger(nSols)
-
-  if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
-  if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
-  if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
-
-  if(!is.null(cplexParamList$trace)) cplexParamList$trace %<>% as.integer
-  if(!is.null(cplexParamList$tilim)) cplexParamList$tilim %<>% as.integer
-
-  if(any(senseVec == "<") | any(senseVec == ">")) stop("Rcplex only supprts <=, == or >= constraints. Modify your rhs?")
-
-  MILPsolve <- Rcplex::Rcplex(cvec = cVec,
-                              Amat = Amat,
-                              bvec = bVec,
-                              sense = unlist(list("<=" = "L", "==" = "E", ">=" = "G")[senseVec]),
-                              objsense = "max",
-                              vtype = vtypeVec,
-                              control = cplexParamList,
-                              n = nSols)
-
-  MILPsolve$solution <- MILPsolve$xopt
-
-  return(MILPsolve)
+  return( toupper(stoneTrees_solvers[stoneTrees_solvers %in% .packages(all.available = "TRUE")][1]) )
 }
 
 # This function uses the lower-level cplexAPI package, which does not suffer from the segfault bug in Rcplex for larger matricies
@@ -57,7 +27,7 @@ solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPar
 
   env <- cplexAPI::openEnvCPLEX()
 
-  prob <- cplexAPI::initProbCPLEX(env, pname = "RankMatrixDecompostion")
+  prob <- cplexAPI::initProbCPLEX(env, pname = "steiner")
 
   if(cplexParamList$trace > 0){ cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_SCRIND, cplexAPI::CPX_ON) }
   if(!is.null(cplexParamList$tilim)){ cplexAPI::setDblParmCPLEX(env, cplexAPI::CPX_PARAM_TILIM, cplexParamList$tilim) }
@@ -164,5 +134,59 @@ solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPa
                                                types = vtypeVec,
                                                time_limit = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
                                                verbosity = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace) -2, -2))
+  return(MILPsolve)
+}
+
+
+
+solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
+  
+  if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
+  if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
+  if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
+  if(!is.null(cplexParamList$nThreads)){ cplexParamList$nThreads %<>% as.integer}else{ cplexParamList$nThreads <- as.integer( max(c(detectCores() - 2,1, na.rm = TRUE))) }
+  
+  if(!"rcbc" %in% .packages(all.available = TRUE) ) stop("rcbc must be installed in order to use the CBC solver")
+  
+  #Prepare the column bounds
+  colUB <- rep.int(Inf, ncol(Amat))
+  colLB <- rep.int(-Inf, ncol(Amat))
+  
+  colUB[vtypeVec == "B"] <- 1L
+  colLB[vtypeVec == "B"] <- 0L
+  
+  # Prepare the row bounds
+  rowUB <- rep.int(Inf, nrow(Amat))
+  rowLB <- rep.int(-Inf, nrow(Amat))
+  
+  rowUB[senseVec == "=="] <- bVec[senseVec == "=="]
+  rowLB[senseVec == "=="] <- bVec[senseVec == "=="]
+  
+  rowUB[senseVec == ">="] <- Inf
+  rowLB[senseVec == ">="] <- bVec[senseVec == ">="]
+
+  rowUB[senseVec == "<="] <- bVec[senseVec == "<="]
+  rowLB[senseVec == "<="] <- -Inf
+  
+  MILPsolve <- rcbc::cbc_solve(
+    obj = cVec,
+    mat = Amat,
+    
+    row_ub = rowUB,
+    row_lb = rowLB,
+    
+    col_ub = colUB,
+    col_lb = colLB,
+    
+    is_integer = (vtypeVec == "B"),
+    
+    max = TRUE,
+    cbc_args = list("sec" = ifelse( is.numeric(cplexParamList$tilim), as.integer(cplexParamList$tilim), -1),
+                    "logLevel" = ifelse( is.numeric(cplexParamList$trace), as.integer(cplexParamList$trace), 0),
+                    "threads" = 0)
+  )
+  
+  MILPsolve$solution <- MILPsolve$column_solution
+  
   return(MILPsolve)
 }

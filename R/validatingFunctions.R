@@ -90,8 +90,8 @@ validateFlag <- function(flag2validate){
 validateSolverChoice <- function(candidateSolverChoice){
 
   candidateSolverChoice %<>%  ensure(is.character,
-                                     toupper(.) %in% c("RCPLEX","CPLEXAPI","RGLPK","LPSYMPHONY","LPSOLVE"),
-                                     err_desc = "At current only RCPLEX, CPLEXAPI, RGLPK, LPSYMPHONY and LPSOLVE solvers are supported")
+                                     toupper(.) %in% toupper(stoneTrees_solvers),
+                                     err_desc = paste0( c("At current the supported solvers are:", stoneTrees_solvers), collapse = " "))
 
   invisible(toupper(candidateSolverChoice))
 }

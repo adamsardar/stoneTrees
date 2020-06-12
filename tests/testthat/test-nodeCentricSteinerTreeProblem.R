@@ -194,6 +194,8 @@ test_that("Trying MWCS solver against the lymphoma.stp instance in the ACTMOD St
 
 test_that("nodeCentricSteinerTreeProblem max iteration warning",{
   
+  if(!"Rglpk" %in% .packages(all.available = TRUE)){skip("GLPK must be installed")}
+  
   expect_warning(gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), 
                                      verbose = FALSE,
                                      solverChoice = "RGLPK")$findSingleSteinerSolution(3), regexp = "Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
