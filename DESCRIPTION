@@ -3,7 +3,7 @@ Type: Package
 Title: Solve node centric Steiner tree problems
 Version: 1.2
 Date: 11-June-2020
-Authors@R: c( person("Adam", "Sardar", email = "adam@sardar.me.uk", role = c("aut", "cre", "cph")),
+Authors@R: c( person("Adam", "Sardar", email = "adam@sardar.me.uk", role = c("aut", "cre", "cph"), comment = c(ORCID="0000-0002-6912-6125")),
               person("Julie", "Borgel", email = "borgel.julie@gmail.com", role = c("ctb")))
 Description: A package aimed at solving Steiner ('stone') tree problems with uniform edge weights,
     such as the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph (MWCS) problems. It
