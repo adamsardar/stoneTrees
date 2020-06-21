@@ -147,10 +147,30 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       private$currentSolutionIndices <- integer()
       
       return(super$findSingleSteinerSolution(maxItr = maxItr))
-    }
+    },
     
+    getInitialSeed = function(){ head(private$seedPool, n=1)},
+    getLatestSeed = function(){ tail(private$seedPool, n=1)},
+    getAllSeeds = function(){ return(private$seedPool) }
+
   ),
   private = list(
+
+    addSeedToPool = function(seed){ private$seedPool <- c(private$seedPool, seed); invisible(self)},
+    
+    sampleNewSeed <- function(){return(sample.int(n = .Machine$integer.max, size=1))},
+    
+    generateNextRNGseed = function(){
+      
+      latestSeed <- self$getLatestSeed() 
+      set.seed(latestSeed)
+      newSeed <- private$sampleNewSeed()
+      
+      private$addSeedToPool(newSeed)
+      
+      invisible(self)
+    }
+    
     
     resampleFixedTerminals = function(pSuccess = 0.5){
       
@@ -158,6 +178,8 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       
       #Flush the set of existing terminals
       private$fixedTerminalIndices <- integer()
+      
+      private$generateNextRNGseed()
       
       while(length(private$fixedTerminalIndices) == 0){
         
