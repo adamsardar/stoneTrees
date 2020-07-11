@@ -4,11 +4,13 @@
 \name{karateGraph}
 \alias{karateGraph}
 \title{Zachary's famous karate graph}
-\format{An igraph object with 34 nodes and 78 edges
+\format{
+An igraph object with 34 nodes and 78 edges
 \describe{
   \item{name}{Unique identifiers for each vertex}
   \item{isTerminal}{A boolean flag detailing as to whether a vertex is a fixed node or not}
-}}
+}
+}
 \source{
 \url{https://networkdata.ics.uci.edu/data.php?id=105}
 }

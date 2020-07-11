@@ -4,8 +4,13 @@
 \alias{findHeinzMWCS}
 \title{use the heinz algorithm to find a solution to the maximum weight connected subgraph problem}
 \usage{
-findHeinzMWCS(searchGraph_igraph, n.threads = 2,
-  induceSubgraph = FALSE, verbose = TRUE, timeLimit = 600)
+findHeinzMWCS(
+  searchGraph_igraph,
+  n.threads = 2,
+  induceSubgraph = FALSE,
+  verbose = TRUE,
+  timeLimit = 600
+)
 }
 \arguments{
 \item{searchGraph_igraph}{The igraph representation of the graph that we look to search over with the MWCS solver}

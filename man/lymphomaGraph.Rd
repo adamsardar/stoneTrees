@@ -4,11 +4,13 @@
 \name{lymphomaGraph}
 \alias{lymphomaGraph}
 \title{Lymphoma example from DIMAC11 challenge}
-\format{An igraph object with 2034 nodes and 7756 edges
+\format{
+An igraph object with 2034 nodes and 7756 edges
 \describe{
   \item{name}{Unique identifiers for each vertex - note, not an index despite being character numbers}
   \item{nodeScore}{A score or weight on the node. Produced using the BioNet algroithm using diffuse large B-cell lymphoma data}
-}}
+}
+}
 \source{
 \url{http://dimacs11.zib.de/downloads.html}
 }
