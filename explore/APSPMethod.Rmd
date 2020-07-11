@@ -1,0 +1,160 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+library(purrr)
+devtools::load_all()
+```
+
+
+```{r}
+
+seeds <- V(gene42_igraph)[isTerminal]$name
+
+```
+
+## Calculate all shortest paths : stoneTrees method
+
+I'm just looking how all shortest paths are computed in the package.
+
+```{r}
+calculateAPSPmodule
+```
+
+Compute all shortest path using the same method than the package.
+
+```{r}
+
+allShortestPaths <- all_shortest_paths(gene42_igraph, from = seeds, to = V(gene42_igraph)[name %in% seeds], mode = "all")$res
+```
+
+ * How many paths are found ?
+ 
+```{r}
+length(allShortestPaths)
+```
+
+* From ?
+
+Extract 1st node for each paths.
+
+```{r}
+map_chr(allShortestPaths, ~{ .x[1] %>%  as_ids(.) } ) %>% unique
+```
+
+That's where the error is. We want all shortest paths from **all** nodes to **all** nodes. It looks like we obtain all shortest paths from the 1st node only.
+
+ * to ?
+ 
+Extract last node for each paths. 
+
+```{r} 
+map_chr(allShortestPaths, ~{ .x[length(.x)] %>% as_ids(.) } ) %>% unique
+```
+
+That looks alright.
+
+## Calculate all shortest paths : For all nodes
+
+Compute all shortest paths from **all** nodes to all nodes.
+
+```{r}
+
+allShortestPaths2 <-  map(seeds, ~{ all_shortest_paths(gene42_igraph, from = .x, to = V(gene42_igraph)[name %in% seeds], mode = "all")$res } ) %>% unlist(., recursive = FALSE)
+```
+
+
+ * How many paths are found ?
+ 
+```{r}
+length(allShortestPaths2)
+```
+
+many more paths are found.
+
+* From ?
+
+Extract 1st node for each paths.
+
+```{r}
+map_chr(allShortestPaths2, ~{ .x[1] %>%  as_ids(.) } ) %>% unique
+```
+
+ * to ?
+ 
+Extract last nodefor each paths. 
+
+```{r} 
+map_chr(allShortestPaths2, ~{ .x[length(.x)] %>% as_ids(.) } ) %>% unique
+```
+
+
+## APSP from all to all
+
+
+```{r}
+
+calculateAPSPmoduleForAll <- function(seeds, searchGraph, omitNA = TRUE){
+
+  searchGraphName <- deparse(substitute(searchGraph)) #Capture search graph name
+
+  validateIsNetwork(searchGraph)
+
+  ifelse(omitNA,
+         seeds %<>% na.omit(seeds),
+         if(any(is.na(V(searchGraph)$name))) warning("NA nodes found in input seed list but 'omitNA' set to FALSE - this can lead to unstable behaviour") )
+
+  seedsNotInGaph <- setdiff(seeds,V(searchGraph)$name)
+  seedsInGaph <- intersect(seeds,V(searchGraph)$name)
+
+  if(length(seedsNotInGaph) == length(seeds)){stop("None of the seeds were found in graph!")}
+  if(length(seedsNotInGaph) > 0){ warning("Not all seeds found in graph: ",seedsNotInGaph)}
+
+  APSP_vertices <- map(V(searchGraph)[name %in% seedsInGaph], ~{ 
+    
+    
+    all_shortest_paths(searchGraph,
+                       from = .x,
+                       to = V(searchGraph)[name %in% seedsInGaph],
+                       mode="all") %>% 
+      .$res } ) %>% 
+    unlist %>% 
+    as.integer %>% 
+    unique %>% 
+    na.omit
+
+  process_APSP_module <- induced_subgraph(searchGraph,V(searchGraph)[APSP_vertices])
+
+  V(process_APSP_module)$isSeed <- FALSE
+  V(process_APSP_module)[name %in% seeds]$isSeed <- TRUE
+
+  process_APSP_module %<>% set_graph_attr("SearchNetwork", searchGraphName)
+
+  return(process_APSP_module)
+}
+
+```
+
+
+```{r}
+calculateAPSPmoduleForAll(seeds,gene42_igraph)
+calculateAPSPmodule(seeds,gene42_igraph)
+```
+
+Another example :
+
+```{r}
+
+seeds <- V(lymphomaGraph)$name[V(lymphomaGraph)$nodeScore >0]
+
+calculateAPSPmoduleForAll(seeds,lymphomaGraph)
+
+calculateAPSPmodule(seeds,lymphomaGraph)
+
+
+```
+
