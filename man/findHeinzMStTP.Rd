@@ -4,8 +4,13 @@
 \alias{findHeinzMStTP}
 \title{use the heinz algorithm to find a solution to the minimum steiner problem}
 \usage{
-findHeinzMStTP(searchGraph.igraph, n.threads = 2,
-  induceSubgraph = FALSE, verbose = TRUE, timeLimit = 600)
+findHeinzMStTP(
+  searchGraph.igraph,
+  n.threads = 2,
+  induceSubgraph = FALSE,
+  verbose = TRUE,
+  timeLimit = 600
+)
 }
 \arguments{
 \item{searchGraph.igraph}{The igraph representation of the graph that we look to search over with the MStTP solver. Note, this graph should have vertex attributes of 'isTerminal'}

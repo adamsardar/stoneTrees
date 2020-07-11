@@ -1,0 +1,550 @@
+---
+title: "Untitled"
+output: html_document
+editor_options:
+  chunk_output_type: console
+---
+
+I want to test whether doing APSP before steinerTree can speed up the process
+
+
+```{r}
+library(data.table)
+library(dplyr)
+library(igraph)
+library(InteractomeServices)
+library(purrr)
+library(ggplot2)
+library(stringr)
+devtools::load_all()
+```
+
+```{r}
+solverToTest <- "cplexAPI"
+
+```
+
+```{r}
+PtoExclude <- fread("~/Documents/InternalDiscoveryProjects/covid19/EmpiricalHostVirusPPI/Resources/proteins_to_exclude.tsv")
+
+```
+
+```{r}
+searchOptions <- samplingStrategyOptions(includedTaxonomies= 9606, filteredAccession = PtoExclude$Accession)
+
+interactome <- generateWorkbenchFilteredNetwork("ETX Interactome v5.2.0", searchOptions)
+
+undirected <- as.undirected(interactome, mode = "collapse")
+
+simpleUndirected <- simplify(undirected)
+
+simpleUndirectedBiggestComponent <- decompose(simpleUndirected) %>% .[order(map_int(., vcount), decreasing = TRUE)] %>%.[[1]]
+
+interactome <- simpleUndirectedBiggestComponent
+
+```
+
+
+```{r}
+
+
+seedName <- list.files("~/Documents/InternalDiscoveryProjects/covid19/EmpiricalHostVirusPPI/covid19Translatome/Resources/Seeds", pattern = ".txt")
+
+seedSetlist <- map(seedName, ~{ fread(paste0("~/Documents/InternalDiscoveryProjects/covid19/EmpiricalHostVirusPPI/covid19Translatome/Resources/Seeds/", .x)  ) })
+
+
+names(seedSetlist) <- str_remove(seedName, ".txt")
+
+
+seedSetlist <- map(seedSetlist, ~{ .x[Accession %in% V(interactome)$name]  })
+
+```
+
+
+```{r}
+
+
+
+SFBenchDT <-map2(seedSetlist, names(seedSetlist), function(seeds,name){
+
+
+  print(paste("Compute APSP for ", name))
+
+  APSPModule <- calculateAPSPmodule(seeds$Accession, interactome)
+
+  V(APSPModule)$isTerminal <- V(APSPModule)$isSeed
+
+
+  Results <- map(solverToTest, ~{
+
+print(.x)
+
+  # Note, The two process are not solving the exact same problem. Stochastic algorithms are a pain
+
+time <- system.time( SteinForSolverX <- nodeCentricSteinerForestProblem$new(APSPModule,
+                                                                               solverChoice = .x,
+                                                                               verbose = TRUE,
+                                                                               solverTrace = 0)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100) )
+
+
+NconnectivityConstraintsCalls <- SteinForSolverX$getNconnectivityConstraintsCallsPool()
+#NconnectivityConstraintsCalls
+
+SolutionPool <- SteinForSolverX$getBootstrapSolutionPoolGraphs(collapseSols = FALSE)
+
+
+#length(NconnectivityConstraintsCalls) == length(SolutionPool[-length(SolutionPool)])
+
+save(SolutionPool, file = paste0("./results/APSPInteractome_SF_100Bootstrap_Solver_",name, "_",.x,".RData"))
+
+
+
+    Sizes <- map_int(SolutionPool, vcount)
+
+  return(data.table(solver = paste(.x),
+                    seedSet = paste(name),
+                    time = time["elapsed"],
+                    vcount = vcount(SteinForSolverX$getBootstrapSolutionPoolGraphs()),
+                    modulesVcount = list(Sizes[-length(Sizes)]),
+                    Niteration = length(Sizes[-length(Sizes)]),
+                     NconnectivityConstraintsCalls = list(NconnectivityConstraintsCalls)))
+
+
+
+}) %>% rbindlist()
+
+
+return(Results)  
+
+  })  %>% rbindlist()
+
+
+fwrite(SFBenchDT, paste0("./results/APSPInteractome_SF_100Bootstrap_Solver.tsv"))
+
+SFBenchDT
+```
+
+
+```{r}
+
+
+
+SFBenchDT <-map2(seedSetlist, names(seedSetlist), function(seeds,name){
+
+
+  #seeds <- seedSetlist$TranslatomeCluster4
+
+  V(interactome)$isTerminal <- V(interactome)$name %in% seeds$Accession
+
+
+  Results <- map(solverToTest, ~{
+
+print(.x)
+
+  # Note, The two process are not solving the exact same problem. Stochastic algorithms are a pain
+
+time <- system.time( SteinForSolverX <- nodeCentricSteinerForestProblem$new(interactome,
+                                                                               solverChoice = .x,
+                                                                               verbose = TRUE,
+                                                                               solverTrace = 0)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100) )
+
+
+NconnectivityConstraintsCalls <- SteinForSolverX$getNconnectivityConstraintsCallsPool()
+#NconnectivityConstraintsCalls
+
+SolutionPool <- SteinForSolverX$getBootstrapSolutionPoolGraphs(collapseSols = FALSE)
+
+
+#length(NconnectivityConstraintsCalls) == length(SolutionPool[-length(SolutionPool)])
+
+save(SolutionPool, file = paste0("./results/etxInteractome_SF_100Bootstrap_Solver_",name, "_",.x,".RData"))
+
+
+
+    Sizes <- map_int(SolutionPool, vcount)
+
+  return(data.table(solver = paste(.x),
+                    seedSet = paste(name),
+                    time = time["elapsed"],
+                    vcount = vcount(SteinForSolverX$getBootstrapSolutionPoolGraphs()),
+                    modulesVcount = list(Sizes[-length(Sizes)]),
+                    Niteration = length(Sizes[-length(Sizes)]),
+                     NconnectivityConstraintsCalls = list(NconnectivityConstraintsCalls)))
+
+
+
+}) %>% rbindlist()
+
+
+return(Results)  
+
+  })  %>% rbindlist()
+
+
+fwrite(SFBenchDT, paste0("./results/etxInteractome_SF_100Bootstrap_Solver.tsv"))
+
+SFBenchDT
+```
+
+
+
+
+
+```{r}
+
+
+
+steinerTreeBenchDT <-map2(seedSetlist, names(seedSetlist), function(seeds,name){
+
+  print(paste("Compute APSP for ", name))
+
+  APSPModule <- calculateAPSPmodule(seeds$Accession, interactome)
+
+  V(APSPModule)$isTerminal <- V(APSPModule)$isSeed
+
+
+  Results <- map(solverToTest, ~{
+
+print(.x)
+
+  # Note, The two process are not solving the exact same problem. Stochastic algorithms are a pain
+
+time <- system.time( SteinForSolverX <- subOptimalSteinerProblem$new(APSPModule,
+                                                                               solverChoice = .x,
+                                                                               verbose = TRUE,
+                                                                               solverTrace = 0)$identifyMultipleSteinerSolutions(maxItr = 500) )
+
+
+NconnectivityConstraintsCalls <- SteinForSolverX$getNconnectivityConstraintsCalls()
+
+
+SolutionPool <- SteinForSolverX$getSolutionPoolGraphs(collapseSols = FALSE)
+
+
+save(SolutionPool, file = paste0("./results/APSPInteractome_MStT_500Degenerate_Solver_",name, "_",.x,".RData"))
+
+
+
+    Sizes <- map_int(SolutionPool, vcount)
+
+  return(data.table(solver = paste(.x),
+                    seedSet = paste(name),
+                    time = time["elapsed"],
+                    vcount = vcount(SteinForSolverX$getSolutionPoolGraphs()),
+                    modulesVcount = list(Sizes),
+                    Niteration = length(Sizes),
+                    NconnectivityConstraintsCalls = list(NconnectivityConstraintsCalls) ))
+
+
+
+}) %>% rbindlist()
+
+
+return(Results)  
+
+  })  %>% rbindlist()
+
+
+fwrite(steinerTreeBenchDT, paste0("./results/APSPInteractome_MStT_500Degenerate_Solver.tsv"))
+
+steinerTreeBenchDT
+```
+
+```{r}
+
+
+
+steinerTreeBenchDT <-map2(seedSetlist, names(seedSetlist), function(seeds,name){
+
+#seeds <- seedSetlist$TranslatomeCluster1
+
+  V(interactome)$isTerminal <- V(interactome)$name %in% seeds$Accession
+
+
+  Results <- map(solverToTest, ~{
+
+print(.x)
+
+  # Note, The two process are not solving the exact same problem. Stochastic algorithms are a pain
+
+time <- system.time( SteinForSolverX <- subOptimalSteinerProblem$new(interactome,
+                                                                               solverChoice = .x,
+                                                                               verbose = TRUE,
+                                                                               solverTrace = 0)$identifyMultipleSteinerSolutions(maxItr = 500) )
+
+
+NconnectivityConstraintsCalls <- SteinForSolverX$getNconnectivityConstraintsCalls()
+
+
+SolutionPool <- SteinForSolverX$getSolutionPoolGraphs(collapseSols = FALSE)
+
+
+save(SolutionPool, file = paste0("./results/etxInteractome_MStT_500Degenerate_Solver_",name, "_",.x,".RData"))
+
+
+
+    Sizes <- map_int(SolutionPool, vcount)
+
+  return(data.table(solver = paste(.x),
+                    seedSet = paste(name),
+                    time = time["elapsed"],
+                    vcount = vcount(SteinForSolverX$getSolutionPoolGraphs()),
+                    modulesVcount = list(Sizes),
+                    Niteration = length(Sizes),
+                    NconnectivityConstraintsCalls = list(NconnectivityConstraintsCalls) ))
+
+
+
+}) %>% rbindlist()
+
+
+return(Results)  
+
+  })  %>% rbindlist()
+
+
+fwrite(steinerTreeBenchDT, paste0("./results/etxInteractome_MStT_500Degenerate_Solver.tsv"))
+
+steinerTreeBenchDT
+```
+
+
+
+```{r}
+
+ETXinteractomeBenchDT <- rbind(fread("./results/APSPInteractome_MStT_500Degenerate_Solver.tsv") %>% 
+                                 .[,`:=`(APSPpresolveMethod = TRUE,
+                                         samplingMethod = "MStT",
+                                         modulesVcount =  strsplit(modulesVcount, "\\|"),
+                                         NconnectivityConstraintsCalls =  strsplit(NconnectivityConstraintsCalls, "\\|"))],
+                               
+                               fread("./results/etxInteractome_MStT_500Degenerate_Solver.tsv") %>% 
+                                 .[,`:=`(APSPpresolveMethod = FALSE,
+                                         samplingMethod = "MStT",
+                                         modulesVcount =  strsplit(modulesVcount, "\\|"),
+                                         NconnectivityConstraintsCalls =  strsplit(NconnectivityConstraintsCalls, "\\|"))],
+                               
+                               fread("./results/etxInteractome_SF_100Bootstrap_Solver.tsv") %>% 
+                                 .[,`:=`(APSPpresolveMethod = FALSE,
+                                         samplingMethod = "SF",
+                                         modulesVcount =  strsplit(modulesVcount, "\\|"),
+                                         NconnectivityConstraintsCalls =  strsplit(NconnectivityConstraintsCalls, "\\|"))],
+                               
+                               fread("./results/APSPInteractome_SF_100Bootstrap_Solver.tsv") %>% 
+                                 .[,`:=`(APSPpresolveMethod = TRUE,
+                                         samplingMethod = "SF",
+                                         modulesVcount =  strsplit(modulesVcount, "\\|"),
+                                         NconnectivityConstraintsCalls =  strsplit(NconnectivityConstraintsCalls, "\\|"))]
+        
+        )
+
+```
+
+
+
+```{r}
+
+ETXinteractomeBenchDT[, .(`TotalTime(hours)` = sum(time)/60/60), by = .(solver, APSPpresolveMethod)]
+
+ETXinteractomeBenchDT[, .(TotalTime = sum(time)/60/60), by = .(solver)][,TotalTime] %>% sum
+
+ETXinteractomeBenchDT[, .(AvSise = mean(vcount)), by = .(solver, seedSet, APSPpresolveMethod)]
+
+
+```
+
+```{r}
+
+
+
+presolveMethod.labs <- str_c("APSP presolve method ", c(TRUE, FALSE))
+names(presolveMethod.labs) <- c(TRUE, FALSE)
+
+p1 <- ggplot(ETXinteractomeBenchDT, aes(x = APSPpresolveMethod, y = time/60)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.1, height = 0, aes(color =seedSet)) +
+  facet_wrap(~samplingMethod)+
+  theme_minimal(base_size = 20) +
+  theme(legend.position = "none")+
+  labs(y = "Time (min)",
+       title = "Time taken to find solutions")
+
+#
+p3 <- ggplot(ETXinteractomeBenchDT, aes(x = APSPpresolveMethod, y = vcount))+
+  #geom_boxplot() +
+   facet_wrap(~samplingMethod)+
+  geom_point(aes(color = seedSet)) +
+  theme_minimal(base_size = 20) +
+  #scale_color_hue()+
+  theme(legend.position = "none")+
+  labs( y = "number of nodes",
+        title = "Size of the solutions")
+
+
+
+p4 <- ETXinteractomeBenchDT[,.(modulesVcount = unlist(modulesVcount)), by = .(samplingMethod, time, vcount, Niteration, seedSet, APSPpresolveMethod)] %>%
+
+  ggplot(., aes(x = APSPpresolveMethod, y = as.numeric(modulesVcount))) +
+  facet_wrap(~seedSet + samplingMethod, nrow = 5, scales = "free")+
+  geom_jitter(width = 0.1, height = 0, aes(color = samplingMethod)) +
+  geom_boxplot(outlier.shape = NA) +
+  theme_minimal(base_size = 20) +
+  theme(legend.position = "none")+
+  labs(y = "vCount of all modules",
+       title = "Individual tree solutions")+
+  scale_y_continuous(breaks = seq(0,135,1))
+
+
+
+
+p5 <- ggplot(ETXinteractomeBenchDT, aes(x = APSPpresolveMethod, y = Niteration)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~samplingMethod)+
+  geom_jitter(width = 0.1, height = 0, aes(color =seedSet)) +
+  theme_minimal(base_size = 20) +
+  theme(legend.position = "right")+
+  labs(y = "Number of solutions",
+       title = "Size of solution pools")+
+  scale_y_continuous(breaks = seq(0,13,3))
+
+
+p6 <- ETXinteractomeBenchDT[,.(NconnectivityConstraintsCalls = unlist(NconnectivityConstraintsCalls)), by = .(samplingMethod, time, vcount, Niteration, seedSet, APSPpresolveMethod)] %>%
+
+  ggplot(., aes(x = APSPpresolveMethod, y = as.numeric(NconnectivityConstraintsCalls))) +
+  facet_wrap(~seedSet + samplingMethod, nrow = 5, scales = "free")+
+  geom_jitter(width = 0.1, height = 0, aes(color = samplingMethod)) +
+  geom_boxplot(outlier.shape = NA) +
+  theme_minimal(base_size = 20) +
+  #scale_y_log10()+
+  theme(legend.position = "none")+
+  labs(y = "number of 'adding connectivity constraints' iterations",
+       title = "Individual tree solutions")+
+  scale_y_continuous(breaks = seq(0,20,1))
+
+
+
+
+plot1 <- egg::ggarrange(p1,p3, p5, ncol = 3,
+
+                       top =  paste(
+
+  "APSP presolve Method (with CPLEX) \n MStT : collecting up to 500 degenerate solutions \n SF : 100 bootstrap collecting 1 solution"))
+
+
+#ggpubr::ggarrange(p1,p2,p3,p5)
+
+
+ggsave(plot = plot1, filename = "./results/APSPpresolveMethod1.png", width = 25, height = 8)
+
+
+plot2 <- egg::ggarrange(p4, p6, 
+                       
+                       #heights = c(0.15, 0.15, 0.7),
+                       
+                       ncol = 2,
+                       
+                       top =  paste(
+  
+  "APSP presolve Method (with CPLEX)  \n MStT : collecting up to 500 degenerate solutions \n SF : 100 bootstraps collecting 1 solution"))
+
+
+ggsave(plot = plot2, filename = "./results/APSPpresolveMethod2.png",  width = 18, height = 30)
+
+```
+
+
+
+```{r}
+
+
+allSolutions <- c(list.files("./results", pattern = "500Degenerate"),
+                  list.files("./results", pattern = "100Bootstrap"))
+
+allSolutions <- allSolutions[grepl("RData", allSolutions)]
+
+allSolutionDT <- data.table(files = allSolutions)
+
+allSolutionDT[,`:=`(graphPool = map(files, ~{ load(paste0("./results/",.x))
+                                               SolutionPool } )), by = files]
+
+
+allSolutionDT[,`:=`(APSPpresolveMethod =  str_extract(files, "APSPInteractome|etxInteractome"),
+                    seedSet = str_match(files, "_Solver_(.*?)_")%>% .[1,2],
+                    solver = str_extract(files, "cplexAPI|rcbc|Rglpk"),
+                    samplingMethod = str_extract(files, "SF|MStT")), by = files]
+
+
+allSolutionDT[,APSPpresolveMethod := ifelse(APSPpresolveMethod == "APSPInteractome", TRUE, FALSE)]
+
+allSolutionDT[,`:=`( collapsedGraph = map(graphPool, ~{ induced.subgraph(interactome, V(interactome)[map(.x, ~{ V(.x)$name }) %>% unlist() %>% unique()]) }))]
+
+allSolutionDT[,`:=`(eigenCentralityVector = map(collapsedGraph, ~{ eigen_centrality(.x)$vector  } )), by = files]
+
+allSolutionDT[,`:=`(nodesVectorCollapsedGraph = map(collapsedGraph, ~{ V(.x)$name  } )), by = files]
+
+allSolutionDT[,`:=`(nodesVectors = map(graphPool, ~{ map(.x, ~{ V(.x)$name  } ) } )), by = files]
+```
+
+```{r}
+ScatterPlot <- function(dt,x,y){
+
+                dt1 <- dt[,.(x = get(x), y = get(y)), by = eval(colnames(dt))]
+
+                return(ggplot(dt1, aes(x=x, y=y)) +
+
+                ggplot2::geom_point(shape=16, show.legend = FALSE,  alpha = 0.5, color = "paleturquoise4", size = 3) +
+
+                ggplot2::geom_abline(intercept = 0, slope = 1, col="darkred") +
+                theme_minimal())}
+
+```
+
+```{r}
+eigenCentralityDT <- allSolutionDT[,.(eigenCentrality = unlist(eigenCentralityVector),
+                 nodeID = names(unlist(eigenCentralityVector))), by = .(seedSet, solver, APSPpresolveMethod, samplingMethod)]
+
+
+eigenCentralityDT <- dcast(eigenCentralityDT,  nodeID+seedSet+solver~APSPpresolveMethod+samplingMethod, value.var = "eigenCentrality", fill = 0)
+
+
+
+ScatterPlot(dt = eigenCentralityDT, x = "TRUE_MStT", y = "FALSE_MStT") +
+  facet_wrap(~solver+seedSet, ncol = 5)+
+  labs(y = "APSP presolve Method TRUE", x = "APSP presolve Method FALSE", title = "eigen_centrality \n MStT : collecting up to 500 degenerate solutions") +
+  theme_minimal(base_size = 20)
+
+ggsave("./results/EigenCentralityAPSPpresolveMethodMStT.png", width = 20, height = 12)
+
+
+ScatterPlot(dt = eigenCentralityDT, x = "TRUE_SF", y = "FALSE_SF") +
+  facet_wrap(~solver+seedSet, ncol = 5)+
+  labs(y = "APSP presolve Method TRUE", x = "APSP presolve Method FALSE", title = "eigen_centrality \n SF : 100 bootstraps collecting 1 solution") +
+  theme_minimal(base_size = 20)
+
+ggsave("./results/EigenCentralityAPSPpresolveMethodSF.png", width = 20, height = 12)
+
+
+
+
+
+```
+
+```{r}
+
+
+allSolutionDT[,`:=`(vcount = map_int(collapsedGraph, ~{ vcount(.x) } ),
+                    isConnected = map_lgl(collapsedGraph, ~{ is.connected(.x) } ),
+                    seeds = seedSetlist[names(seedSetlist) == seedSet]), by = files]
+
+
+allSolutionDT[,`:=`(containsAllSeeds = map2_lgl(collapsedGraph, seeds, function(x, y){ y[Accession %in% V(x)$name]$Accession %>% length(.) == nrow(y) }
+
+                                            )), by = files]
+
+
+allSolutionDT[,.(solver, seedSet, vcount, APSPpresolveMethod = ifelse(APSPpresolveMethod == "APSPpresolveMethod", TRUE, FALSE), isConnected, containsAllSeeds)] %>% .[order(APSPpresolveMethod, seedSet)]
+
+allSolutionDT[isConnected == FALSE]$networks[[1]] %>% decompose(.) %>% .[order(map_int(., vcount), decreasing = TRUE)]
+
+
+```

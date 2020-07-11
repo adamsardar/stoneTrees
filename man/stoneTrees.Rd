@@ -3,7 +3,6 @@
 \docType{package}
 \name{stoneTrees}
 \alias{stoneTrees}
-\alias{stoneTrees-package}
 \title{Solve Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph Problems Using Integer Linear Programming}
 \description{
 A package dedicated to finding minimum Steiner trees in networks. Particularly biological ones,

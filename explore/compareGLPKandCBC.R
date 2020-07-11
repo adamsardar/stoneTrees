@@ -1,6 +1,6 @@
 devtools::load_all()
 library(igraph)
-library(microbenchmark)
+#library(microbenchmark)
 
 
 fixedTerminalLymphomaGraph <- lymphomaGraph
@@ -17,7 +17,7 @@ cbctime <- system.time( SteinForCBC <- nodeCentricSteinerForestProblem$new(fixed
 
 
 
-testSteinFor <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rcbc")
+testSteinFor <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = TRUE, solverChoice = "rcbc")
 
 set.seed(2345)
 

@@ -107,17 +107,24 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
     
     setSolutionTolerance = function(x){ private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(x) ; return(invisible(self))},
     
+    getNconnectivityConstraintsCalls = function(){ private$NconnectivityConstraintsCalls },
+    
     identifyMultipleSteinerSolutions = function(maxItr = 10){
       
       validateSingleInteger(maxItr)
       
       self$findSingleSteinerSolution()
+      
+      private$NconnectivityConstraintsCalls <- self$getNconnectivityConstraintsCalls()
+      
       private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
       
       multiSteinerItr <- 1
       
+      super$NconnectivityConstraintsCalls <- 0
+      
       while(multiSteinerItr <= maxItr){
-        
+
         private$setNoveltyConstraints()
         
         super$solve()
@@ -138,13 +145,24 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
           if(  abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <= private$tolerance ){
             
             private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+            
+            private$NconnectivityConstraintsCalls <- c(self$getNconnectivityConstraintsCalls(),
+                                                           super$NconnectivityConstraintsCalls)
+            
+            super$NconnectivityConstraintsCalls <- 0
+            
           }else{
             
             message("Next feasible solution is outside of solution tolerance! Consider increasing it with $setSolutionTolerance(x) method?")
             break()
           }
           
-        }else{ super$addConnectivityConstraints() }
+        }else{ super$addConnectivityConstraints() 
+
+          super$NconnectivityConstraintsCalls <- super$NconnectivityConstraintsCalls %<>% add(1)
+               
+               
+               }
                                                   } 
                                                  }
       
@@ -192,6 +210,8 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
     solutionIndicesPool = sets::set(),
     
     novelSolutionsConstraint = list(),
+    
+    #NconnectivityConstraintsCalls = numeric(),
     
     tolerance = numeric()
   )
