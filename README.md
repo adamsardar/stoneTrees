@@ -14,7 +14,7 @@ A package dedicated to finding solutions to [Steiner tree problems](https://en.w
 * [Liang et al. (2017)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5723949/) use MStT to infer phylogenies of mutated cancer cells from a dataset of copy-number variation (CNV).
 * [Lam, Alexandersson and Pachter (2004)](https://www.liebertpub.com/doi/abs/10.1089/10665270360688156) show that sequence alignment can be mapped to a Steiner tree problem.
 
-This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017). This algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/). A major advancement of Fischetti et al. is that ILP variables are only introduced for nodes, rather than edges *as well*, which dramatically decreases the run-time of the process.
+This package serves as a faithful implementation of "Thinning out Steiner Trees" (with a few bells and whistles added on the sides) by Fischetti et al. (2017). This is the algorithm that more-or-less won the [DIMACS11 competition on algorithms for solving Steiner Tree problems](http://dimacs11.zib.de/). A major advancement of Fischetti et al. is that ILP variables are only introduced for nodes, rather than edges *as well*, which dramatically decreases the run-time of the process.
 
 ## Installation
 
@@ -27,8 +27,7 @@ This package serves as a faithful implementation of "Thinning out Steiner Trees"
 
 `stoneTrees` aims to be compatible with several ILP solvers; at current a user can chose from [`lpsymphony`](https://www.bioconductor.org/packages/release/bioc/html/lpsymphony.html), [`Rglpk`](https://cran.r-project.org/web/packages/Rglpk/index.html), [`lpSolve`](https://cran.r-project.org/web/packages/lpSolve/index.html), [`rcbc`](https://github.com/dirkschumacher/rcbc/) and [`cplexAPI`](https://cran.r-project.org/web/packages/cplexAPI/index.html) .  The default solver is `lpSolve`. However, there is a strong recommendation for the open-source solver `rcbc` (perhaps `Rglpk` as a second choice) or, better yet, the proprietary `cplexAPI` solver. Installation of these packages, whilst relatively straightforward, is complex enough to affect the choice of default.
 
-`rcbc` is not currently on CRAN and must be installed directly from the [github page](https://github.com/dirkschumacher/rcbc/). The package README contains instructions for installation of dependencies (`apt install coinor-libcbc-dev coinor-libclp-dev` on Debian/Ubuntu), after which 
-`devtools::install_github("dirkschumacher/rcbc")` will install the package.
+`rcbc` is not currently on CRAN and must be installed directly from the [github page](https://github.com/dirkschumacher/rcbc/). The package README contains instructions for installation of dependencies. For Debian/Ubuntu run `apt install coinor-libcbc-dev coinor-libclp-dev`, after which `devtools::install_github("dirkschumacher/rcbc")` will install the package.
 
 `Rglpk` can be easily installed. On Linux install the glpk-dev package (`apt install libglpk-dev`); on Mac OSX you can use brew (`brew install glpk`) and on Windows you can [follow the community install guild](http://winglpk.sourceforge.net/). Following that `install.packages("Rglpk")` should work.
 
