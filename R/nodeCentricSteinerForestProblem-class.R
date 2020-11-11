@@ -95,7 +95,10 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
         
         #Find up to ten degenerate solutions as you can
         super$identifyMultipleSteinerSolutions(maxItr)
-        
+
+        private$nConnectivityConstraintsCallsPool <- c(self$getNconnectivityConstraintsCallsPool(),
+                                                         super$getNconnectivityConstraintsCalls())
+
         private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
         
         #Flush the parent solution pool as we're about to research for solutions
@@ -111,7 +114,11 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       
       return(private$metasolutionIndicesPool)
     },
-    
+
+    getNconnectivityConstraintsCallsPool = function(){
+
+      return(private$nConnectivityConstraintsCallsPool) },
+
     #Overide
     getSolutionPool = function(){
       
@@ -179,6 +186,8 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
     },
     
     #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
-    metasolutionIndicesPool = sets::set()
+    metasolutionIndicesPool = sets::set(),
+
+    nConnectivityConstraintsCallsPool = numeric()
   )
 )

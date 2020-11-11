@@ -107,15 +107,22 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
     
     setSolutionTolerance = function(x){ private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(x) ; return(invisible(self))},
     
+    getNconnectivityConstraintsCalls = function(){ private$nConnectivityConstraintsCalls },
+
     identifyMultipleSteinerSolutions = function(maxItr = 10){
       
       validateSingleInteger(maxItr)
       
       self$findSingleSteinerSolution()
+
+      private$nConnectivityConstraintsCalls <- self$getNconnectivityConstraintsCalls()
+
       private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
       
       multiSteinerItr <- 1
-      
+
+      super$nConnectivityConstraintsCalls <- 0
+
       while(multiSteinerItr <= maxItr){
         
         private$setNoveltyConstraints()
@@ -138,14 +145,25 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
           if(  abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <= private$tolerance ){
             
             private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+
+            private$nConnectivityConstraintsCalls <- c(self$getNconnectivityConstraintsCalls(),
+                                                           super$nConnectivityConstraintsCalls)
+
+            super$nConnectivityConstraintsCalls <- 0
+
           }else{
             
             message("Next feasible solution is outside of solution tolerance! Consider increasing it with $setSolutionTolerance(x) method?")
             break()
           }
-          
-        }else{ super$addConnectivityConstraints() }
-                                                  } 
+
+        }else{ super$addConnectivityConstraints()
+
+          super$nConnectivityConstraintsCalls <- super$nConnectivityConstraintsCalls %<>% add(1)
+
+
+               }
+                                                  }
                                                  }
       
       return( invisible(self) )
