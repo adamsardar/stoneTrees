@@ -159,7 +159,7 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
 
 test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a medium MStTP",{
 
-    if(!"RCplex" %in% .packages(all.available = TRUE)){skip("SteinLib test takes too long using GLPK")}
+    if(! any(c("RCplex","rcbc") %in% .packages(all.available = TRUE))){skip("SteinLib test takes too long using GLPK. Use CBC or CPLEX.")}
 
     gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
     expect_true(is.connected(gene42_MSTP))
