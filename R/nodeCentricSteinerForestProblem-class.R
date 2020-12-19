@@ -165,7 +165,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
 
     addSeedToPool = function(seed){ private$seedPool <- c(private$seedPool, seed); invisible(self)},
     
-    sampleNewSeed <- function(){return(sample.int(n = .Machine$integer.max, size=1))},
+    sampleNewSeed = function(){return(sample.int(n = .Machine$integer.max, size=1))},
     
     generateNextRNGseed = function(){
       
@@ -176,7 +176,7 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       private$addSeedToPool(newSeed)
       
       invisible(self)
-    }
+    },
     
     
     resampleFixedTerminals = function(pSuccess = 0.5){
