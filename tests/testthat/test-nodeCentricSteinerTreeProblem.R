@@ -10,14 +10,14 @@ inspectNodeCentricSteinerTreeObjectCreation = function(testGraph){
 
     if(is.directed(testGraph)){
 
-      expect_warning(testSteinObject = nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE, presolveGraph = FALSE),
+      expect_warning({ nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE, presolveGraph = FALSE) },
                      regexp = "directed",
                      info = "Directed graphs are cast to undirected with a warning")
     }
 
     testGraph = as.undirected(testGraph)
 
-    expect_message(testSteinObject = nodeCentricSteinerTreeProblem$new(testGraph, verbose = TRUE, presolveGraph = FALSE),
+    expect_message({ testSteinObject = nodeCentricSteinerTreeProblem$new(testGraph, verbose = TRUE, presolveGraph = FALSE) },
                    regexp = "constraints",
                    info = "verbose flag should control diagnostic printing")
 
@@ -161,12 +161,12 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
 
     if(! any(c("RCplex","rcbc") %in% .packages(all.available = TRUE))){skip("SteinLib test takes too long using GLPK. Use CBC or CPLEX.")}
 
-    gene42_MSTP = nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
+    gene42_MSTP = nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution(maxItr = 50)
     expect_true(is.connected(gene42_MSTP))
     expect_true(vcount(gene42_MSTP) <= 1.05*126) # Within 5% of the known optimum
 
     expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
-    expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"gene42_igraph")
+    expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"as.undirected(gene42_igraph)")
 })
 
 
@@ -196,9 +196,10 @@ test_that("nodeCentricSteinerTreeProblem max iteration warning",{
   
   if(!"Rglpk" %in% .packages(all.available = TRUE)){skip("GLPK must be installed")}
   
-  expect_warning(gene42_MSTP = nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph),
+  expect_warning({gene42_MSTP = nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph),
                                      verbose = FALSE,
-                                     solverChoice = "RGLPK")$findSingleSteinerSolution(3), regexp = "Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
+                                     solverChoice = "RGLPK")$findSingleSteinerSolution(3)},
+                   regexp = "Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
   expect_false(is.connected(gene42_MSTP))
   expect_false(is.null(graph_attr(gene42_MSTP)$SearchNetwork))
   expect_equal(graph_attr(gene42_MSTP)$SearchNetwork,"as.undirected(gene42_igraph)")

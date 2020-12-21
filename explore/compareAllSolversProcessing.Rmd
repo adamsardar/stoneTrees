@@ -1,0 +1,306 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(ggplot2)
+library(igraph)
+library(purrr)
+library(data.table)
+library(stringr)
+library(GGally)
+library(foreach)
+```
+
+```{r}
+
+ScatterPlot <- function(dt,x,y){ 
+                
+                dt1 <- dt[,.(x = get(x), y = get(y)), by = eval(colnames(dt))]
+  
+                return(ggplot(dt1, aes(x=x, y=y)) +
+    
+                ggplot2::geom_point(shape=16, show.legend = FALSE,  alpha = 0.3, color = "paleturquoise4") +
+
+                ggplot2::geom_abline(intercept = 0, slope = 1, col="darkred") +
+                theme_minimal())}
+  
+
+GGscatterPlot <- function(data, mapping, ...) {
+
+
+    x <- GGally::eval_data_col(data, mapping$x)
+    y <- GGally::eval_data_col(data, mapping$y)
+
+    dt <- data.table(Var1 = x, Var2 = y)
+
+#Prepare plot
+    pp <- ScatterPlot(dt = dt, x = "Var1", y = "Var2")
+
+return(pp)
+}
+
+
+```
+
+
+```{r}
+devtools::load_all()
+fixedTerminalLymphomaGraph <- lymphomaGraph
+V(fixedTerminalLymphomaGraph)$isTerminal <- FALSE
+V(fixedTerminalLymphomaGraph)[nodeScore > 0]$isTerminal <- TRUE
+V(fixedTerminalLymphomaGraph)$nodeScore <- -1
+
+```
+
+
+```{r}
+
+allSolutions <- list.files("./results", pattern = ".RData", full.names = TRUE)
+
+allSolutions <- allSolutions[!grepl("Reproducible", allSolutions)]
+
+allSolutionDT <- data.table(files = allSolutions)
+
+allSolutionDT[,`:=`(graphPool = map(files, ~{ load(.x)
+                                               SolutionPool[-length(SolutionPool)] } )), by = files]
+
+#allSolutionDT[,`:=`(graphPool = map(files, ~{ load(.x)
+#                                               SolutionPool } )), by = files]
+
+allSolutionDT[,`:=`(poolSize = map(graphPool, length) %>% unlist,
+                    collapsedGraph = map(graphPool, ~{ induced.subgraph(fixedTerminalLymphomaGraph, V(fixedTerminalLymphomaGraph)[map(.x, ~{ V(.x)$name }) %>% unlist() %>% unique()]) }),
+                    Type =  str_match(files, "Version_(.*?)_")%>% .[1,2],
+                    trial = str_match(files, "_Trial(.*?).RData")%>% .[1,2],
+                    samplingMethod = str_extract(files, "MStT|steinForest")), by = files]
+
+allSolutionDT[is.na(Type), `:=`(Type =  str_match(files, "Solver_(.*?)_")%>% .[1,2]), by = files]
+
+allSolutionDT[,`:=`(eigenCentralityVector = map(collapsedGraph, ~{ eigen_centrality(.x)$vector  } )), by = files]
+
+
+allSolutionDT[,`:=`(nodesVectorCollapsedGraph = map(collapsedGraph, ~{ V(.x)$name  } )), by = files]
+
+allSolutionDT[,`:=`(nodesVectors = map(graphPool, ~{ map(.x, ~{ V(.x)$name  } ) } )), by = files]
+
+```
+
+
+```{r}
+eigenCentralityDT <- allSolutionDT[,.(eigenCentrality = unlist(eigenCentralityVector),
+                 nodeID = names(unlist(eigenCentralityVector))), by = .(trial, Type, samplingMethod)]
+
+
+eigenCentralityDT <- dcast(eigenCentralityDT,  nodeID+trial+samplingMethod~Type, value.var = "eigenCentrality", fill = 0) 
+
+# New facet label names for dose variable
+trial.labs <- str_c("trial ", eigenCentralityDT[,trial] %>% unique)
+names(trial.labs) <- eigenCentralityDT[,trial] %>% unique
+
+
+ScatterPlot(dt = eigenCentralityDT[samplingMethod == "steinForest"], x = "rcbc", y = "cplexAPI") +
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "cplexAPI", x = "rcbc", title = "eigen_centrality") +
+  theme_minimal(base_size = 20) 
+
+#ggsave("./results/EigenCentralityCompareSolvers_CBC_CPLEX.png", width = 14, height = 10)
+
+ScatterPlot(dt = eigenCentralityDT[samplingMethod == "steinForest"], x = "cplexAPI", y = "Rglpk") +
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "Rglpk", x = "cplexAPI", title = "eigen_centrality") +
+  theme_minimal(base_size = 20) 
+
+ScatterPlot(dt = eigenCentralityDT[samplingMethod == "steinForest"], x = "rcbc", y = "Rglpk") +
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "Rglpk", x = "rcbc", title = "eigen_centrality") +
+  theme_minimal(base_size = 20) 
+
+ScatterPlot(dt = eigenCentralityDT[samplingMethod == "steinForest"], x = "1.0.26000", y = "1.2") +
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "1.2", x = "1.0.26000", title = "eigen_centrality") +
+  theme_minimal(base_size = 20) 
+
+# all trials are the same so I'm showing only one
+p1 <- ScatterPlot(dt = eigenCentralityDT[samplingMethod == "MStT" & trial == 1], x = "rcbc", y = "cplexAPI") +
+  #facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "cplexAPI", x = "rcbc", title = "CPLEX vs CBC") +
+  theme_minimal(base_size = 20) 
+
+p2 <- ScatterPlot(dt = eigenCentralityDT[samplingMethod == "MStT" & trial == 1], x = "Rglpk", y = "cplexAPI") +
+  #facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "cplexAPI", x = "Rglpk", title = "CPLEX vs GLPK") +
+  theme_minimal(base_size = 20) 
+
+p3 <- ScatterPlot(dt = eigenCentralityDT[samplingMethod == "MStT" & trial == 1], x = "rcbc", y = "Rglpk") +
+  #facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))+
+  labs(y = "Rglpk", x = "rcbc", title = "CBC vs GLPK") +
+  theme_minimal(base_size = 20) 
+
+plot <- egg::ggarrange(p1,p2,p3, top = "eigen vector centrality", ncol = 3)
+
+
+
+#ggsave(plot = plot, filename = "./results/EigenCentralityCompareSolvers_MStT.png", width = 13, height = 5)
+
+
+
+```
+
+
+```{r}
+eigenCentralityDT <- allSolutionDT[,.(eigenCentrality = unlist(eigenCentralityVector),
+                 nodeID = names(unlist(eigenCentralityVector))), by = .(trial, Type, samplingMethod)]
+
+eigenCentralityDT <- dcast(eigenCentralityDT,  nodeID+Type+samplingMethod~trial, value.var = "eigenCentrality", fill = 0) 
+
+SM <- "steinForest"
+
+trialPlots <- map(eigenCentralityDT[samplingMethod == SM, Type] %>% unique, ~{
+  
+  if(SM == "MStT"){ DT <- eigenCentralityDT[Type == .x & samplingMethod == SM,.(nodeID, Type, samplingMethod, `1` = `1`, `2` = `2`, `3` = `3`)] }else{ DT <- eigenCentralityDT[Type == .x & samplingMethod == SM] }
+  
+ggpairs(DT, 
+        columns = 3:ncol(DT), 
+        lower = list(continuous = wrap(GGscatterPlot, method="pearson")),
+        upper = list(continuous = wrap("cor", method= "pearson")),
+        diag = "blank",
+        columnLabels = str_c("Trial ", colnames(DT[, 3:ncol(DT)])),
+        title = paste("- ", .x, "- Eigen-centrality (collapsed Solutions)"))
+        
+} )
+
+
+#trialPlots[[1]]
+
+#trialPlots[[5]]
+
+#ggsave("./results/EigenCentralityCompareTrials_CBC.png", width = 17, height = 15)
+```
+
+
+
+```{r}
+
+distMethod <- "manhattan"
+
+nodesDT <- allSolutionDT[,.(nodeID = unlist(nodesVectors, recursive = FALSE),
+                           solution = seq(1:poolSize)), by = .(trial, Type, poolSize, samplingMethod)] %>%
+  .[,.(nodeID = unlist(nodeID), value = 1), by = .(trial, Type, poolSize, samplingMethod, solution)]
+
+
+nodesDT[,.N, by  = .(trial, Type, poolSize, samplingMethod, solution)]
+
+SM <- "MStT"
+
+DistanceResults <- foreach::foreach(type = nodesDT[samplingMethod == SM,Type] %>% unique)%do%{
+
+nodeVectorDT <- dcast(nodesDT[Type == type & samplingMethod == SM],  Type+trial +solution +poolSize+ samplingMethod~nodeID, fill = 0) 
+
+distanceDT <- map(nodeVectorDT[,trial] %>% unique, ~{ 
+  
+nodesMatrix <- as.matrix(nodeVectorDT[trial == .x, 5:(ncol(nodeVectorDT))])
+
+distance <- dist(nodesMatrix, method = distMethod, diag = FALSE, upper =FALSE) 
+
+distanceDT <-  reshape::melt(as.matrix(distance), varnames = c("row", "col")) %>%
+  as.data.table()
+
+distanceDT <- distanceDT[row > col]
+
+distanceDT[,`:=`(trial = .x, Type = type)]
+
+return(distanceDT)
+
+} ) %>% rbindlist()
+
+return(distanceDT)
+
+} %>% rbindlist()
+
+
+ggplot(DistanceResults[!grepl("1", Type)], aes(x=value, color = Type, fill = Type))+ 
+  geom_histogram(bins =100, alpha=0.5,show.legend = T)+
+  theme_minimal()+
+  labs(y='', x= paste(distMethod, 'distance'))+
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))
+
+#ggsave("./results/ManhattanDistancePools.png", width = 14, height = 10)
+
+ggplot(DistanceResults[!grepl("1", Type)], aes(x=value, color = trial, fill = trial))+ 
+  geom_histogram(alpha=0.5, bins =100, show.legend = T)+
+  theme_minimal()+
+  labs(y='', x= paste(distMethod, 'distance'))+
+  facet_wrap(~Type)
+
+ggplot(DistanceResults[grepl("1", Type)], aes(x=value, color = Type, fill = Type))+ 
+  geom_histogram(bins =100, alpha=0.5,show.legend = T)+
+  theme_minimal()+
+  labs(y='', x= paste(distMethod, 'distance'))+
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))
+
+#ggsave("./results/ManhattanDistancePoolsVersions.png", width = 14, height = 10)
+
+ggplot(DistanceResults[grepl("1", Type)], aes(x=value, color = trial, fill = trial))+ 
+  geom_histogram(alpha=0.5, bins =100, show.legend = T)+
+  theme_minimal()+
+  labs(y='', x= paste(distMethod, 'distance'))+
+  facet_wrap(~Type)
+
+
+
+#ggplot(DistanceResults[!grepl("1", Type)], aes(x=value, color = Type, fill = Type))+ 
+ # geom_histogram(alpha=0.5,show.legend = T)+
+  #theme_minimal()+
+  #labs(y='', x= paste(distMethod, 'distance'))+
+  #facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))  
+```
+
+```{r}
+library(graphkernels)
+
+KStepRandomWalkKernelResults <- foreach::foreach(type = allSolutionDT[,Type] %>% unique)%do%{
+
+  print(type)
+  
+DTmeltedAll<- map(allSolutionDT[,trial] %>% unique %>% .[1:3], ~{ 
+
+  print(.x)
+  
+DT <- CalculateKStepRandomWalkKernel(allSolutionDT[ Type == type & trial == .x ]$graphPool %>% unlist(., recursive =FALSE), 5)
+
+DTmelted <- melt(DT)%>% as.data.table()
+
+DTmelted <- DTmelted[Var1 > Var2]
+
+DTmelted[,`:=`(trial = .x, Type = type)]
+
+return(DTmelted)
+
+} ) %>% rbindlist()
+
+return(DTmeltedAll)
+
+} %>% rbindlist()
+
+
+
+ggplot(KStepRandomWalkKernelResults[!grepl("1", Type)], aes(x=value, color = Type, fill = Type))+ 
+  geom_histogram(bins =100, alpha=0.5,show.legend = T)+
+  theme_minimal()+
+  #labs(y='', x= paste(distMethod, 'distance'))+
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))
+
+ggplot(KStepRandomWalkKernelResults[grepl("1", Type)], aes(x=value, color = Type, fill = Type))+ 
+  geom_histogram(bins =100, alpha=0.5,show.legend = T)+
+  theme_minimal()+
+  #labs(y='', x= paste(distMethod, 'distance'))+
+  facet_wrap(~trial, ncol = 5, labeller = labeller(trial = trial.labs))
+```
+
+
+
+
+
+

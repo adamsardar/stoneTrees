@@ -11,7 +11,7 @@
 #' @author Adam Sardar
 #' @references Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comput. dimacs11.cs.princeton.edu; 2017
 #' @import R6
-#' @importFrom data.table ".__T__[=:base" ".__T__$=:base" ".__T__[:base"  rbindlist as.data.table data.table ":=" %like% fread setkey setnames
+#' @importFrom data.table ".__T__$:base" ".__T__$<-:base" ".__T__[[<-:base" ".__T__[<-:base" ".__T__[:base"  rbindlist as.data.table data.table ":=" %like% fread setkey setnames
 #' @import igraph
 #' @import Matrix
 #' @importFrom magrittr "%<>%"
