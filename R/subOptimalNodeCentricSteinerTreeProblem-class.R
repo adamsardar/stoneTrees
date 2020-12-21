@@ -29,7 +29,7 @@
 #'  ## Vertex attribute details node costs/prizes
 #'  head(V(lymphomaGraph)$nodeScore)
 #'
-#'  lymphoma_multiMWCS <- subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 0.5)
+#'  lymphoma_multiMWCS = subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 0.5)
 #'
 #'  #Populate the solution pool with multiple solutions - notice the
 #'  lymphoma_multiMWCS$identifyMultipleSteinerSolutions()
@@ -47,7 +47,7 @@
 #' @seealso nodeCentricSteinerTreeProblem
 #' @importFrom sets set set_union
 #' @export
-subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
+subOptimalSteinerProblem = R6Class("subOptimalSteinerProblem",
                                     inherit = nodeCentricSteinerTreeProblem,
   public = list(
     
@@ -105,7 +105,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
     
     getSolutionTolerance = function(){return(private$tolerance)},
     
-    setSolutionTolerance = function(x){ private$tolerance <- validateSinglePositiveSemiDefiniteNumeric(x) ; return(invisible(self))},
+    setSolutionTolerance = function(x){ private$tolerance = validateSinglePositiveSemiDefiniteNumeric(x) ; return(invisible(self))},
     
     getNconnectivityConstraintsCalls = function(){ private$nConnectivityConstraintsCalls },
 
@@ -115,13 +115,13 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
       
       self$findSingleSteinerSolution()
 
-      private$nConnectivityConstraintsCalls <- self$getNconnectivityConstraintsCalls()
+      private$nConnectivityConstraintsCalls = self$getNconnectivityConstraintsCalls()
 
-      private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+      private$solutionIndicesPool = set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
       
-      multiSteinerItr <- 1
+      multiSteinerItr = 1
 
-      super$nConnectivityConstraintsCalls <- 0
+      super$nConnectivityConstraintsCalls = 0
 
       while(multiSteinerItr <= maxItr){
         
@@ -144,12 +144,12 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
           #If the absolute difference between scores is within tolerance, then add to pool
           if(  abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <= private$tolerance ){
             
-            private$solutionIndicesPool <- set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
+            private$solutionIndicesPool = set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
 
-            private$nConnectivityConstraintsCalls <- c(self$getNconnectivityConstraintsCalls(),
+            private$nConnectivityConstraintsCalls = c(self$getNconnectivityConstraintsCalls(),
                                                            super$nConnectivityConstraintsCalls)
 
-            super$nConnectivityConstraintsCalls <- 0
+            super$nConnectivityConstraintsCalls = 0
 
           }else{
             
@@ -159,7 +159,7 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
 
         }else{ super$addConnectivityConstraints()
 
-          super$nConnectivityConstraintsCalls <- super$nConnectivityConstraintsCalls %<>% add(1)
+          super$nConnectivityConstraintsCalls = super$nConnectivityConstraintsCalls %<>% add(1)
 
 
                }
@@ -187,11 +187,11 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
     # For each solution, sum_i y_i > 0 for i !in a solution
     setNoveltyConstraints = function(){
       
-      noveltyConstraintsList <- private$solutionIndicesPool %>%
+      noveltyConstraintsList = private$solutionIndicesPool %>%
                                 as.list %>%
                                 lapply(function(solIndices){
-                                noveltyConstraint <- Matrix(1, nrow = 1, ncol = vcount(private$searchGraph), sparse = TRUE)
-                                noveltyConstraint[solIndices] <- 0
+                                noveltyConstraint = Matrix(1, nrow = 1, ncol = vcount(private$searchGraph), sparse = TRUE)
+                                noveltyConstraint[solIndices] = 0
                                 return(noveltyConstraint)})
       
       if(private$verbosity) message("Adding ", length(noveltyConstraintsList)," novelty constraint(s) ...")
@@ -199,9 +199,9 @@ subOptimalSteinerProblem <- R6Class("subOptimalSteinerProblem",
       #Deal with empty solution pools - add a matrix with no rows but the correct columns
       noveltyConstraintsList %<>% c(list(Matrix(nrow = 0, ncol = vcount(private$searchGraph))))
       
-      noveltyConstraintsMatrix <- Reduce(rbind, noveltyConstraintsList)
+      noveltyConstraintsMatrix = Reduce(rbind, noveltyConstraintsList)
       
-      private$novelSolutionsConstraint <- list(
+      private$novelSolutionsConstraint = list(
         variables = noveltyConstraintsMatrix,
         directions = rep(">=",nrow(noveltyConstraintsMatrix)) ,
         rhs = rep(1,nrow(noveltyConstraintsMatrix)))

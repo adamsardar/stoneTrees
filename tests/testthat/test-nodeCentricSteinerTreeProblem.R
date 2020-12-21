@@ -4,20 +4,20 @@ library(igraph)
 library(data.table)
 
 #Define a utility function - the allows us to perform a load of checks across networks of different kinds
-inspectNodeCentricSteinerTreeObjectCreation <- function(testGraph){
+inspectNodeCentricSteinerTreeObjectCreation = function(testGraph){
 
   test_that("Inspect object creation", {
 
     if(is.directed(testGraph)){
 
-      expect_warning(testSteinObject <- nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE, presolveGraph = FALSE),
+      expect_warning(testSteinObject = nodeCentricSteinerTreeProblem$new(testGraph, verbose = FALSE, presolveGraph = FALSE),
                      regexp = "directed",
                      info = "Directed graphs are cast to undirected with a warning")
     }
 
-    testGraph <- as.undirected(testGraph)
+    testGraph = as.undirected(testGraph)
 
-    expect_message(testSteinObject <- nodeCentricSteinerTreeProblem$new(testGraph, verbose = TRUE, presolveGraph = FALSE),
+    expect_message(testSteinObject = nodeCentricSteinerTreeProblem$new(testGraph, verbose = TRUE, presolveGraph = FALSE),
                    regexp = "constraints",
                    info = "verbose flag should control diagnostic printing")
 
@@ -131,7 +131,7 @@ test_that("Ensure that incorrect constructor inputs are not tolerated", {
                regexp = "boolean",
                info = "Class should fail when a nonsense verbosity choice is given")
 
-  disconnectedGraph <- add.vertices(lymphomaGraph, 1)
+  disconnectedGraph = add.vertices(lymphomaGraph, 1)
 
   expect_error(nodeCentricSteinerTreeProblem$new(disconnectedGraph),
                regexp = "single connected component",
@@ -149,7 +149,7 @@ inspectNodeCentricSteinerTreeObjectCreation(gene42_igraph)
 
 test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against a small MStTP",{
 
-  karateGraph_MSTP <- nodeCentricSteinerTreeProblem$new(karateGraph, verbose = FALSE)$findSingleSteinerSolution()
+  karateGraph_MSTP = nodeCentricSteinerTreeProblem$new(karateGraph, verbose = FALSE)$findSingleSteinerSolution()
   expect_true(is.connected(karateGraph_MSTP))
   expect_true(vcount(karateGraph_MSTP) == 4)
 
@@ -161,7 +161,7 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
 
     if(! any(c("RCplex","rcbc") %in% .packages(all.available = TRUE))){skip("SteinLib test takes too long using GLPK. Use CBC or CPLEX.")}
 
-    gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
+    gene42_MSTP = nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), verbose = FALSE)$findSingleSteinerSolution()
     expect_true(is.connected(gene42_MSTP))
     expect_true(vcount(gene42_MSTP) <= 1.05*126) # Within 5% of the known optimum
 
@@ -172,7 +172,7 @@ test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solu
 
 test_that("Studying nodeCentricSteinerTreeProblem solver for correctness of solution against an easy MWCS",{
 
-  lymphoma_MWCS <- nodeCentricSteinerTreeProblem$new( lymphomaGraph, verbose = FALSE)$findSingleSteinerSolution()
+  lymphoma_MWCS = nodeCentricSteinerTreeProblem$new( lymphomaGraph, verbose = FALSE)$findSingleSteinerSolution()
 
   expect_equal(vcount(lymphoma_MWCS),46)
   expect_gt(sum(V(lymphoma_MWCS)$nodeScore),70)
@@ -185,10 +185,10 @@ test_that("Trying MWCS solver against the lymphoma.stp instance in the ACTMOD St
 
   skip("SteinLib drosophila test takes too long even using CPLEX - although it does pass!")
 
-  #drosophila001_igraph <- readMWCSgraph('./testData/ACTMOD/drosophila001.stp')
+  #drosophila001_igraph = readMWCSgraph('./testData/ACTMOD/drosophila001.stp')
 
   # Takes around five minutes with CPLEX
-  #drosophila001_MWCS <- nodeCentricSteinerTreeProblem$new(drosophila001_igraph, verbose = T)$findSingleSteinerSolution(100)
+  #drosophila001_MWCS = nodeCentricSteinerTreeProblem$new(drosophila001_igraph, verbose = T)$findSingleSteinerSolution(100)
 })
 
 
@@ -196,7 +196,7 @@ test_that("nodeCentricSteinerTreeProblem max iteration warning",{
   
   if(!"Rglpk" %in% .packages(all.available = TRUE)){skip("GLPK must be installed")}
   
-  expect_warning(gene42_MSTP <- nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph), 
+  expect_warning(gene42_MSTP = nodeCentricSteinerTreeProblem$new( as.undirected(gene42_igraph),
                                      verbose = FALSE,
                                      solverChoice = "RGLPK")$findSingleSteinerSolution(3), regexp = "Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
   expect_false(is.connected(gene42_MSTP))

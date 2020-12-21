@@ -2,9 +2,9 @@ context("Checking that the APSP function works as expected")
 
 test_that("Look at APSP for gene42",{
 
-  seedNodes <- V(gene42_igraph)[isTerminal]$name
+  seedNodes = V(gene42_igraph)[isTerminal]$name
 
-  gene42APSPmod <- calculateAPSPmodule(seedNodes,gene42_igraph)
+  gene42APSPmod = calculateAPSPmodule(seedNodes,gene42_igraph)
 
   expect_true(is.igraph(gene42APSPmod))
   expect_true(is.connected(gene42APSPmod))
@@ -16,13 +16,13 @@ test_that("Look at APSP for gene42",{
 })
 
 #NA is not in graphml spec - it's an R thing. Hence we store the graph as .RDS
-NAnamefGraph <- readRDS("./testData/NAnamedNetword.RDS")
+NAnamefGraph = readRDS("./testData/NAnamedNetword.RDS")
 
 test_that("Check Behaviour On A Graph With NA Values - with a seed set containing an NA node",{
 
-  seedNodes <- c("Y","J","C",NA)
+  seedNodes = c("Y","J","C",NA)
 
-  apspMod <- calculateAPSPmodule(seedNodes,NAnamefGraph)
+  apspMod = calculateAPSPmodule(seedNodes,NAnamefGraph)
 
   expect_warning(calculateAPSPmodule(seedNodes,NAnamefGraph,omitNA = FALSE))
 
@@ -34,9 +34,9 @@ test_that("Check Behaviour On A Graph With NA Values - with a seed set containin
 
 test_that("Check Behaviour On A Graph With NA Values - with a path known to include an NA-named node",{
 
-  seedNodes <- c("B","H","Z","J")
+  seedNodes = c("B","H","Z","J")
 
-  apspMod <- calculateAPSPmodule(seedNodes,NAnamefGraph)
+  apspMod = calculateAPSPmodule(seedNodes,NAnamefGraph)
 
   expect_true(is.igraph(apspMod))
   expect_true(is.connected(apspMod))

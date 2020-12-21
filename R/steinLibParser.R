@@ -7,26 +7,26 @@ globalVariables(c("edgeVerbosity","edgeInfo","rowIndex","terminalVerbosity","ter
 #' @importFrom stringr str_match str_extract str_split
 #' @importFrom stats na.exclude
 #' @importFrom magrittr add
-parseSTPfile <- function(fileName){
+parseSTPfile = function(fileName){
 
-  file.connection <- file(fileName,open="r")
-  file.lines <- readLines(file.connection)
+  file.connection = file(fileName,open="r")
+  file.lines = readLines(file.connection)
   close(file.connection)
 
-  nEdges <- file.lines %>% str_match('Edges\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
-  nArcs <- file.lines %>% str_match('Arcs\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
-  nNodes <- file.lines %>% str_match('Nodes\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
-  nTerminals <- file.lines %>% str_match('Terminals\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
+  nEdges = file.lines %>% str_match('Edges\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
+  nArcs = file.lines %>% str_match('Arcs\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
+  nNodes = file.lines %>% str_match('Nodes\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
+  nTerminals = file.lines %>% str_match('Terminals\\s+\\d+') %>% na.omit() %>% str_extract('\\d+') %>% as.integer()
 
-  if(length(nEdges) > 0 & length(nArcs) == 0){nArcs <- 0}
-  if(length(nArcs) > 0 & length(nEdges) == 0){nEdges <- 0}
+  if(length(nEdges) > 0 & length(nArcs) == 0){nArcs = 0}
+  if(length(nArcs) > 0 & length(nEdges) == 0){nEdges = 0}
 
   if(length(nEdges) > 1){ stop('MStTP parser failed. There should only be one line that declares the number of edges')  }
   if(length(nArcs) > 1){ stop('MStTP parser failed. There should only be one line that declares the number of arcs')  }
   if(length(nNodes) > 1){ stop('MStTP parser failed. There should only be one line that declares the number of nodes')  }
   if(length(nTerminals) > 1){ stop('MStTP parser failed. There should only be one line that declares the number of terminals')  }
 
-  graphEdgesDT <- file.lines %>% str_match('^[AE]?\\s+\\d+\\s+\\d+\\s*\\d*') %>% na.exclude() %>% str_split('\\s+') %>% data.table(edgeInfo = .)
+  graphEdgesDT = file.lines %>% str_match('^[AE]?\\s+\\d+\\s+\\d+\\s*\\d*') %>% na.exclude() %>% str_split('\\s+') %>% data.table(edgeInfo = .)
   graphEdgesDT[,edgeVerbosity := length(edgeInfo[[1]]),by=1:nrow(graphEdgesDT)]
 
   if(graphEdgesDT[,unique(edgeVerbosity)] %>% length > 1){ stop('Differing amounts of information in each edge line!')}
@@ -62,7 +62,7 @@ parseSTPfile <- function(fileName){
 
 
   # Now lets pass the terminal information - note the optional P in the rejex for terminals that must be present
-  terminalSet <- grep('^TP?\\s+',file.lines,perl=TRUE,value=TRUE) %>% str_split('\\s+') %>% data.table(terminalInfo = .)
+  terminalSet = grep('^TP?\\s+',file.lines,perl=TRUE,value=TRUE) %>% str_split('\\s+') %>% data.table(terminalInfo = .)
   terminalSet[,rowIndex := seq(1,nrow(terminalSet))]
   terminalSet[,terminalVerbosity := length(terminalInfo[[1]]),by=rowIndex]
 
@@ -103,20 +103,20 @@ globalVariables(c("edgeType","weight","nodeIndex"))
 #' @references \url{http://steinlib.zib.de/format.php}
 #' @importFrom magrittr add
 #' @export
-readMStTPgraph <- function(MStTPstpFile){
+readMStTPgraph = function(MStTPstpFile){
 
-  stpGraphInformation <- parseSTPfile(MStTPstpFile)
+  stpGraphInformation = parseSTPfile(MStTPstpFile)
 
-  edgesDT <- stpGraphInformation$edges
+  edgesDT = stpGraphInformation$edges
   #We're gonna create a digraph by default, so we'll add reverse arcs back if we have and edges (which are undirected)
 
   if(ncol(edgesDT) == 4){
     edgesDT %<>% rbind(edgesDT[edgeType == 'E',.(start = end,end=start,edgeType,weight)])
-    MStTP_igraph <- graph.data.frame(edgesDT[,.(start,end,edgeWeight=weight)])
+    MStTP_igraph = graph.data.frame(edgesDT[,.(start,end,edgeWeight=weight)])
 
   }else if(ncol(edgesDT) == 3){
     edgesDT %<>% rbind(edgesDT[edgeType == 'E',.(start = end,end=start,edgeType)])
-    MStTP_igraph <- graph.data.frame(edgesDT[,.(start,end)])
+    MStTP_igraph = graph.data.frame(edgesDT[,.(start,end)])
 
   }else{  stop('Parsing of MStTP file failed on edges\n') }
 
@@ -127,16 +127,16 @@ readMStTPgraph <- function(MStTPstpFile){
     #there shouldn't be any edgeWeight info for E type (undirected) edges
   }
 
-  terminalDT <- stpGraphInformation$terminalNodes
+  terminalDT = stpGraphInformation$terminalNodes
 
   #It's very possible for there to be nodes in the terminal list that do not have edges.
-  nodes2add <- terminalDT[! nodeIndex %in% V(MStTP_igraph)$name, nodeIndex]
+  nodes2add = terminalDT[! nodeIndex %in% V(MStTP_igraph)$name, nodeIndex]
   for(node2add in nodes2add){
     MStTP_igraph %<>% add(vertex(node2add))
   }
 
-  V(MStTP_igraph)$isTerminal <- FALSE
-  V(MStTP_igraph)[name %in% stpGraphInformation$terminalNodes$nodeIndex ]$isTerminal <- TRUE
+  V(MStTP_igraph)$isTerminal = FALSE
+  V(MStTP_igraph)[name %in% stpGraphInformation$terminalNodes$nodeIndex ]$isTerminal = TRUE
   #Here we assume that any terminal listed in a file is a so-called fixed terminal - i.e. it must be considered in a candidate solution
 
   if(length(which(V(MStTP_igraph)$isTerminal )) >= 0.3*vcount(MStTP_igraph) ){warning('Over 30% of your graph nodes are fixed terminals. Are you sure that this is what you want?')}
@@ -154,20 +154,20 @@ globalVariables(c("edgeType","weight","nodeIndex","nodeScore","start","end"))
 #' @references \url{http://steinlib.zib.de/format.php}
 #' @importFrom magrittr add
 #' @export
-readMWCSgraph <- function(MWCSstpFile){
+readMWCSgraph = function(MWCSstpFile){
 
-  stpGraphInformation <- parseSTPfile(MWCSstpFile)
+  stpGraphInformation = parseSTPfile(MWCSstpFile)
 
-  edgesDT <- stpGraphInformation$edges
+  edgesDT = stpGraphInformation$edges
   #We're gonna create a digraph by default, so we'll add reverse arcs back if we have and edges (which are undirected)
 
   if(ncol(edgesDT) == 4){
     edgesDT %<>% rbind(edgesDT[edgeType == 'E',.(start = end,end=start,edgeType,weight)])
-    MWCS_igraph <- graph.data.frame(edgesDT[,.(start,end,edgeWeight=weight)])
+    MWCS_igraph = graph.data.frame(edgesDT[,.(start,end,edgeWeight=weight)])
 
   }else if(ncol(edgesDT) == 3){
     edgesDT %<>% rbind(edgesDT[edgeType == 'E',.(start = end,end=start,edgeType)])
-    MWCS_igraph <- graph.data.frame(edgesDT[,.(start,end)])
+    MWCS_igraph = graph.data.frame(edgesDT[,.(start,end)])
 
   }else{  stop('Parsing of MStTP file failed on edges\n') }
 
@@ -179,12 +179,12 @@ readMWCSgraph <- function(MWCSstpFile){
     #there shouldn't be any edgeWeight info for E type (undirected) edges
   }
 
-  terminalDT <- stpGraphInformation$terminalNodes
+  terminalDT = stpGraphInformation$terminalNodes
 
   if(nrow(terminalDT) < vcount(MWCS_igraph)){warning('It is recommended that you provide a node score per vertex for the MWCS problem')}
 
   #It's very possible for there to be nodes in the terminal list that do not have edges.
-  nodes2add <- terminalDT[! nodeIndex %in% V(MWCS_igraph)$name, nodeIndex]
+  nodes2add = terminalDT[! nodeIndex %in% V(MWCS_igraph)$name, nodeIndex]
   for(node2add in nodes2add){
     MWCS_igraph %<>% add(vertex(node2add))
   }
@@ -193,8 +193,8 @@ readMWCSgraph <- function(MWCSstpFile){
 
   terminalDT[,nodeIndex := as.character(nodeIndex)]
   setkey(terminalDT,'nodeIndex')
-  V(MWCS_igraph)$nodeScore <- as.numeric(NA)
-  V(MWCS_igraph)[terminalDT[V(MWCS_igraph)$name,nodeIndex]]$nodeScore <- terminalDT[V(MWCS_igraph)$name,nodeScore]
+  V(MWCS_igraph)$nodeScore = as.numeric(NA)
+  V(MWCS_igraph)[terminalDT[V(MWCS_igraph)$name,nodeIndex]]$nodeScore = terminalDT[V(MWCS_igraph)$name,nodeScore]
 
   return(MWCS_igraph)
 }
@@ -211,22 +211,22 @@ globalVariables(c("index","edgeType","edgeWeight","nodeType","indexA","indexB","
 #' @return node2ID A data.table of nodeName to nodeIndex mappings
 #' @references \url{http://steinlib.zib.de/format.php}
 #' @references \url{https://github.com/ls-cwi/heinz}
-writeMStTPfile_heinzFormat <-function(network.igraph,file.name, remark ='Nothing of note',problem = 'MStTP', name = 'Autogenerated Name'){
+writeMStTPfile_heinzFormat =function(network.igraph,file.name, remark ='Nothing of note',problem = 'MStTP', name = 'Autogenerated Name'){
 
   network.igraph %<>% as.undirected
-  terminal.nodes <- V(network.igraph)[isTerminal == TRUE]$name
+  terminal.nodes = V(network.igraph)[isTerminal == TRUE]$name
 
-  node2ID <- data.table( node = unique(V(network.igraph)$name))
+  node2ID = data.table( node = unique(V(network.igraph)$name))
   node2ID[,index := 1:nrow(node2ID)]
 
-  edges2ID <- get.edgelist(network.igraph) %>% data.table
+  edges2ID = get.edgelist(network.igraph) %>% data.table
   setnames(edges2ID,c('V1'),c('node'))
-  edges2ID <- merge(node2ID,edges2ID, by = 'node')
+  edges2ID = merge(node2ID,edges2ID, by = 'node')
   setnames(edges2ID, c('node','index','V2'),c('nodeA','indexA','node'))
-  edges2ID <- merge(node2ID,edges2ID, by = 'node')
+  edges2ID = merge(node2ID,edges2ID, by = 'node')
   setnames(edges2ID, c('node','index'),c('nodeB','indexB'))
 
-  edge.type <- 'E'
+  edge.type = 'E'
   edges2ID[,edgeType := edge.type]
   #To do - allow for variable edge weight
   if(is.element('edgeWeight', list.edge.attributes(network.igraph))){

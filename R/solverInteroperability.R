@@ -1,9 +1,9 @@
 globalVariables(c("."))
 
-stoneTrees_solvers <- c("cplexAPI", "rcbc", "Rglpk", "lpSolve" ,"lpsymphony")
+stoneTrees_solvers = c("cplexAPI", "rcbc", "Rglpk", "lpSolve" ,"lpsymphony")
 
 # Choose the best solver from those available
-chooseSolver <- function(){
+chooseSolver = function(){
 
   return( toupper(stoneTrees_solvers[stoneTrees_solvers %in% .packages(all.available = "TRUE")][1]) )
 }
@@ -11,7 +11,7 @@ chooseSolver <- function(){
 # This function uses the lower-level cplexAPI package, which does not suffer from the segfault bug in Rcplex for larger matricies
 # The use of cplexAPI:: so as to acess the namespace is horrid, but necessary for a clean build process without CPLEX being available
 #' @importFrom parallel detectCores
-solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
+solver_CPLEXapi = function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
 
   if(!"cplexAPI" %in% .packages(all.available = TRUE) ) stop("cplexAPI must be installed in order to use the CPLEX solver")
 
@@ -23,11 +23,11 @@ solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPar
   if(!is.null(cplexParamList$tilim)) cplexParamList$tilim %<>% as.numeric
   if(!is.null(cplexParamList$nThreads)) cplexParamList$nThreads %<>% as.integer
 
-  Acpx <- toCPXMatrix(Amat)
+  Acpx = toCPXMatrix(Amat)
 
-  env <- cplexAPI::openEnvCPLEX()
+  env = cplexAPI::openEnvCPLEX()
 
-  prob <- cplexAPI::initProbCPLEX(env, pname = "steiner")
+  prob = cplexAPI::initProbCPLEX(env, pname = "steiner")
 
   if(cplexParamList$trace > 0){ cplexAPI::setIntParmCPLEX(env, cplexAPI::CPX_PARAM_SCRIND, cplexAPI::CPX_ON) }
   if(!is.null(cplexParamList$tilim)){ cplexAPI::setDblParmCPLEX(env, cplexAPI::CPX_PARAM_TILIM, cplexParamList$tilim) }
@@ -62,18 +62,18 @@ solver_CPLEXapi <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPar
 
   cplexAPI::mipoptCPLEX(env, prob)
 
-  MILPsolve <- cplexAPI::solutionCPLEX(env, prob)
+  MILPsolve = cplexAPI::solutionCPLEX(env, prob)
 
   cplexAPI::delProbCPLEX(env, prob)
 
   cplexAPI::closeEnvCPLEX(env)
 
-  MILPsolve$solution <- MILPsolve$x
+  MILPsolve$solution = MILPsolve$x
 
   return(MILPsolve)
 }
 
-solver_GLPK <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
+solver_GLPK = function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
 
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
@@ -81,11 +81,11 @@ solver_GLPK <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLi
 
   if(!"Rglpk" %in% .packages(all.available = TRUE) ) stop("Rglpk must be installed in order to use the GLPK solver")
 
-  glpkParamList <- list(verbose = FALSE, presolve = TRUE, tm_limit = 0, canonicalize_status = TRUE)
-  glpkParamList$tm_limit <-  ifelse(!is.null(cplexParamList$tilim), as.integer(cplexParamList$tilim)*1000, as.integer(300*1000))
-  glpkParamList$verbose <-  ifelse(cplexParamList$trace == 0, FALSE, TRUE)
+  glpkParamList = list(verbose = FALSE, presolve = TRUE, tm_limit = 0, canonicalize_status = TRUE)
+  glpkParamList$tm_limit =  ifelse(!is.null(cplexParamList$tilim), as.integer(cplexParamList$tilim)*1000, as.integer(300*1000))
+  glpkParamList$verbose =  ifelse(cplexParamList$trace == 0, FALSE, TRUE)
 
-  MILPsolve <- Rglpk::Rglpk_solve_LP(obj = cVec,
+  MILPsolve = Rglpk::Rglpk_solve_LP(obj = cVec,
                                      mat = Amat,
                                      rhs = bVec,
                                      dir = senseVec,
@@ -99,7 +99,7 @@ solver_GLPK <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLi
 
 
 #' @import lpSolve
-solver_LPSOLVE <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
+solver_LPSOLVE = function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
 
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
 
@@ -107,7 +107,7 @@ solver_LPSOLVE <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPara
 
   validateSingleInteger(nSols)
 
-  MILPsolve <- lpSolve::lp(objective.in = cVec,
+  MILPsolve = lpSolve::lp(objective.in = cVec,
                            const.mat = as.matrix(Amat),
                            const.rhs = bVec,
                            const.dir = senseVec,
@@ -118,7 +118,7 @@ solver_LPSOLVE <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPara
   return(MILPsolve)
 }
 
-solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
+solver_SYMPHONY =  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), ...){
 
   if(! all( c("lpsymphony","slam") %in% .packages(all.available = TRUE)) ) stop("lpsymphony and slam must both be installed in order to use the GLPK solver")
 
@@ -126,7 +126,7 @@ solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPa
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
   if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
 
-  MILPsolve <- lpsymphony::lpsymphony_solve_LP(obj = cVec,
+  MILPsolve = lpsymphony::lpsymphony_solve_LP(obj = cVec,
                                                mat = slam::as.simple_triplet_matrix(Amat),
                                                rhs = bVec,
                                                dir = senseVec,
@@ -139,36 +139,36 @@ solver_SYMPHONY <-  function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexPa
 
 
 
-solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
+solver_CBC = function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamList = list(trace = 0), nSols = 1){
   
   if(length(bVec) == 1){bVec %<>% rep(nrow(Amat))}
   if(length(senseVec) == 1){senseVec %<>% rep(nrow(Amat))}
   if(length(vtypeVec) == 1){vtypeVec %<>% rep(ncol(Amat))}
-  if(!is.null(cplexParamList$nThreads)){ cplexParamList$nThreads %<>% as.integer}else{ cplexParamList$nThreads <- as.integer( max(c(detectCores() - 2,1, na.rm = TRUE))) }
+  if(!is.null(cplexParamList$nThreads)){ cplexParamList$nThreads %<>% as.integer}else{ cplexParamList$nThreads = as.integer( max(c(detectCores() - 2,1, na.rm = TRUE))) }
   
   if(!"rcbc" %in% .packages(all.available = TRUE) ) stop("rcbc must be installed in order to use the CBC solver")
   
   #Prepare the column bounds
-  colUB <- rep.int(Inf, ncol(Amat))
-  colLB <- rep.int(-Inf, ncol(Amat))
+  colUB = rep.int(Inf, ncol(Amat))
+  colLB = rep.int(-Inf, ncol(Amat))
   
-  colUB[vtypeVec == "B"] <- 1L
-  colLB[vtypeVec == "B"] <- 0L
+  colUB[vtypeVec == "B"] = 1L
+  colLB[vtypeVec == "B"] = 0L
   
   # Prepare the row bounds
-  rowUB <- rep.int(Inf, nrow(Amat))
-  rowLB <- rep.int(-Inf, nrow(Amat))
+  rowUB = rep.int(Inf, nrow(Amat))
+  rowLB = rep.int(-Inf, nrow(Amat))
   
-  rowUB[senseVec == "=="] <- bVec[senseVec == "=="]
-  rowLB[senseVec == "=="] <- bVec[senseVec == "=="]
+  rowUB[senseVec == "=="] = bVec[senseVec == "=="]
+  rowLB[senseVec == "=="] = bVec[senseVec == "=="]
   
-  rowUB[senseVec == ">="] <- Inf
-  rowLB[senseVec == ">="] <- bVec[senseVec == ">="]
+  rowUB[senseVec == ">="] = Inf
+  rowLB[senseVec == ">="] = bVec[senseVec == ">="]
 
-  rowUB[senseVec == "<="] <- bVec[senseVec == "<="]
-  rowLB[senseVec == "<="] <- -Inf
+  rowUB[senseVec == "<="] = bVec[senseVec == "<="]
+  rowLB[senseVec == "<="] = -Inf
   
-  MILPsolve <- rcbc::cbc_solve(
+  MILPsolve = rcbc::cbc_solve(
     obj = cVec,
     mat = Amat,
     
@@ -186,7 +186,7 @@ solver_CBC <- function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParamLis
                     "threads" = 0)
   )
   
-  MILPsolve$solution <- MILPsolve$column_solution
+  MILPsolve$solution = MILPsolve$column_solution
   
   return(MILPsolve)
 }

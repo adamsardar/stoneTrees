@@ -8,9 +8,9 @@ globalVariables(names=c(".","name"))
 #' @importFrom stats na.omit
 #' @importFrom purrr map
 #' @export
-calculateAPSPmodule <- function(seeds, searchGraph, omitNA = TRUE){
+calculateAPSPmodule = function(seeds, searchGraph, omitNA = TRUE){
 
-  searchGraphName <- deparse(substitute(searchGraph)) #Capture search graph name
+  searchGraphName = deparse(substitute(searchGraph)) #Capture search graph name
 
   validateIsNetwork(searchGraph)
 
@@ -18,13 +18,13 @@ calculateAPSPmodule <- function(seeds, searchGraph, omitNA = TRUE){
          seeds %<>% na.omit(seeds),
          if(any(is.na(V(searchGraph)$name))) warning("NA nodes found in input seed list but 'omitNA' set to FALSE - this can lead to unstable behaviour") )
 
-  seedsNotInGaph <- setdiff(seeds,V(searchGraph)$name)
-  seedsInGaph <- intersect(seeds,V(searchGraph)$name)
+  seedsNotInGaph = setdiff(seeds,V(searchGraph)$name)
+  seedsInGaph = intersect(seeds,V(searchGraph)$name)
 
   if(length(seedsNotInGaph) == length(seeds)){stop("None of the seeds were found in graph!")}
   if(length(seedsNotInGaph) > 0){ warning("Not all seeds found in graph: ",seedsNotInGaph)}
 
-  APSP_vertices <- map(V(searchGraph)[name %in% seedsInGaph], ~{
+  APSP_vertices = map(V(searchGraph)[name %in% seedsInGaph], ~{
 
 
     all_shortest_paths(searchGraph,
@@ -37,10 +37,10 @@ calculateAPSPmodule <- function(seeds, searchGraph, omitNA = TRUE){
     unique %>%
     na.omit
 
-  process_APSP_module <- induced_subgraph(searchGraph,V(searchGraph)[APSP_vertices])
+  process_APSP_module = induced_subgraph(searchGraph,V(searchGraph)[APSP_vertices])
 
-  V(process_APSP_module)$isSeed <- FALSE
-  V(process_APSP_module)[name %in% seeds]$isSeed <- TRUE
+  V(process_APSP_module)$isSeed = FALSE
+  V(process_APSP_module)[name %in% seeds]$isSeed = TRUE
 
   process_APSP_module %<>% set_graph_attr("SearchNetwork", searchGraphName)
 

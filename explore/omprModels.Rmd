@@ -35,27 +35,27 @@ load("./data/karateGraph.RData")
 
 load("./data/lymphomaGraph.RData")
 
-searchGraph <- lymphomaGraph
+searchGraph = lymphomaGraph
 
-V(searchGraph)$isTerminal <- FALSE
-#V(searchGraph)[nodeScore > 5]$isTerminal <- TRUE
+V(searchGraph)$isTerminal = FALSE
+#V(searchGraph)[nodeScore > 5]$isTerminal = TRUE
 
-#searchGraph <- condenseSearchGraph(searchGraph)
+#searchGraph = condenseSearchGraph(searchGraph)
 
 
-fixedTerminals <- V(searchGraph)[isTerminal]
-potentialTerminals <-  V(searchGraph)[nodeScore > 0]
+fixedTerminals = V(searchGraph)[isTerminal]
+potentialTerminals =  V(searchGraph)[nodeScore > 0]
 
-terminals <- unique(c(fixedTerminals, potentialTerminals))
+terminals = unique(c(fixedTerminals, potentialTerminals))
 
-potentialSteinerNodes <-  delete_vertices(searchGraph,
+potentialSteinerNodes =  delete_vertices(searchGraph,
                                           c(fixedTerminals, potentialTerminals))
 
-nodeDT <- get.data.frame(searchGraph, what = "vertices") %>% data.table
+nodeDT = get.data.frame(searchGraph, what = "vertices") %>% data.table
 nodeDT[, .nodeID := .I]
 
-edgeDT <- get.data.frame(searchGraph, what = "edges") %>% data.table
-edgeDT <- rbind(edgeDT[,.(from,to)], edgeDT[,.(from = to, to = from)]) #Undirected network
+edgeDT = get.data.frame(searchGraph, what = "edges") %>% data.table
+edgeDT = rbind(edgeDT[,.(from,to)], edgeDT[,.(from = to, to = from)]) #Undirected network
 edgeDT[, .edgeID := .I]
 
 edgeDT[nodeDT, fromNodeID := .nodeID, on = .(from = name)]
@@ -69,10 +69,10 @@ Constraint 1.)
 
 ```{r objective constraint}
 
-nodeScores <- V(searchGraph)$nodeScore
+nodeScores = V(searchGraph)$nodeScore
 
-#nodeScores <- rep(-1, vcount(searchGraph))
-names(nodeScores) <- V(searchGraph)$name
+#nodeScores = rep(-1, vcount(searchGraph))
+names(nodeScores) = V(searchGraph)$name
 
 ```
 
@@ -82,7 +82,7 @@ Constraint 3.)
 
 ```{r fixed terminals}
 
-fixedTerminals_variables <- 
+fixedTerminals_variables =
   sparseMatrix(i = as.integer(fixedTerminals),
                j = as.integer(fixedTerminals),
                x = 1,
@@ -92,8 +92,8 @@ fixedTerminals_variables <-
 
 fixedTerminals_variables %<>% .[as.integer(fixedTerminals), ]
 
-fixedTerminals_directions <- rep("==", nrow(fixedTerminals_variables))
-fixedTerminals_rhs <- rep(1, nrow(fixedTerminals_variables))
+fixedTerminals_directions = rep("==", nrow(fixedTerminals_variables))
+fixedTerminals_rhs = rep(1, nrow(fixedTerminals_variables))
 ```
 
 
@@ -104,20 +104,20 @@ Constraint 5.)
 
 ```{r Node degree inequlaities}
 
-nodeDegreeInequalities_variables <- get.adjacency(searchGraph, sparse = TRUE)
-diag(nodeDegreeInequalities_variables) <- -2
-diag(nodeDegreeInequalities_variables)[as.integer(terminals)] <- -1
+nodeDegreeInequalities_variables = get.adjacency(searchGraph, sparse = TRUE)
+diag(nodeDegreeInequalities_variables) = -2
+diag(nodeDegreeInequalities_variables)[as.integer(terminals)] = -1
 
 
-nodeDegreeInequalities_directions <- rep(">=", nrow(nodeDegreeInequalities_variables))
-nodeDegreeInequalities_rhs <- rep(0, nrow(nodeDegreeInequalities_variables))
+nodeDegreeInequalities_directions = rep(">=", nrow(nodeDegreeInequalities_variables))
+nodeDegreeInequalities_rhs = rep(0, nrow(nodeDegreeInequalities_variables))
 ```
 
 
 Constraint 6.) If any potential Steiner node next to a potential terminal is included, then the potential terminal must also be included.
 
 ```{r two cycle constraints}
-twoCycle_variables <- edgeDT[fromNodeID %in% as.integer(potentialTerminals),
+twoCycle_variables = edgeDT[fromNodeID %in% as.integer(potentialTerminals),
          sparseMatrix(i = c(.edgeID,.edgeID) ,
                       j = c(fromNodeID,toNodeID),
                       x = rep(c(1, -1) , each = length(.edgeID) ),
@@ -126,8 +126,8 @@ twoCycle_variables <- edgeDT[fromNodeID %in% as.integer(potentialTerminals),
 
 twoCycle_variables  %<>% .[ edgeDT[fromNodeID %in% as.integer(potentialTerminals), .edgeID], ]
 
-twoCycle_directions <- rep(">=", nrow(twoCycle_variables))
-twoCycle_rhs <- rep(0, nrow(twoCycle_variables))
+twoCycle_directions = rep(">=", nrow(twoCycle_variables))
+twoCycle_rhs = rep(0, nrow(twoCycle_variables))
 ```
 
 
@@ -135,7 +135,7 @@ Solve it
 
 ```{r}
 
-solution <- Rglpk_solve_LP(
+solution = Rglpk_solve_LP(
     obj = nodeScores,
     mat = rbind(fixedTerminals_variables, nodeDegreeInequalities_variables, twoCycle_variables),
     dir = c(fixedTerminals_directions, nodeDegreeInequalities_directions, twoCycle_directions),
@@ -144,7 +144,7 @@ solution <- Rglpk_solve_LP(
     control = list(verbose = TRUE),
     types = "B")
 
-graphOfSolution <- induced_subgraph(searchGraph,
+graphOfSolution = induced_subgraph(searchGraph,
                                     V(searchGraph)[which(solution$solution == 1)]) 
 
 is.connected(graphOfSolution)
@@ -155,13 +155,13 @@ is.connected(graphOfSolution)
 ```{r}
 
 
-allTerminalPairs <- combn( names(terminals), 2) %>% t %>% as.data.table
+allTerminalPairs = combn( names(terminals), 2) %>% t %>% as.data.table
 setnames(allTerminalPairs, c("T1name","T2name"))
 
 setkey(nodeDT, name)
 nodeDT[, inComponent := NA_integer_]
 
-disconnectedComponentList <- decompose(graphOfSolution)
+disconnectedComponentList = decompose(graphOfSolution)
 
 allTerminalPairs[nodeDT, T1nodeID := .nodeID, on = .(T1name == name)]
 allTerminalPairs[nodeDT, T2nodeID := .nodeID, on = .(T2name == name)]
@@ -174,14 +174,14 @@ for(i in 1:length(disconnectedComponentList)){
 allTerminalPairs[nodeDT, T1inComponent := inComponent, on = .(T1nodeID = .nodeID)]
 allTerminalPairs[nodeDT, T2inComponent := inComponent, on = .(T2nodeID = .nodeID)]
   
-terminalPairsInDifferentComponents <- allTerminalPairs[!is.na(T1inComponent) & !is.na(T1inComponent)][T1inComponent != T2inComponent]
+terminalPairsInDifferentComponents = allTerminalPairs[!is.na(T1inComponent) & !is.na(T1inComponent)][T1inComponent != T2inComponent]
 
 
 
-connConstraints_variables <- minimalNodeSeperator(searchGraph, nodeDT, terminalPairsInDifferentComponents)
+connConstraints_variables = minimalNodeSeperator(searchGraph, nodeDT, terminalPairsInDifferentComponents)
 
-connConstraints_directions <- rep(">=", nrow(connConstraints_variables))
-connConstraints_rhs <- rep(-1, nrow(connConstraints_variables))
+connConstraints_directions = rep(">=", nrow(connConstraints_variables))
+connConstraints_rhs = rep(-1, nrow(connConstraints_variables))
 ```
 
 
@@ -189,9 +189,9 @@ connConstraints_rhs <- rep(-1, nrow(connConstraints_variables))
 library(profvis)
 
 
-conConstraintProfiling <-  profvis({
+conConstraintProfiling =  profvis({
   
-connConstraints_variables <- minimalNodeSeperator(searchGraph, nodeDT, terminalPairsInDifferentComponents)  
+connConstraints_variables = minimalNodeSeperator(searchGraph, nodeDT, terminalPairsInDifferentComponents)
 })
 
 ```
@@ -201,7 +201,7 @@ connConstraints_variables <- minimalNodeSeperator(searchGraph, nodeDT, terminalP
 ```{r}
 
 
-solution2 <- Rglpk_solve_LP(
+solution2 = Rglpk_solve_LP(
     obj = nodeScores,
     mat = rbind(fixedTerminals_variables,
                 nodeDegreeInequalities_variables,
@@ -221,7 +221,7 @@ solution2 <- Rglpk_solve_LP(
 
 
 
-graphOfSolution2 <- induced_subgraph(searchGraph,
+graphOfSolution2 = induced_subgraph(searchGraph,
                                     V(searchGraph)[which(solution2$solution == 1)]) 
 
 is.connected(graphOfSolution2)
@@ -230,49 +230,49 @@ is.connected(graphOfSolution2)
 
 A function that, when given two node indicies, returns their minimal node seperators
 ```{r}
- # nodeClusterMembershipDT <- nodeDT
- # fullSearchGraph <- searchGraph
- # terminalPairsDT <- terminalPairsInDifferentComponents
+ # nodeClusterMembershipDT = nodeDT
+ # fullSearchGraph = searchGraph
+ # terminalPairsDT = terminalPairsInDifferentComponents
 
-minimalNodeSeperator <- function(fullSearchGraph, nodeClusterMembershipDT, terminalPairsDT){
+minimalNodeSeperator = function(fullSearchGraph, nodeClusterMembershipDT, terminalPairsDT){
   
   # Pre-compute the component surfaces (A(C_i) in paper)
-  clusterSurfacesDT <- nodeClusterMembershipDT[!is.na(inComponent)] %>%
+  clusterSurfacesDT = nodeClusterMembershipDT[!is.na(inComponent)] %>%
                 merge(edgeDT, by.x = ".nodeID", by.y = "fromNodeID") %>%
                 .[,.(componentSurfaceNodeID = .SD[!toNodeID %in% .nodeID, unique(toNodeID)]), by = inComponent]
 
-  allConnectivityConstraints <- Matrix(0,
+  allConnectivityConstraints = Matrix(0,
                                        nrow = nrow(terminalPairsDT),
                                        ncol = nrow(nodeClusterMembershipDT),
                                        dimnames = list(NULL, nodeClusterMembershipDT[order(.nodeID), name]))
   
-  graphDiameter <- diameter(fullSearchGraph)
+  graphDiameter = diameter(fullSearchGraph)
   
   for(r in 1:nrow(terminalPairsDT)){
     
-    terminalPair <- terminalPairsDT[r,]
+    terminalPair = terminalPairsDT[r,]
     
-    C_i_componentSurfaceNodeIDs <- clusterSurfacesDT[ inComponent ==  terminalPair$T1inComponent, componentSurfaceNodeID]
+    C_i_componentSurfaceNodeIDs = clusterSurfacesDT[ inComponent ==  terminalPair$T1inComponent, componentSurfaceNodeID]
     
-    graph_omitCi <- delete_vertices(fullSearchGraph,
+    graph_omitCi = delete_vertices(fullSearchGraph,
                       V(fullSearchGraph)[ nodeClusterMembershipDT[inComponent ==  terminalPair$T1inComponent,.nodeID] ])
     
     #Note that this is the graph LESS the Ci componenet - hence we can't precompute upfront.
     # Notice the use of name, not ID
-    nodeNamesReachableFromJ <- V(make_ego_graph(graph_omitCi,
+    nodeNamesReachableFromJ = V(make_ego_graph(graph_omitCi,
                                nodes = V(graph_omitCi)[name == terminalPair$T2name],
                                order = graphDiameter)[[1]])$name
     #Refered to as Rj in the paper
     
     # N = A(Ci) intersect Rj
-    minNodeSep_ij_nodeIDs <- intersect(C_i_componentSurfaceNodeIDs,  
+    minNodeSep_ij_nodeIDs = intersect(C_i_componentSurfaceNodeIDs,
                        nodeClusterMembershipDT[name %in% nodeNamesReachableFromJ, .nodeID])
     
     
-    allConnectivityConstraints[r, terminalPair$T1nodeID] <- -1
-    allConnectivityConstraints[r, terminalPair$T2nodeID] <- -1
+    allConnectivityConstraints[r, terminalPair$T1nodeID] = -1
+    allConnectivityConstraints[r, terminalPair$T2nodeID] = -1
     
-    allConnectivityConstraints[r, minNodeSep_ij_nodeIDs] <- 1
+    allConnectivityConstraints[r, minNodeSep_ij_nodeIDs] = 1
   }
   
   return(allConnectivityConstraints)
@@ -288,7 +288,7 @@ given two terminal nodes
 
 library(lpSolve)
 
-solution <- lp(
+solution = lp(
     direction = "max",
     objective.in = nodeScores,
     const.mat = as.matrix(rbind(fixedTerminals_variables, nodeDegreeInequalities_variables, twoCycle_variables)),

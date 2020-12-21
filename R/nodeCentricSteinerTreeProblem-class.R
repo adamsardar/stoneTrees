@@ -28,7 +28,7 @@
 #'  unique(V(karateGraph)$isTerminal)
 #'  V(karateGraph)[isTerminal]
 #'
-#'  karateMStTP <- nodeCentricSteinerTreeProblem$new(karateGraph)
+#'  karateMStTP = nodeCentricSteinerTreeProblem$new(karateGraph)
 #'  karateMStTP$findSingleSteinerSolution()
 #'
 #'  # Maximum-Weight Connected Subgraph (MWCS)
@@ -36,7 +36,7 @@
 #'  ## Vertex attribute details node costs/prizes
 #'  head(V(lymphomaGraph)$nodeScore)
 #'
-#'  lymphomaMWCS <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
+#'  lymphomaMWCS = nodeCentricSteinerTreeProblem$new(lymphomaGraph)
 #'  lymphomaMWCS$findSingleSteinerSolution()
 #'
 #'  # A blend of the two approaches
@@ -44,18 +44,18 @@
 #'  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, 
 #'  
 #'  # but otherwise node inclusion should follow node scores
-#'  V(lymphomaGraph)$isTerminal <- FALSE
+#'  V(lymphomaGraph)$isTerminal = FALSE
 #'  ## Choose some random nodes to be seeds
-#'  V(lymphomaGraph)[name %in% c("4","8","15","16","23","42")]$isTerminal <- TRUE
+#'  V(lymphomaGraph)[name %in% c("4","8","15","16","23","42")]$isTerminal = TRUE
 #'
-#'  hybridSteinProb <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
+#'  hybridSteinProb = nodeCentricSteinerTreeProblem$new(lymphomaGraph)
 #'  hybridSteinProb$findSingleSteinerSolution()
 #' @references Fischetti M, Leitner M, Ljubić I, Luipersbeck M, Monaci M, Resch M, et al. Thinning out Steiner trees: a node-based model for uniform edge costs. Math Program Comput. dimacs11.cs.princeton.edu; 2017;9: 203–229.
 #' @references Beisser D, Klau GW, Dandekar T, Müller T, Dittrich MT. BioNet: An R-Package for the functional analysis of biological networks. Bioinformatics. 2010;26: 1129–1130.
 #' @references \url{https://en.wikipedia.org/wiki/Steiner_tree_problem}
 #' @family SteinerProblemSolver
 #' @export
-nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
+nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
 
   public = list(
     
@@ -63,33 +63,33 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                          verbose = TRUE, presolveGraph = TRUE,
                          solverTimeLimit = 300, solverTrace = as.integer(verbose)){
       
-      private$solver <- validateSolverChoice(solverChoice)
-      private$solverTimeLimit <- validateSingleInteger(solverTimeLimit)
-      private$verbosity <- validateFlag(verbose)
-      private$solverTrace <- validateSingleInteger(solverTrace)
+      private$solver = validateSolverChoice(solverChoice)
+      private$solverTimeLimit = validateSingleInteger(solverTimeLimit)
+      private$verbosity = validateFlag(verbose)
+      private$solverTrace = validateSingleInteger(solverTrace)
       
-      interactomeName <- deparse(substitute(network)) #Capture interactome name for later
+      interactomeName = deparse(substitute(network)) #Capture interactome name for later
       
       validateIsNetwork(network)
       if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
       
       
-      private$graphPresolved <- validateFlag(presolveGraph)
-      inputGraph <- network %>% as.undirected %>% simplify
-      if(presolveGraph){inputGraph <- condenseSearchGraph(inputGraph)} #graph condensation is a presolve step
+      private$graphPresolved = validateFlag(presolveGraph)
+      inputGraph = network %>% as.undirected %>% simplify
+      if(presolveGraph){inputGraph = condenseSearchGraph(inputGraph)} #graph condensation is a presolve step
       
-      V(inputGraph)$.nodeID <- 1:vcount(inputGraph)
+      V(inputGraph)$.nodeID = 1:vcount(inputGraph)
       
-      private$searchGraph <-  set_graph_attr(inputGraph, "SearchNetwork", interactomeName)
+      private$searchGraph =  set_graph_attr(inputGraph, "SearchNetwork", interactomeName)
       
       if(length(decompose(private$searchGraph)) != 1) stop("Search network must only have a single connected component.")
       
                                              # check for nodeScore: all -1 if absent, validate if present
-                                             if(!"nodeScore" %in% vertex_attr_names( private$searchGraph)){ V(private$searchGraph)$nodeScore <- -1 }
+                                             if(!"nodeScore" %in% vertex_attr_names( private$searchGraph)){ V(private$searchGraph)$nodeScore = -1 }
                                              
 
                                              # nodeDT with node indices
-      private$nodeDT <- get.data.frame(private$searchGraph, what = "vertices") %>% data.table
+      private$nodeDT = get.data.frame(private$searchGraph, what = "vertices") %>% data.table
       
       # Solution status will effectively be provided by the 'inComponent' attribute
       private$nodeDT[, inComponent := NA_integer_]
@@ -112,16 +112,16 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         if( ! (is.numeric(private$nodeDT$nodeScore) & all(!is.na(private$nodeDT$nodeScore))) ) stop("nodeScore node attributes *must* all be numeric values, with no NA's")
       }
       
-      private$fixedTerminalIndices <- private$nodeDT[isTerminal == TRUE, .nodeID] # Fixed terminals must be included in a solution
-      private$potentialTerminalIndices <- private$nodeDT[nodeScore > 0, .nodeID] # potential terminals are those with nodeScore greater than 0
+      private$fixedTerminalIndices = private$nodeDT[isTerminal == TRUE, .nodeID] # Fixed terminals must be included in a solution
+      private$potentialTerminalIndices = private$nodeDT[nodeScore > 0, .nodeID] # potential terminals are those with nodeScore greater than 0
       
       # Check that there are *some* terminals, otherwise error
       if(length( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScore and/or isTerminal vertex attributes!")
       
-      eDT <- get.data.frame( private$searchGraph, what = "edges") %>% data.table
+      eDT = get.data.frame( private$searchGraph, what = "edges") %>% data.table
       eDT[,.edgeID := .I]
       
-      private$edgeDT <- rbind(eDT[,.(from,to,.edgeID)], eDT[,.(to = from,from = to,.edgeID)])
+      private$edgeDT = rbind(eDT[,.(from,to,.edgeID)], eDT[,.(to = from,from = to,.edgeID)])
       
       private$edgeDT[private$nodeDT, fromNodeID := .nodeID, on = .(from = name)]
       private$edgeDT[private$nodeDT, toNodeID := .nodeID, on = .(to = name)]
@@ -155,11 +155,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
     
     findSingleSteinerSolution = function(maxItr = 20){
       
-      itrCount <- 1
+      itrCount = 1
       
       while( (! self$isSolutionConnected() ) & (itrCount <= maxItr) ){
         
-        private$nConnectivityConstraintsCalls <- itrCount -1
+        private$nConnectivityConstraintsCalls = itrCount -1
 
         private$solve()
         
@@ -200,7 +200,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       
       addFixedTerminalConstraints = function(){
         
-        fixedTerminals_variables <-
+        fixedTerminals_variables =
           sparseMatrix(i = private$fixedTerminalIndices,
                        j = private$fixedTerminalIndices,
                        x = 1,
@@ -208,7 +208,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
                        dimnames = list( paste0("fixedTerminalConstraintFor", 1:vcount(private$searchGraph)),
                                         V(private$searchGraph)$name))
         
-        private$fixedTerminalConstraints <- list(
+        private$fixedTerminalConstraints = list(
           variables = fixedTerminals_variables[private$fixedTerminalIndices, ],
           directions = rep("==", length(private$fixedTerminalIndices)),
           rhs = rep(1, length(private$fixedTerminalIndices)) )
@@ -221,11 +221,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       # Constraint 5.) Only potential or fixed terminals can have a degree of 1, all other nodes must have degree >= 2
       addNodeDegreeInequalities = function(){
         
-        nodeDegreeInequalities_variables <- get.adjacency(private$searchGraph, sparse = TRUE)
-        diag(nodeDegreeInequalities_variables) <- -2
-        diag(nodeDegreeInequalities_variables)[unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))] <- -1
+        nodeDegreeInequalities_variables = get.adjacency(private$searchGraph, sparse = TRUE)
+        diag(nodeDegreeInequalities_variables) = -2
+        diag(nodeDegreeInequalities_variables)[unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))] = -1
         
-        private$nodeDegreeConstraints <- list(
+        private$nodeDegreeConstraints = list(
           variables = nodeDegreeInequalities_variables,
           directions = rep(">=", nrow(nodeDegreeInequalities_variables)),
           rhs = rep(0, nrow(nodeDegreeInequalities_variables)) )
@@ -243,7 +243,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         # y_i ≤ y_j ∀ i ∈ V, j ∈ T_p
         
         # Two cycle constraints are simple - for each edge i->j around a potential terminal i, have a setup which enforces its inclusion if j is present in solutoion
-        twoCycle_variables <- private$edgeDT[,
+        twoCycle_variables = private$edgeDT[,
                                              sparseMatrix(i = c(.edgeID, .edgeID) ,
                                                           j = c(fromNodeID, toNodeID),
                                                           x = rep(c(1, -1) , each = length(.edgeID) ),
@@ -253,7 +253,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         # We only care about edges *from* a potential terminal node
         twoCycle_variables  %<>% .[ private$edgeDT[fromNodeID %in% private$potentialTerminalIndices, .edgeID], ]
         
-        private$twoCycleConstraints <- list(
+        private$twoCycleConstraints = list(
           variables = twoCycle_variables,
           directions = rep(">=", nrow(twoCycle_variables)),
           rhs = rep(0, nrow(twoCycle_variables)) )
@@ -267,7 +267,7 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       # A utility function - forget all of the exisiting connectivity constraints
       flushConnectivityConstraints = function(){
         
-        private$connectivityConstraints <- list( variables = Matrix(0, sparse = TRUE, nrow = 0,
+        private$connectivityConstraints = list( variables = Matrix(0, sparse = TRUE, nrow = 0,
                                                                     ncol = vcount(private$searchGraph),
                                                                     dimnames = list(NULL, V(private$searchGraph)$name)),
                                                  directions = character(),
@@ -293,8 +293,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         }
         
         # Break solution into connected components. If only a single component, then we're done
-        componentsSummaryDT <- private$nodeDT[!is.na(inComponent), .N, by = inComponent]
-        terminalsInComponentsDT <-  private$nodeDT[!is.na(inComponent)][.nodeID %in% unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))]
+        componentsSummaryDT = private$nodeDT[!is.na(inComponent), .N, by = inComponent]
+        terminalsInComponentsDT =  private$nodeDT[!is.na(inComponent)][.nodeID %in% unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))]
         
         if(private$verbosity){
           
@@ -308,51 +308,51 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
           
           # Create terminal pairs
           # Filter for terminal pairs in different components
-          allTerminalPairs <- combn( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)), 2) %>% t %>% as.data.table
+          allTerminalPairs = combn( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)), 2) %>% t %>% as.data.table
           setnames(allTerminalPairs, c("T1nodeID","T2nodeID")) # Note that we are working by node indicies here to avoid using node names
           
           allTerminalPairs[private$nodeDT, "T1inComponent" := inComponent, on = .(T1nodeID = .nodeID)]
           allTerminalPairs[private$nodeDT, "T2inComponent" := inComponent, on = .(T2nodeID = .nodeID)]
           
           # Only need keep node pairs where both nodes are in the solution but not in the same component
-          terminalPairsInDifferentComponents <-
+          terminalPairsInDifferentComponents =
             allTerminalPairs[!is.na(T1inComponent) & !is.na(T1inComponent)][T1inComponent != T2inComponent]
           
           # Pre-compute the component surfaces (A(C_i) in paper) - i.e. nodes that are adjacent to C_i but not in C_i
-          clusterSurfacesDT <- private$nodeDT[!is.na(inComponent)] %>%
+          clusterSurfacesDT = private$nodeDT[!is.na(inComponent)] %>%
             merge(private$edgeDT, by.x = ".nodeID", by.y = "fromNodeID") %>%
             .[,.(componentSurfaceNodeID = .SD[!toNodeID %in% .nodeID, unique(toNodeID)]), by = inComponent]
           
           # Any edge that starts from a member of a cluster is stored in this table
-          clusterEdgesDT <- private$nodeDT[!is.na(inComponent)] %>%
+          clusterEdgesDT = private$nodeDT[!is.na(inComponent)] %>%
             merge(private$edgeDT, by.x = ".nodeID", by.y = "fromNodeID")
           
           #A pot to keep the conConstraints in
-          conConstraints <- list()
+          conConstraints = list()
           
           # The computationally expensive piece
           for(T1component in unique(terminalPairsInDifferentComponents$T1inComponent) ){
             
-            termainPairsWithT1incomponent <- terminalPairsInDifferentComponents[T1inComponent == T1component]
+            termainPairsWithT1incomponent = terminalPairsInDifferentComponents[T1inComponent == T1component]
             termainPairsWithT1incomponent[, constraintIndex := .I]
             
-            clusterEdgeIDs <- clusterEdgesDT[inComponent == T1component, unique(.edgeID )]
+            clusterEdgeIDs = clusterEdgesDT[inComponent == T1component, unique(.edgeID )]
             
             #Crucially the nodes are still present from the original component
-            searchGraphWithoutComponent <- delete.edges(private$searchGraph,
+            searchGraphWithoutComponent = delete.edges(private$searchGraph,
                                                         E(private$searchGraph)[ clusterEdgeIDs ] )
             
             # For each terminal pair i,j; compute R_j (reachable set from R_j in graph ommiting C_i) and compute the minimum node-seperator set 𝒩(i,j) = A(C_i) intersect R_j
             
             # R_j in the network wihtout C_i
             # Note that this is the graph LESS the Ci componenet - hence we can't precompute upfront.
-            reachabilityMatrix <- distances(searchGraphWithoutComponent,
+            reachabilityMatrix = distances(searchGraphWithoutComponent,
                                             v = V(searchGraphWithoutComponent)[termainPairsWithT1incomponent$T2nodeID])
-            reachabilityMatrix[is.infinite(reachabilityMatrix)] <- 0
+            reachabilityMatrix[is.infinite(reachabilityMatrix)] = 0
             
             # A(C_i)
-            clusterSurfaceNodes <- clusterSurfacesDT[inComponent == T1component, componentSurfaceNodeID]
-            componentSurfaceMatrix <- sparseMatrix( i = rep(1:nrow(reachabilityMatrix), each = length(clusterSurfaceNodes) ) ,
+            clusterSurfaceNodes = clusterSurfacesDT[inComponent == T1component, componentSurfaceNodeID]
+            componentSurfaceMatrix = sparseMatrix( i = rep(1:nrow(reachabilityMatrix), each = length(clusterSurfaceNodes) ) ,
                                                     j =  rep(clusterSurfaceNodes, nrow(reachabilityMatrix)),
                                                     x = TRUE,
                                                     dims = dim(reachabilityMatrix),
@@ -364,29 +364,29 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
             # This acts as a way of repairing a disconnected solution in a lazy fashion (there are exponentially many node seperators, hence enumerating them all up front is not feasible)
             
             # 𝒩(i,j) = A(C_i) intersect R_j: y(N) above
-            minimumNodeSeperatorsMatrix <- ( (reachabilityMatrix) & componentSurfaceMatrix)
+            minimumNodeSeperatorsMatrix = ( (reachabilityMatrix) & componentSurfaceMatrix)
             
             # These are the -1's: y_i + y_j
-            termianlPairValues <- termainPairsWithT1incomponent[, sparseMatrix( i =  rep(constraintIndex, times = 2) ,
+            termianlPairValues = termainPairsWithT1incomponent[, sparseMatrix( i =  rep(constraintIndex, times = 2) ,
                                                                                 j =  c(T1nodeID,T2nodeID) ,
                                                                                 x =  -1 ,
                                                                                 dims = dim(minimumNodeSeperatorsMatrix),
                                                                                 dimnames = dimnames(minimumNodeSeperatorsMatrix))]
             
-            minimumNodeSeperatorsMatrix <- minimumNodeSeperatorsMatrix + termianlPairValues
+            minimumNodeSeperatorsMatrix = minimumNodeSeperatorsMatrix + termianlPairValues
             
             conConstraints %<>% c(minimumNodeSeperatorsMatrix)
           }
           
-          allConnectivityConstraints <- Reduce(rbind, conConstraints)
+          allConnectivityConstraints = Reduce(rbind, conConstraints)
           
                                                if(private$verbosity) message("Adding ",nrow(allConnectivityConstraints)," connectivity constraints based on node-separators ...")
           
           # Append connectivity constraints matrix to existing variables, building up a pool of constraints that dictate connectivity
-          private$connectivityConstraints <- list( variables = rbind(private$connectivityConstraints$variables, allConnectivityConstraints) )
+          private$connectivityConstraints = list( variables = rbind(private$connectivityConstraints$variables, allConnectivityConstraints) )
           
-          private$connectivityConstraints$directions <- rep(">=", nrow(private$connectivityConstraints$variables) )
-          private$connectivityConstraints$rhs <- rep(-1, nrow(private$connectivityConstraints$variables) )
+          private$connectivityConstraints$directions = rep(">=", nrow(private$connectivityConstraints$variables) )
+          private$connectivityConstraints$rhs = rep(-1, nrow(private$connectivityConstraints$variables) )
         }
         
         return(invisible(self))
@@ -400,11 +400,11 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
         if(length(unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)) ) == 1){
           
           if(private$verbosity) message("Only a single terminal (in the possibly presolved graph) - a trivial solution")
-          private$currentSolutionIndices <- unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))
+          private$currentSolutionIndices = unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))
         }else{
           
           
-          functionArgs <- list(
+          functionArgs = list(
             
             cVec = private$nodeDT[order(.nodeID), nodeScore],
             
@@ -421,19 +421,19 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
             
             nSols = 1)
           
-          MILPsolve <- switch(private$solver ,
+          MILPsolve = switch(private$solver ,
                               CPLEXAPI = do.call("solver_CPLEXapi", functionArgs),
                               LPSOLVE = do.call("solver_LPSOLVE", functionArgs),
                               RCBC = do.call("solver_CBC", functionArgs),
                               RGLPK = do.call("solver_GLPK", functionArgs),
                               LPSYMPHONY = do.call("solver_SYMPHONY", functionArgs))
           
-          solVec <- round(MILPsolve$solution)
+          solVec = round(MILPsolve$solution)
           
-          private$currentSolutionIndices <- which(solVec > 0)
+          private$currentSolutionIndices = which(solVec > 0)
         }
         
-        disconnectedComponentList <- decompose( self$getCurrentSolutionGraph())# The nodeDT table and inComponent variable keeps track of which node is where
+        disconnectedComponentList = decompose( self$getCurrentSolutionGraph())# The nodeDT table and inComponent variable keeps track of which node is where
         
         private$nodeDT[,inComponent := NA_integer_]
         

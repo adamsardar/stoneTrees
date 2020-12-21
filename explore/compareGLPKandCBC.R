@@ -3,21 +3,21 @@ library(igraph)
 library(microbenchmark)
 
 
-fixedTerminalLymphomaGraph <- lymphomaGraph
-V(fixedTerminalLymphomaGraph)$isTerminal <- FALSE
-V(fixedTerminalLymphomaGraph)[nodeScore > 0]$isTerminal <- TRUE
-V(fixedTerminalLymphomaGraph)$nodeScore <- -1
+fixedTerminalLymphomaGraph = lymphomaGraph
+V(fixedTerminalLymphomaGraph)$isTerminal = FALSE
+V(fixedTerminalLymphomaGraph)[nodeScore > 0]$isTerminal = TRUE
+V(fixedTerminalLymphomaGraph)$nodeScore = -1
 
 # I notice that the Steiner forest is actually much harder than MWCS to solve - probably the symmetry of having no node-weights
 
 # 10 bootstraps, 5x suboptimal
-glpktim <- system.time( SteinForGLPK <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RGLPK")$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
+glpktim = system.time( SteinForGLPK = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RGLPK")$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
 ## Takes around a minute using RGLPK as the solver
-cbctime <- system.time( SteinForCBC <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RCBC")$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
+cbctime = system.time( SteinForCBC = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RCBC")$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
 
 
 
-testSteinFor <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rcbc")
+testSteinFor = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rcbc")
 
 set.seed(2345)
 
@@ -37,12 +37,12 @@ for(i in 1:100){
   testSteinFor$.__enclos_env__$private$resampleFixedTerminals()
 
   testSteinFor$.__enclos_env__$private$flushConnectivityConstraints()
-  testSteinFor$.__enclos_env__$private$solver <- "RGLPK"
-  rglpkTime <- system.time(RGLPKsol <- testSteinFor$findSingleSteinerSolution())
+  testSteinFor$.__enclos_env__$private$solver = "RGLPK"
+  rglpkTime = system.time(RGLPKsol = testSteinFor$findSingleSteinerSolution())
 
   testSteinFor$.__enclos_env__$private$flushConnectivityConstraints()  
-  testSteinFor$.__enclos_env__$private$solver <- "RCBC"
-  rcbcTime <- system.time(RCBCsol <- testSteinFor$findSingleSteinerSolution()) 
+  testSteinFor$.__enclos_env__$private$solver = "RCBC"
+  rcbcTime = system.time(RCBCsol = testSteinFor$findSingleSteinerSolution())
   
   fwrite(data.table(RCBCtime = rcbcTime["elapsed"], 
                RCBCvcount = vcount(RCBCsol),
@@ -53,7 +53,7 @@ for(i in 1:100){
 }
 
 
-solDetailsDT <- fread("/tmp/solDetails.tsv")
+solDetailsDT = fread("/tmp/solDetails.tsv")
 
 solDetailsDT  %>%
   .[,trial := .I] %>%
@@ -83,7 +83,7 @@ system.time( nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, ver
 system.time( nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rglpk")$findSingleSteinerSolution() )
 
 
-bench <- microbenchmark(
+bench = microbenchmark(
   {set.seed(1234); nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rcbc")$sampleMultipleBootstrapSteinerSolutions()$getBootstrapSolutionPoolGraphs()},
   {set.seed(1234);  nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rglpk")$sampleMultipleBootstrapSteinerSolutions()$getBootstrapSolutionPoolGraphs()}
 )
@@ -106,9 +106,9 @@ for(i in 1:100){
   
   #Ensure that our solvers are both solving the same type of problem
   # We can't just run two bootstrap Steiner forest routines 
-  rglpkTime <- system.time(RGLPKsol <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rglpk")$sampleMultipleBootstrapSteinerSolutions())
+  rglpkTime = system.time(RGLPKsol = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rglpk")$sampleMultipleBootstrapSteinerSolutions())
   
-  rcbcTime <- system.time(RCBCsol <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rcbc")$sampleMultipleBootstrapSteinerSolutions())
+  rcbcTime = system.time(RCBCsol = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, verbose = FALSE, solverChoice = "rcbc")$sampleMultipleBootstrapSteinerSolutions())
             
   
                 
@@ -122,11 +122,11 @@ for(i in 1:100){
 }
 
 
-steinForBench <- fread("~/steinForestBench.tsv")
+steinForBench = fread("~/steinForestBench.tsv")
 
 steinForBench[, trial := .I]
 
-pTime <- steinForBench[,.(RCBCtime, RGLPKtime, trial)] %>% 
+pTime = steinForBench[,.(RCBCtime, RGLPKtime, trial)] %>%
   melt(id.vars = "trial") %>%
   ggplot(aes(x = variable, y = as.numeric(value)/60)) +
   geom_boxplot(aes(colour = variable)) +
@@ -164,15 +164,15 @@ for(i in 1:15){
   # Note, The two process are not solving the exact same problem. Stochastic algorithms are a pain
   
 message("Starting GLPK")
-  glpktim <- system.time( SteinForGLPK <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RGLPK", verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
+  glpktim = system.time( SteinForGLPK = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RGLPK", verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
 message("Completed GLPK")
 
 message("Starting CBC")
-  cbctime <- system.time( SteinForCBC <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RCBC", verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
+  cbctime = system.time( SteinForCBC = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph, solverChoice = "RCBC", verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 100, maxItr = 5) )
 message("Completed CBC")  
 
-  cbcSizes <- sapply(SteinForCBC$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), vcount)
-  glpkSizes <- sapply(SteinForGLPK$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), vcount)
+  cbcSizes = sapply(SteinForCBC$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), vcount)
+  glpkSizes = sapply(SteinForGLPK$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), vcount)
 
   # The final item in the set is the standard Steiner Tree solution, omit
   glpkSizes[-length(glpkSizes)] %>% length  
@@ -192,7 +192,7 @@ message("Completed CBC")
 }
 
 
-steinForestSuboptimalBenchDT <- fread("~/steinForestSuboptimalBench.tsv")
+steinForestSuboptimalBenchDT = fread("~/steinForestSuboptimalBench.tsv")
 steinForestSuboptimalBenchDT[, trial := .I]
 
 # Much faster
@@ -220,11 +220,11 @@ steinForestSuboptimalBenchDT[,.(CBCvcount, GLPKvcount, trial)]  %>%
 
 
 
-GLPKmodules <- steinForestSuboptimalBenchDT[,.(solver = "GLPK", size = unlist(strsplit(GLPKmodulesVcount, "\\|"))), by = trial]
-CBCmodules <- steinForestSuboptimalBenchDT[,.(solver = "CBC", size = unlist(strsplit(CBCmodulesVcount, "\\|"))), by = trial]
+GLPKmodules = steinForestSuboptimalBenchDT[,.(solver = "GLPK", size = unlist(strsplit(GLPKmodulesVcount, "\\|"))), by = trial]
+CBCmodules = steinForestSuboptimalBenchDT[,.(solver = "CBC", size = unlist(strsplit(CBCmodulesVcount, "\\|"))), by = trial]
 
 
-solutionModules <- rbind(CBCmodules, GLPKmodules)
+solutionModules = rbind(CBCmodules, GLPKmodules)
 solutionModules[,size := as.integer(size)]
 
 solutionModules %>%

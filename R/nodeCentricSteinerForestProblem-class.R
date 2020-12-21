@@ -26,18 +26,18 @@
 #'
 #' #Prepare a simple seed-based Steiner sampling in a reasonable sized network
 #'
-#' fixedTerminalLymphomaGraph <- lymphomaGraph
-#' V(fixedTerminalLymphomaGraph)$isTerminal <- FALSE
-#' V(fixedTerminalLymphomaGraph)[nodeScore > 0]$isTerminal <- TRUE
-#' fixedTerminalLymphomaGraph <- delete_vertex_attr(fixedTerminalLymphomaGraph, "nodeScore")
+#' fixedTerminalLymphomaGraph = lymphomaGraph
+#' V(fixedTerminalLymphomaGraph)$isTerminal = FALSE
+#' V(fixedTerminalLymphomaGraph)[nodeScore > 0]$isTerminal = TRUE
+#' fixedTerminalLymphomaGraph = delete_vertex_attr(fixedTerminalLymphomaGraph, "nodeScore")
 #'
 #'
 #' # Example of solving *just* the single-solution Minimum Steiner Tree Problem
-#' MStTPsingle <- nodeCentricSteinerTreeProblem$new(fixedTerminalLymphomaGraph)
+#' MStTPsingle = nodeCentricSteinerTreeProblem$new(fixedTerminalLymphomaGraph)
 #' MStTPsingle$findSingleSteinerSolution()
 #'
 #' #Solve multiple bootstrap Steiner Trees (Steiner Forest)
-#' SteinFor <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph)
+#' SteinFor = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph)
 #'
 #' #Run two bootstrap routines (resample fixed terminals and solve) and 
 #' #ALSO run the sub-optimal solution searcher thrice
@@ -52,7 +52,7 @@
 #' @seealso subOptimalSteinerProblem
 #' @importFrom sets set set_union
 #' @export
-nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
+nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
                                            inherit = subOptimalSteinerProblem,
   public = list(
     
@@ -83,9 +83,9 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       # solve normal steiner tree - this produces a bunch of connectivity constraints and
       # will also ensure that the solution is connected
       self$findSingleSteinerSolution()
-      private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
+      private$metasolutionIndicesPool = set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
       
-      bootItr <- 1
+      bootItr = 1
       
       while(bootItr <= nBootstraps){
         
@@ -96,13 +96,13 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
         #Find up to ten degenerate solutions as you can
         super$identifyMultipleSteinerSolutions(maxItr)
 
-        private$nConnectivityConstraintsCallsPool <- c(self$getNconnectivityConstraintsCallsPool(),
+        private$nConnectivityConstraintsCallsPool = c(self$getNconnectivityConstraintsCallsPool(),
                                                          super$getNconnectivityConstraintsCalls())
 
-        private$metasolutionIndicesPool <- set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
+        private$metasolutionIndicesPool = set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
         
         #Flush the parent solution pool as we're about to research for solutions
-        private$solutionIndicesPool <- sets::set()
+        private$solutionIndicesPool = sets::set()
         
         bootItr %<>% add(1)
       }
@@ -150,8 +150,8 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
     #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time. This is because we resample the seeds repeatedly.
     findSingleSteinerSolution = function(maxItr = 20){
       
-      private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .nodeID]
-      private$currentSolutionIndices <- integer()
+      private$fixedTerminalIndices = super$getNodeDT()[isTerminal == TRUE, .nodeID]
+      private$currentSolutionIndices = integer()
       
       return(super$findSingleSteinerSolution(maxItr = maxItr))
     },
@@ -163,15 +163,15 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
   ),
   private = list(
 
-    addSeedToPool = function(seed){ private$seedPool <- c(private$seedPool, seed); invisible(self)},
+    addSeedToPool = function(seed){ private$seedPool = c(private$seedPool, seed); invisible(self)},
     
     sampleNewSeed = function(){return(sample.int(n = .Machine$integer.max, size=1))},
     
     generateNextRNGseed = function(){
       
-      latestSeed <- self$getLatestSeed() 
+      latestSeed = self$getLatestSeed()
       set.seed(latestSeed)
-      newSeed <- private$sampleNewSeed()
+      newSeed = private$sampleNewSeed()
       
       private$addSeedToPool(newSeed)
       
@@ -184,14 +184,14 @@ nodeCentricSteinerForestProblem <- R6Class("nodeCentricSteinerForestProblem",
       if(private$verbosity){message("Bootstrap sampling seeds/fixed terminals ...")}
       
       #Flush the set of existing terminals
-      private$fixedTerminalIndices <- integer()
+      private$fixedTerminalIndices = integer()
       
       private$generateNextRNGseed()
       
       while(length(private$fixedTerminalIndices) == 0){
         
         #Looks complicated, but really it just resamples the isTerminal/fixedTerminal nodeIDs
-        private$fixedTerminalIndices <- super$getNodeDT()[isTerminal == TRUE, .SD[runif(n = .N) <= pSuccess, .nodeID] ]
+        private$fixedTerminalIndices = super$getNodeDT()[isTerminal == TRUE, .SD[runif(n = .N) <= pSuccess, .nodeID] ]
         
         if(any(duplicated(private$fixedTerminalIndices))){warning("Duplicated fixed terminals - this shouldn't be possible. Please contact package maintainer!: ",  private$fixedTerminalIndices)}
         

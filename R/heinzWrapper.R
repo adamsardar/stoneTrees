@@ -11,20 +11,20 @@ globalVariables(c("score1","nodeA","nodeB","node","V1","V2"))
 #' @references M. T. Dittrich, G. W. Klau, A. Rosenwald, T. Dandekar and T. Mueller (2008) Identifying functional modules in protein-protein interaction networks: an integrated exact approach. (ISMB2008) Bioinformatics 24: 13. i223-i231 Jul.
 #' @references D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics 26:08. 1129-1130 Apr.
 #' @importFrom utils write.table
-findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit = 600){
+findHeinzMWCS = function(searchGraph_igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit = 600){
 
-  interactomeName <- deparse(substitute(searchGraph_igraph))
+  interactomeName = deparse(substitute(searchGraph_igraph))
 
   if(!Sys.which("heinz") %like% "heinz"){stop("heinz binary must be on search path!!")}
 
   #Heinz doesn't like undirected graphs - clearly there's some CPLEX constraint that can end up in a loop.
-  searchGraph_UndirectedIgraph <- searchGraph_igraph %>% simplify %>% as.undirected
+  searchGraph_UndirectedIgraph = searchGraph_igraph %>% simplify %>% as.undirected
 
-  edgelist <- searchGraph_UndirectedIgraph %>% get.edgelist %>% data.table
+  edgelist = searchGraph_UndirectedIgraph %>% get.edgelist %>% data.table
   edgelist[,score1 := 0]
   setnames(edgelist, c('V1','V2'),c('nodeA','nodeB'))
 
-  nodelist <- data.table(node = V(searchGraph_UndirectedIgraph)$name, score1 = V(searchGraph_UndirectedIgraph)$nodeScore)
+  nodelist = data.table(node = V(searchGraph_UndirectedIgraph)$name, score1 = V(searchGraph_UndirectedIgraph)$nodeScore)
   nodelist %<>% .[,.(score1 = max(score1)),by='node']
 
   edgelist %<>% .[nodeA %in% nodelist$node | nodeB %in% nodelist$node]
@@ -33,8 +33,8 @@ findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FA
   setnames(edgelist, c('nodeA'), c('#nodeA'))
   setnames(nodelist, c('node'), c('#node'))
 
-  MWCS.filename <- tempfile(pattern = "MWCSinput")
-  MWCS.result <- tempfile(pattern = "MWCSresult")
+  MWCS.filename = tempfile(pattern = "MWCSinput")
+  MWCS.result = tempfile(pattern = "MWCSresult")
 
   nodelist %>% write.table(file = paste(c(MWCS.filename,'nodes'),collapse = '.'), quote = FALSE, row.names = FALSE)
   edgelist %>% unique.data.frame %>% write.table(file = paste(c(MWCS.filename,'edges'),collapse = '.'), quote = FALSE, row.names = FALSE)
@@ -51,10 +51,10 @@ findHeinzMWCS <- function(searchGraph_igraph, n.threads = 2, induceSubgraph = FA
     return(graph.empty())
   }
 
-  cplex.result <- fread(MWCS.result, header = FALSE)[! V1 %like% '#']
-  MWCS.nodes <- cplex.result[V2 != 'NaN', V1]
+  cplex.result = fread(MWCS.result, header = FALSE)[! V1 %like% '#']
+  MWCS.nodes = cplex.result[V2 != 'NaN', V1]
 
-  MWCS.module <- induced.subgraph(searchGraph_igraph,vids = MWCS.nodes)
+  MWCS.module = induced.subgraph(searchGraph_igraph,vids = MWCS.nodes)
 
   file.remove(paste(c(MWCS.filename,'nodes'), collapse = '.'))
   file.remove(paste(c(MWCS.filename,'edges'), collapse = '.'))
@@ -83,17 +83,17 @@ globalVariables("isTerminal")
 #' @references M. T. Dittrich, G. W. Klau, A. Rosenwald, T. Dandekar and T. Mueller (2008) Identifying functional modules in protein-protein interaction networks: an integrated exact approach. (ISMB2008) Bioinformatics 24: 13. i223-i231 Jul.
 #' @references D. Beisser, G. W. Klau, T. Dandekar, T. Mueller and M. Dittrich (2010) BioNet: an R-package for the Functional Analysis of Biological Networks. Bioinformatics 26:08. 1129-1130 Apr.
 #' @references \url{http://dimacs11.cs.princeton.edu/contest/challenge-results.pdf}
-findHeinzMStTP <- function(searchGraph.igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit=600){
+findHeinzMStTP = function(searchGraph.igraph, n.threads = 2, induceSubgraph = FALSE, verbose = TRUE, timeLimit=600){
 
-  interactomeName <- deparse(substitute(searchGraph.igraph))
+  interactomeName = deparse(substitute(searchGraph.igraph))
 
-  terminalNodes <- V(searchGraph.igraph)[isTerminal == TRUE]$name
+  terminalNodes = V(searchGraph.igraph)[isTerminal == TRUE]$name
 
-  V(searchGraph.igraph)$nodeScore <- -1
-  V(searchGraph.igraph)[name %in% terminalNodes]$nodeScore <- 1000
+  V(searchGraph.igraph)$nodeScore = -1
+  V(searchGraph.igraph)[name %in% terminalNodes]$nodeScore = 1000
 
   #It turns out that converting the problem to the MWCS and solving that is actually better than the dedicated MStTP solver in heinz
-  sol_MSTtP <- findHeinzMWCS(searchGraph.igraph,n.threads = n.threads,
+  sol_MSTtP = findHeinzMWCS(searchGraph.igraph,n.threads = n.threads,
                 induceSubgraph = induceSubgraph,
                 verbose = verbose,
                 timeLimit = timeLimit)

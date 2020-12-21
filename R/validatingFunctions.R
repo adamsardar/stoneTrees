@@ -3,7 +3,7 @@ globalVariables(c("."))
 
 #' @importFrom  ensurer ensure
 #' @import igraph
-validateIsNetwork <- function(network2validate, singleWeakComponent = TRUE, isDirected = NULL){
+validateIsNetwork = function(network2validate, singleWeakComponent = TRUE, isDirected = NULL){
 
   network2validate %<>% ensure(is.igraph,
                                err_desc = "Input network must be an igraph object")
@@ -40,7 +40,7 @@ validateIsNetwork <- function(network2validate, singleWeakComponent = TRUE, isDi
 }
 
 #' @importFrom  ensurer ensure
-validateSquareMatrix <- function(Matrix2validate){
+validateSquareMatrix = function(Matrix2validate){
 
   Matrix2validate %<>% ensure(toupper(class(.)) %like% "MATRIX",
                               nrow(.) > 0,
@@ -52,7 +52,7 @@ validateSquareMatrix <- function(Matrix2validate){
 }
 
 #' @importFrom  ensurer ensure
-validateSingleInteger <- function(int2evaluate){
+validateSingleInteger = function(int2evaluate){
 
   int2evaluate %<>% ensure(is.numeric,
                       is.whole.number,
@@ -63,7 +63,7 @@ validateSingleInteger <- function(int2evaluate){
 }
 
 #' @importFrom  ensurer ensure
-validateSinglePositiveSemiDefiniteNumeric <- function(num2evaluate){
+validateSinglePositiveSemiDefiniteNumeric = function(num2evaluate){
 
   num2evaluate %<>% ensure(is.numeric,
                            length(.) == 1,
@@ -75,9 +75,9 @@ validateSinglePositiveSemiDefiniteNumeric <- function(num2evaluate){
 
 #' @importFrom ensurer ensure
 #' @importFrom stringr str_c
-validateFlag <- function(flag2validate){
+validateFlag = function(flag2validate){
 
-  flagName <- deparse(substitute(flag2validate))
+  flagName = deparse(substitute(flag2validate))
 
   flag2validate %<>% ensure(is.logical(.),
                           length(.) == 1,
@@ -87,7 +87,7 @@ validateFlag <- function(flag2validate){
 }
 
 #' @importFrom  ensurer ensure
-validateSolverChoice <- function(candidateSolverChoice){
+validateSolverChoice = function(candidateSolverChoice){
 
   candidateSolverChoice %<>%  ensure(is.character,
                                      toupper(.) %in% toupper(stoneTrees_solvers),
@@ -96,4 +96,4 @@ validateSolverChoice <- function(candidateSolverChoice){
   invisible(toupper(candidateSolverChoice))
 }
 
-is.whole.number <- function(x){ x == as.integer(x)}
+is.whole.number = function(x){ x == as.integer(x)}
