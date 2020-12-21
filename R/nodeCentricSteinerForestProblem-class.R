@@ -59,8 +59,12 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
     #Overide
     initialize = function(network, solverChoice = chooseSolver(),
                           verbose = TRUE, solverTimeLimit = 300,
-                          solutionTolerance = 0, solverTrace = as.integer(verbose)){
-      
+                          solutionTolerance = 0,
+                          solverTrace = as.integer(verbose),
+                          RNGseed = sample.int(size = 1, .Machine$integer.max)){
+
+      private$seedPool = RNGseed
+
       super$initialize(network,
                        solverChoice = solverChoice,
                        verbose = verbose,
@@ -207,8 +211,8 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
       return(invisible(self))
     },
     
-    #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
-    metasolutionIndicesPool = sets::set(),
+
+    metasolutionIndicesPool = sets::set(),  #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
     seedPool = integer(),
     nConnectivityConstraintsCallsPool = numeric()
   )

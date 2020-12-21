@@ -125,7 +125,8 @@ Other SteinerProblemSolver:
   verbose = TRUE,
   solverTimeLimit = 300,
   solutionTolerance = 0,
-  solverTrace = as.integer(verbose)
+  solverTrace = as.integer(verbose),
+  RNGseed = sample.int(size = 1, .Machine$integer.max)
 )}\if{html}{\out{</div>}}
 }
 
