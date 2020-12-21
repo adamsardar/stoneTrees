@@ -23,6 +23,7 @@ Imports:
     magrittr (>= 1.0),
     methods,
     lpSolve (>= 5.6),
+    purrr,
     R6 (>= 2.4),
     sets (>= 1.0),
     stringr (>= 1.0)

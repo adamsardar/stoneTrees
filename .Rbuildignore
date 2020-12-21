@@ -10,3 +10,5 @@
 ^appveyor\.yml$
 explore/
 ^\.idea$
+^explore$
+^\.github$
