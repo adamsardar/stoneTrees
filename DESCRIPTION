@@ -1,6 +1,6 @@
 Package: stoneTrees
 Type: Package
-Title: Solve node centric Steiner tree problems
+Title: Solve Node Centric Steiner Tree Problems
 Version: 1.2
 Date: 21-Dec-2020
 Authors@R: c(
