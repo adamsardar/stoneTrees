@@ -159,6 +159,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       
       while( (! self$isSolutionConnected() ) & (itrCount <= maxItr) ){
         
+        private$nConnectivityConstraintsCalls <- itrCount -1
+
         private$solve()
         
         #Stop loop if solver couldn't find a solution at all (Most probably the solver will run for nothing after that)
@@ -183,7 +185,10 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
     
     getNodeDT = function(){ private$nodeDT },
     getEdgeDT = function(){ private$edgeDT },
-    
+
+    getnConnectivityConstraintsCalls = function(){ private$nConnectivityConstraintsCalls },
+
+
     #Access to the constraint matricies (will make for easier testing)
     getFixedTerminalConstraints = function(){ private$fixedTerminalConstraints },
     getNodeDegreeConstraints = function(){ private$nodeDegreeConstraints },
@@ -467,6 +472,8 @@ nodeCentricSteinerTreeProblem <- R6Class("nodeCentricSteinerTreeProblem",
       # Work with integers rather than names
       fixedTerminalIndices = integer(),
       potentialTerminalIndices = integer(),
+
+      nConnectivityConstraintsCalls = integer(),
       
       fixedTerminalConstraints = list(),
       nodeDegreeConstraints = list(),
