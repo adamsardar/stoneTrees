@@ -5,8 +5,6 @@
   [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
   <!-- badges: end -->
 
-# ARCHIVED - development now occurs at the [open source repo](https://github.com/adamsardar/stoneTrees)
-
 # stoneTrees - an R package for solving Steiner tree problems
 
 A package dedicated to finding solutions to [Steiner tree problems](https://en.wikipedia.org/wiki/Steiner_tree_problem) in graphs using Integer Linear Programming (ILP). Motivation stems from a need for solutions to the Minimum Steiner Tree (MStT) and Maximum-Weight Connected Sub-graph (MWCS) problems in computational biology. For example:
