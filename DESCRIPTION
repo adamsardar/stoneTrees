@@ -15,6 +15,7 @@ License: MPL-2.0 | file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5)
+Remotes: dirkschumacher/rcbc
 Imports:
     data.table (>= 1.12),
     ensurer (>= 1.1),
@@ -33,6 +34,5 @@ Suggests:
     lpsymphony (>= 1.1),
     rcbc (>= 0.1),
     Rglpk (>= 0.6),
-    slam (>= 0.1),
-    covr
+    slam (>= 0.1)
 RoxygenNote: 6.1.1
