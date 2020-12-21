@@ -36,7 +36,7 @@ library(igraph)
  unique(V(karateGraph)$isTerminal)
  V(karateGraph)[isTerminal]
 
- karateMStTP <- nodeCentricSteinerTreeProblem$new(karateGraph)
+ karateMStTP = nodeCentricSteinerTreeProblem$new(karateGraph)
  karateMStTP$findSingleSteinerSolution()
 
  # Maximum-Weight Connected Subgraph (MWCS)
@@ -44,7 +44,7 @@ library(igraph)
  ## Vertex attribute details node costs/prizes
  head(V(lymphomaGraph)$nodeScore)
 
- lymphomaMWCS <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
+ lymphomaMWCS = nodeCentricSteinerTreeProblem$new(lymphomaGraph)
  lymphomaMWCS$findSingleSteinerSolution()
 
  # A blend of the two approaches
@@ -52,11 +52,11 @@ library(igraph)
  ## Say there are some nodes (e.g. drug binding targets) that *must* be included, 
  
  # but otherwise node inclusion should follow node scores
- V(lymphomaGraph)$isTerminal <- FALSE
+ V(lymphomaGraph)$isTerminal = FALSE
  ## Choose some random nodes to be seeds
- V(lymphomaGraph)[name \%in\% c("4","8","15","16","23","42")]$isTerminal <- TRUE
+ V(lymphomaGraph)[name \%in\% c("4","8","15","16","23","42")]$isTerminal = TRUE
 
- hybridSteinProb <- nodeCentricSteinerTreeProblem$new(lymphomaGraph)
+ hybridSteinProb = nodeCentricSteinerTreeProblem$new(lymphomaGraph)
  hybridSteinProb$findSingleSteinerSolution()
 }
 \references{
@@ -83,6 +83,7 @@ Other SteinerProblemSolver:
 \item \href{#method-findSingleSteinerSolution}{\code{nodeCentricSteinerTreeProblem$findSingleSteinerSolution()}}
 \item \href{#method-getNodeDT}{\code{nodeCentricSteinerTreeProblem$getNodeDT()}}
 \item \href{#method-getEdgeDT}{\code{nodeCentricSteinerTreeProblem$getEdgeDT()}}
+\item \href{#method-getnConnectivityConstraintsCalls}{\code{nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()}}
 \item \href{#method-getFixedTerminalConstraints}{\code{nodeCentricSteinerTreeProblem$getFixedTerminalConstraints()}}
 \item \href{#method-getNodeDegreeConstraints}{\code{nodeCentricSteinerTreeProblem$getNodeDegreeConstraints()}}
 \item \href{#method-getTwoCycleConstraints}{\code{nodeCentricSteinerTreeProblem$getTwoCycleConstraints()}}
@@ -166,6 +167,15 @@ Other SteinerProblemSolver:
 \subsection{Method \code{getEdgeDT()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getEdgeDT()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-getnConnectivityConstraintsCalls"></a>}}
+\if{latex}{\out{\hypertarget{method-getnConnectivityConstraintsCalls}{}}}
+\subsection{Method \code{getnConnectivityConstraintsCalls()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()}\if{html}{\out{</div>}}
 }
 
 }
