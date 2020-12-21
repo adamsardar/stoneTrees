@@ -209,7 +209,7 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
     
     #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
     metasolutionIndicesPool = sets::set(),
-
+    seedPool = integer(),
     nConnectivityConstraintsCallsPool = numeric()
   )
 )
