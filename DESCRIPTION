@@ -14,7 +14,7 @@ Description: A package aimed at solving Steiner ('stone') tree problems with uni
 License: MPL-2.0 | file LICENSE
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5)
+Depends: R (>= 3.6)
 Remotes: dirkschumacher/rcbc
 Imports:
     data.table (>= 1.12),
@@ -35,4 +35,4 @@ Suggests:
     rcbc (>= 0.1),
     Rglpk (>= 0.6),
     slam (>= 0.1)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
