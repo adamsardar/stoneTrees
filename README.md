@@ -1,9 +1,9 @@
-  <!-- badges: start -->
-  [![R build status](https://github.com/adamsardar/stoneTrees/workflows/R-CMD-check/badge.svg)](https://github.com/adamsardar/stoneTrees/actions)
-  [![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/branch/master/graph/badge.svg)](https://codecov.io/gh/adamsardar/stoneTrees?branch=master)
-  [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
-  [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-  <!-- badges: end -->
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/adamsardar/stoneTrees/workflows/R-CMD-check/badge.svg)](https://github.com/adamsardar/stoneTrees/actions)
+[![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/branch/master/graph/badge.svg)](https://app.codecov.io/gh/adamsardar/stoneTrees?branch=master)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+[![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
+<!-- badges: end -->
 
 # stoneTrees - an R package for solving Steiner tree problems
 
