@@ -39,8 +39,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, cplexAPI=?ignore, lpsymphony=?ignore, rcbc=?ignore, Rglpk=?ignore
+          extra-packages: any::rcmdcheck, any::testthat
           needs: check
+          dependencies: NA
           cache: false
 
       - uses: r-lib/actions/check-r-package@v2
