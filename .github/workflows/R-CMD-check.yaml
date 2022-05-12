@@ -41,7 +41,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck, any::testthat
           needs: check
-          dependencies: 'NA'
+          dependencies: '"hard"'
           cache: false
 
       - uses: r-lib/actions/check-r-package@v2
