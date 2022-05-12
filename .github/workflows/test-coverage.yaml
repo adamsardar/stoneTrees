@@ -25,7 +25,7 @@ jobs:
         with:
           extra-packages: any::covr
           needs: coverage
-          dependencies: 'NA'
+          dependencies: '"hard"'
           cache: false
 
       - name: Test coverage
