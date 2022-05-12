@@ -23,8 +23,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr, cplexAPI=?ignore, lpsymphony=?ignore, rcbc=?ignore, Rglpk=?ignore
+          extra-packages: any::covr
           needs: coverage
+          dependencies: NA
           cache: false
 
       - name: Test coverage
