@@ -1,6 +1,4 @@
-```
-stoneTrees: an R package for solving Steiner tree problems
-```
+> _stoneTrees:_ an R package for solving Steiner tree problems
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/adamsardar/stoneTrees/workflows/R-CMD-check/badge.svg)](https://github.com/adamsardar/stoneTrees/actions)
