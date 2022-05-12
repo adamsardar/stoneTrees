@@ -25,6 +25,7 @@ jobs:
         with:
           extra-packages: any::covr, cplexAPI=?ignore, lpsymphony=?ignore, rcbc=?ignore, Rglpk=?ignore
           needs: coverage
+          cache: false
 
       - name: Test coverage
         run: covr::codecov(quiet = FALSE)
