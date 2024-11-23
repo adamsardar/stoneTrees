@@ -114,7 +114,7 @@ subOptimalSteinerProblem = R6Class("subOptimalSteinerProblem",
 
     identifyMultipleSteinerSolutions = function(maxItr = 10){
       
-      validateSingleInteger(maxItr)
+      check_number_whole(maxItr, min = 1)
       
       self$findSingleSteinerSolution()
 

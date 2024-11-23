@@ -105,7 +105,7 @@ solver_LPSOLVE = function(cVec, Amat, senseVec, bVec=0, vtypeVec="B", cplexParam
 
   if(!"lpSolve" %in% .packages(all.available = TRUE) ) stop("lpSolve must be installed in order to use the GLPK solver")
 
-  validateSingleInteger(nSols)
+  check_number_whole(nSols, min = 1)
 
   MILPsolve = lpSolve::lp(objective.in = cVec,
                            const.mat = as.matrix(Amat),

@@ -63,22 +63,26 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
                          verbose = TRUE, presolveGraph = TRUE,
                          solverTimeLimit = 300, solverTrace = as.integer(verbose)){
       
-      private$solver = validateSolverChoice(solverChoice)
+      check_string(solverChoice, allow_empty = FALSE)
+      private$solver = solverChoice
 
-      private$solverTimeLimit = validateSingleInteger(solverTimeLimit)
+      check_number_whole(solverTimeLimit, min = 1)
+      private$solverTimeLimit = solverTimeLimit
       
-      private$verbosity = validateFlag(verbose)
+      check_bool(verbose)
+      private$verbosity = verbose
       
-      
-      private$solverTrace = validateSingleInteger(solverTrace)
+      check_number_whole(solverTrace)
+      private$solverTrace = solverTrace
       
       interactomeName = deparse(substitute(network)) #Capture interactome name for later
       
       check_network(network)
       if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
       
+      check_bool(presolveGraph)
+      private$graphPresolved = presolveGraph
       
-      private$graphPresolved = validateFlag(presolveGraph)
       inputGraph = network %>% as.undirected %>% simplify
       if(presolveGraph){inputGraph = condenseSearchGraph(inputGraph)} #graph condensation is a presolve step
       
