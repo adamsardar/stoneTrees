@@ -1,8 +1,10 @@
 > _stoneTrees:_ an R package for solving Steiner tree problems
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/adamsardar/stoneTrees/workflows/R-CMD-check/badge.svg)](https://github.com/adamsardar/stoneTrees/actions)
-[![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/branch/master/graph/badge.svg)](https://app.codecov.io/gh/adamsardar/stoneTrees?branch=master)
+[![R-CMD-check](https://github.com/adamsardar/stoneTrees/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/adamsardar/stoneTrees/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/adamsardar/stoneTrees/graph/badge.svg)](https://app.codecov.io/gh/adamsardar/stoneTrees)
+[![test-coverage](https://github.com/adamsardar/stoneTrees/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/adamsardar/stoneTrees/actions/workflows/test-coverage.yaml)
+[![pr-commands](https://github.com/adamsardar/stoneTrees/actions/workflows/pr-commands.yaml/badge.svg)](https://github.com/adamsardar/stoneTrees/actions/workflows/pr-commands.yaml)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 <!-- badges: end -->
