@@ -64,13 +64,17 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
                          solverTimeLimit = 300, solverTrace = as.integer(verbose)){
       
       private$solver = validateSolverChoice(solverChoice)
+
       private$solverTimeLimit = validateSingleInteger(solverTimeLimit)
+      
       private$verbosity = validateFlag(verbose)
+      
+      
       private$solverTrace = validateSingleInteger(solverTrace)
       
       interactomeName = deparse(substitute(network)) #Capture interactome name for later
       
-      validateIsNetwork(network)
+      check_network(network)
       if(is.directed(network)){warning("Input network is directed and only undirected networks are supported - casting to a simple undirected network.")}
       
       

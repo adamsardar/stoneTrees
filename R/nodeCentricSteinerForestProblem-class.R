@@ -80,10 +80,10 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
     
     sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5){
       
-      validateSingleInteger(nBootstraps)
-      validateSingleInteger(maxItr)
-      validateSinglePositiveSemiDefiniteNumeric(resamplingProbability) #TODO This should also validate that it is within [0,1]
-      
+      check_number_whole(nBootstraps, min = 1)
+      check_number_whole(maxItr, min = 1)
+      check_number_decimal(resamplingProbability, min = 0, max = 1)
+
       # solve normal steiner tree - this produces a bunch of connectivity constraints and
       # will also ensure that the solution is connected
       self$findSingleSteinerSolution()

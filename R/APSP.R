@@ -12,7 +12,7 @@ calculateAPSPmodule = function(seeds, searchGraph, omitNA = TRUE){
 
   searchGraphName = deparse(substitute(searchGraph)) #Capture search graph name
 
-  validateIsNetwork(searchGraph)
+  check_network(searchGraph)
 
   ifelse(omitNA,
          seeds %<>% na.omit(seeds),
