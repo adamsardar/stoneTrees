@@ -2,6 +2,7 @@
 % Please edit documentation in R/stoneTrees-package.R
 \docType{package}
 \name{stoneTrees}
+\alias{stoneTrees-package}
 \alias{stoneTrees}
 \title{Solve Minimum Steiner Tree (MStT) and Maximum-Weight Connected Subgraph Problems Using Integer Linear Programming}
 \description{
