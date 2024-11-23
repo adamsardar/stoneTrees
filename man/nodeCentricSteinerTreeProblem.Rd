@@ -75,25 +75,25 @@ Other SteinerProblemSolver:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{nodeCentricSteinerTreeProblem$new()}}
-\item \href{#method-isSolutionConnected}{\code{nodeCentricSteinerTreeProblem$isSolutionConnected()}}
-\item \href{#method-getCurrentSolutionGraph}{\code{nodeCentricSteinerTreeProblem$getCurrentSolutionGraph()}}
-\item \href{#method-getCurrentSolutionScore}{\code{nodeCentricSteinerTreeProblem$getCurrentSolutionScore()}}
-\item \href{#method-getTerminals}{\code{nodeCentricSteinerTreeProblem$getTerminals()}}
-\item \href{#method-findSingleSteinerSolution}{\code{nodeCentricSteinerTreeProblem$findSingleSteinerSolution()}}
-\item \href{#method-getNodeDT}{\code{nodeCentricSteinerTreeProblem$getNodeDT()}}
-\item \href{#method-getEdgeDT}{\code{nodeCentricSteinerTreeProblem$getEdgeDT()}}
-\item \href{#method-getnConnectivityConstraintsCalls}{\code{nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()}}
-\item \href{#method-getFixedTerminalConstraints}{\code{nodeCentricSteinerTreeProblem$getFixedTerminalConstraints()}}
-\item \href{#method-getNodeDegreeConstraints}{\code{nodeCentricSteinerTreeProblem$getNodeDegreeConstraints()}}
-\item \href{#method-getTwoCycleConstraints}{\code{nodeCentricSteinerTreeProblem$getTwoCycleConstraints()}}
-\item \href{#method-getConnectivityConstraints}{\code{nodeCentricSteinerTreeProblem$getConnectivityConstraints()}}
-\item \href{#method-clone}{\code{nodeCentricSteinerTreeProblem$clone()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-new}{\code{nodeCentricSteinerTreeProblem$new()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-isSolutionConnected}{\code{nodeCentricSteinerTreeProblem$isSolutionConnected()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getCurrentSolutionGraph}{\code{nodeCentricSteinerTreeProblem$getCurrentSolutionGraph()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getCurrentSolutionScore}{\code{nodeCentricSteinerTreeProblem$getCurrentSolutionScore()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getTerminals}{\code{nodeCentricSteinerTreeProblem$getTerminals()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-findSingleSteinerSolution}{\code{nodeCentricSteinerTreeProblem$findSingleSteinerSolution()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getNodeDT}{\code{nodeCentricSteinerTreeProblem$getNodeDT()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getEdgeDT}{\code{nodeCentricSteinerTreeProblem$getEdgeDT()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getnConnectivityConstraintsCalls}{\code{nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getFixedTerminalConstraints}{\code{nodeCentricSteinerTreeProblem$getFixedTerminalConstraints()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getNodeDegreeConstraints}{\code{nodeCentricSteinerTreeProblem$getNodeDegreeConstraints()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getTwoCycleConstraints}{\code{nodeCentricSteinerTreeProblem$getTwoCycleConstraints()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-getConnectivityConstraints}{\code{nodeCentricSteinerTreeProblem$getConnectivityConstraints()}}
+\item \href{#method-nodeCentricSteinerTreeProblem-clone}{\code{nodeCentricSteinerTreeProblem$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-new"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$new(
@@ -108,8 +108,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-isSolutionConnected"></a>}}
-\if{latex}{\out{\hypertarget{method-isSolutionConnected}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-isSolutionConnected"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-isSolutionConnected}{}}}
 \subsection{Method \code{isSolutionConnected()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$isSolutionConnected()}\if{html}{\out{</div>}}
@@ -117,8 +117,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getCurrentSolutionGraph"></a>}}
-\if{latex}{\out{\hypertarget{method-getCurrentSolutionGraph}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getCurrentSolutionGraph"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getCurrentSolutionGraph}{}}}
 \subsection{Method \code{getCurrentSolutionGraph()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getCurrentSolutionGraph()}\if{html}{\out{</div>}}
@@ -126,8 +126,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getCurrentSolutionScore"></a>}}
-\if{latex}{\out{\hypertarget{method-getCurrentSolutionScore}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getCurrentSolutionScore"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getCurrentSolutionScore}{}}}
 \subsection{Method \code{getCurrentSolutionScore()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getCurrentSolutionScore()}\if{html}{\out{</div>}}
@@ -135,8 +135,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getTerminals"></a>}}
-\if{latex}{\out{\hypertarget{method-getTerminals}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getTerminals"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getTerminals}{}}}
 \subsection{Method \code{getTerminals()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getTerminals()}\if{html}{\out{</div>}}
@@ -144,8 +144,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-findSingleSteinerSolution"></a>}}
-\if{latex}{\out{\hypertarget{method-findSingleSteinerSolution}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-findSingleSteinerSolution"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-findSingleSteinerSolution}{}}}
 \subsection{Method \code{findSingleSteinerSolution()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$findSingleSteinerSolution(maxItr = 20)}\if{html}{\out{</div>}}
@@ -153,8 +153,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getNodeDT"></a>}}
-\if{latex}{\out{\hypertarget{method-getNodeDT}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getNodeDT"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getNodeDT}{}}}
 \subsection{Method \code{getNodeDT()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getNodeDT()}\if{html}{\out{</div>}}
@@ -162,8 +162,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getEdgeDT"></a>}}
-\if{latex}{\out{\hypertarget{method-getEdgeDT}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getEdgeDT"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getEdgeDT}{}}}
 \subsection{Method \code{getEdgeDT()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getEdgeDT()}\if{html}{\out{</div>}}
@@ -171,8 +171,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getnConnectivityConstraintsCalls"></a>}}
-\if{latex}{\out{\hypertarget{method-getnConnectivityConstraintsCalls}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getnConnectivityConstraintsCalls"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getnConnectivityConstraintsCalls}{}}}
 \subsection{Method \code{getnConnectivityConstraintsCalls()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()}\if{html}{\out{</div>}}
@@ -180,8 +180,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getFixedTerminalConstraints"></a>}}
-\if{latex}{\out{\hypertarget{method-getFixedTerminalConstraints}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getFixedTerminalConstraints"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getFixedTerminalConstraints}{}}}
 \subsection{Method \code{getFixedTerminalConstraints()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getFixedTerminalConstraints()}\if{html}{\out{</div>}}
@@ -189,8 +189,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getNodeDegreeConstraints"></a>}}
-\if{latex}{\out{\hypertarget{method-getNodeDegreeConstraints}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getNodeDegreeConstraints"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getNodeDegreeConstraints}{}}}
 \subsection{Method \code{getNodeDegreeConstraints()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getNodeDegreeConstraints()}\if{html}{\out{</div>}}
@@ -198,8 +198,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getTwoCycleConstraints"></a>}}
-\if{latex}{\out{\hypertarget{method-getTwoCycleConstraints}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getTwoCycleConstraints"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getTwoCycleConstraints}{}}}
 \subsection{Method \code{getTwoCycleConstraints()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getTwoCycleConstraints()}\if{html}{\out{</div>}}
@@ -207,8 +207,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getConnectivityConstraints"></a>}}
-\if{latex}{\out{\hypertarget{method-getConnectivityConstraints}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getConnectivityConstraints"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getConnectivityConstraints}{}}}
 \subsection{Method \code{getConnectivityConstraints()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getConnectivityConstraints()}\if{html}{\out{</div>}}
@@ -216,8 +216,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

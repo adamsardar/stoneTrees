@@ -71,52 +71,52 @@ Other SteinerProblemSolver:
 }
 \concept{SteinerProblemSolver}
 \section{Super classes}{
-\code{\link[stoneTrees:nodeCentricSteinerTreeProblem]{stoneTrees::nodeCentricSteinerTreeProblem}} -> \code{\link[stoneTrees:subOptimalSteinerProblem]{stoneTrees::subOptimalSteinerProblem}} -> \code{nodeCentricSteinerForestProblem}
+\code{stoneTrees::nodeCentricSteinerTreeProblem} -> \code{stoneTrees::subOptimalSteinerProblem} -> \code{nodeCentricSteinerForestProblem}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{nodeCentricSteinerForestProblem$new()}}
-\item \href{#method-sampleMultipleBootstrapSteinerSolutions}{\code{nodeCentricSteinerForestProblem$sampleMultipleBootstrapSteinerSolutions()}}
-\item \href{#method-getBootstrapSolutionPool}{\code{nodeCentricSteinerForestProblem$getBootstrapSolutionPool()}}
-\item \href{#method-getNconnectivityConstraintsCallsPool}{\code{nodeCentricSteinerForestProblem$getNconnectivityConstraintsCallsPool()}}
-\item \href{#method-getSolutionPool}{\code{nodeCentricSteinerForestProblem$getSolutionPool()}}
-\item \href{#method-getBootstrapSolutionPoolGraphs}{\code{nodeCentricSteinerForestProblem$getBootstrapSolutionPoolGraphs()}}
-\item \href{#method-getSolutionPoolGraphs}{\code{nodeCentricSteinerForestProblem$getSolutionPoolGraphs()}}
-\item \href{#method-findSingleSteinerSolution}{\code{nodeCentricSteinerForestProblem$findSingleSteinerSolution()}}
-\item \href{#method-getInitialSeed}{\code{nodeCentricSteinerForestProblem$getInitialSeed()}}
-\item \href{#method-getLatestSeed}{\code{nodeCentricSteinerForestProblem$getLatestSeed()}}
-\item \href{#method-getAllSeeds}{\code{nodeCentricSteinerForestProblem$getAllSeeds()}}
-\item \href{#method-clone}{\code{nodeCentricSteinerForestProblem$clone()}}
+\item \href{#method-nodeCentricSteinerForestProblem-new}{\code{nodeCentricSteinerForestProblem$new()}}
+\item \href{#method-nodeCentricSteinerForestProblem-sampleMultipleBootstrapSteinerSolutions}{\code{nodeCentricSteinerForestProblem$sampleMultipleBootstrapSteinerSolutions()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getBootstrapSolutionPool}{\code{nodeCentricSteinerForestProblem$getBootstrapSolutionPool()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getNconnectivityConstraintsCallsPool}{\code{nodeCentricSteinerForestProblem$getNconnectivityConstraintsCallsPool()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getSolutionPool}{\code{nodeCentricSteinerForestProblem$getSolutionPool()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getBootstrapSolutionPoolGraphs}{\code{nodeCentricSteinerForestProblem$getBootstrapSolutionPoolGraphs()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getSolutionPoolGraphs}{\code{nodeCentricSteinerForestProblem$getSolutionPoolGraphs()}}
+\item \href{#method-nodeCentricSteinerForestProblem-findSingleSteinerSolution}{\code{nodeCentricSteinerForestProblem$findSingleSteinerSolution()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getInitialSeed}{\code{nodeCentricSteinerForestProblem$getInitialSeed()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getLatestSeed}{\code{nodeCentricSteinerForestProblem$getLatestSeed()}}
+\item \href{#method-nodeCentricSteinerForestProblem-getAllSeeds}{\code{nodeCentricSteinerForestProblem$getAllSeeds()}}
+\item \href{#method-nodeCentricSteinerForestProblem-clone}{\code{nodeCentricSteinerForestProblem$clone()}}
 }
 }
-\if{html}{
-\out{<details ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getConnectivityConstraints">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getConnectivityConstraints}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getConnectivityConstraints()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getCurrentSolutionGraph">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getCurrentSolutionGraph}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getCurrentSolutionGraph()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getCurrentSolutionScore">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getCurrentSolutionScore}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getCurrentSolutionScore()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getEdgeDT">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getEdgeDT}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getEdgeDT()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getFixedTerminalConstraints">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getFixedTerminalConstraints}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getFixedTerminalConstraints()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getNodeDT">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getNodeDT}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getNodeDT()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getNodeDegreeConstraints">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getNodeDegreeConstraints}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getNodeDegreeConstraints()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getTerminals">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getTerminals}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getTerminals()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getTwoCycleConstraints">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getTwoCycleConstraints}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getTwoCycleConstraints()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getnConnectivityConstraintsCalls">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-getnConnectivityConstraintsCalls}{\code{stoneTrees::nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="isSolutionConnected">}\href{../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-isSolutionConnected}{\code{stoneTrees::nodeCentricSteinerTreeProblem$isSolutionConnected()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getNconnectivityConstraintsCalls">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-getNconnectivityConstraintsCalls}{\code{stoneTrees::subOptimalSteinerProblem$getNconnectivityConstraintsCalls()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getNoveltyConstraints">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-getNoveltyConstraints}{\code{stoneTrees::subOptimalSteinerProblem$getNoveltyConstraints()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getOptimumScore">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-getOptimumScore}{\code{stoneTrees::subOptimalSteinerProblem$getOptimumScore()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getSolutionPoolScores">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-getSolutionPoolScores}{\code{stoneTrees::subOptimalSteinerProblem$getSolutionPoolScores()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getSolutionTolerance">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-getSolutionTolerance}{\code{stoneTrees::subOptimalSteinerProblem$getSolutionTolerance()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="identifyMultipleSteinerSolutions">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-identifyMultipleSteinerSolutions}{\code{stoneTrees::subOptimalSteinerProblem$identifyMultipleSteinerSolutions()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="setSolutionTolerance">}\href{../../stoneTrees/html/subOptimalSteinerProblem.html#method-setSolutionTolerance}{\code{stoneTrees::subOptimalSteinerProblem$setSolutionTolerance()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getConnectivityConstraints"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getConnectivityConstraints'><code>stoneTrees::nodeCentricSteinerTreeProblem$getConnectivityConstraints()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getCurrentSolutionGraph"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getCurrentSolutionGraph'><code>stoneTrees::nodeCentricSteinerTreeProblem$getCurrentSolutionGraph()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getCurrentSolutionScore"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getCurrentSolutionScore'><code>stoneTrees::nodeCentricSteinerTreeProblem$getCurrentSolutionScore()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getEdgeDT"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getEdgeDT'><code>stoneTrees::nodeCentricSteinerTreeProblem$getEdgeDT()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getFixedTerminalConstraints"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getFixedTerminalConstraints'><code>stoneTrees::nodeCentricSteinerTreeProblem$getFixedTerminalConstraints()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getNodeDT"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getNodeDT'><code>stoneTrees::nodeCentricSteinerTreeProblem$getNodeDT()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getNodeDegreeConstraints"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getNodeDegreeConstraints'><code>stoneTrees::nodeCentricSteinerTreeProblem$getNodeDegreeConstraints()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getTerminals"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getTerminals'><code>stoneTrees::nodeCentricSteinerTreeProblem$getTerminals()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getTwoCycleConstraints"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getTwoCycleConstraints'><code>stoneTrees::nodeCentricSteinerTreeProblem$getTwoCycleConstraints()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="getnConnectivityConstraintsCalls"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-getnConnectivityConstraintsCalls'><code>stoneTrees::nodeCentricSteinerTreeProblem$getnConnectivityConstraintsCalls()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="nodeCentricSteinerTreeProblem" data-id="isSolutionConnected"><a href='../../stoneTrees/html/nodeCentricSteinerTreeProblem.html#method-nodeCentricSteinerTreeProblem-isSolutionConnected'><code>stoneTrees::nodeCentricSteinerTreeProblem$isSolutionConnected()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getNconnectivityConstraintsCalls"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-getNconnectivityConstraintsCalls'><code>stoneTrees::subOptimalSteinerProblem$getNconnectivityConstraintsCalls()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getNoveltyConstraints"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-getNoveltyConstraints'><code>stoneTrees::subOptimalSteinerProblem$getNoveltyConstraints()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getOptimumScore"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-getOptimumScore'><code>stoneTrees::subOptimalSteinerProblem$getOptimumScore()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getSolutionPoolScores"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-getSolutionPoolScores'><code>stoneTrees::subOptimalSteinerProblem$getSolutionPoolScores()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="getSolutionTolerance"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-getSolutionTolerance'><code>stoneTrees::subOptimalSteinerProblem$getSolutionTolerance()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="identifyMultipleSteinerSolutions"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-identifyMultipleSteinerSolutions'><code>stoneTrees::subOptimalSteinerProblem$identifyMultipleSteinerSolutions()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="stoneTrees" data-topic="subOptimalSteinerProblem" data-id="setSolutionTolerance"><a href='../../stoneTrees/html/subOptimalSteinerProblem.html#method-subOptimalSteinerProblem-setSolutionTolerance'><code>stoneTrees::subOptimalSteinerProblem$setSolutionTolerance()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-new"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$new(
@@ -132,8 +132,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sampleMultipleBootstrapSteinerSolutions"></a>}}
-\if{latex}{\out{\hypertarget{method-sampleMultipleBootstrapSteinerSolutions}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-sampleMultipleBootstrapSteinerSolutions"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-sampleMultipleBootstrapSteinerSolutions}{}}}
 \subsection{Method \code{sampleMultipleBootstrapSteinerSolutions()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$sampleMultipleBootstrapSteinerSolutions(
@@ -145,8 +145,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getBootstrapSolutionPool"></a>}}
-\if{latex}{\out{\hypertarget{method-getBootstrapSolutionPool}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getBootstrapSolutionPool"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getBootstrapSolutionPool}{}}}
 \subsection{Method \code{getBootstrapSolutionPool()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getBootstrapSolutionPool()}\if{html}{\out{</div>}}
@@ -154,8 +154,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getNconnectivityConstraintsCallsPool"></a>}}
-\if{latex}{\out{\hypertarget{method-getNconnectivityConstraintsCallsPool}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getNconnectivityConstraintsCallsPool"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getNconnectivityConstraintsCallsPool}{}}}
 \subsection{Method \code{getNconnectivityConstraintsCallsPool()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getNconnectivityConstraintsCallsPool()}\if{html}{\out{</div>}}
@@ -163,8 +163,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getSolutionPool"></a>}}
-\if{latex}{\out{\hypertarget{method-getSolutionPool}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getSolutionPool"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getSolutionPool}{}}}
 \subsection{Method \code{getSolutionPool()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getSolutionPool()}\if{html}{\out{</div>}}
@@ -172,8 +172,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getBootstrapSolutionPoolGraphs"></a>}}
-\if{latex}{\out{\hypertarget{method-getBootstrapSolutionPoolGraphs}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getBootstrapSolutionPoolGraphs"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getBootstrapSolutionPoolGraphs}{}}}
 \subsection{Method \code{getBootstrapSolutionPoolGraphs()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getBootstrapSolutionPoolGraphs(
@@ -183,8 +183,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getSolutionPoolGraphs"></a>}}
-\if{latex}{\out{\hypertarget{method-getSolutionPoolGraphs}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getSolutionPoolGraphs"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getSolutionPoolGraphs}{}}}
 \subsection{Method \code{getSolutionPoolGraphs()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getSolutionPoolGraphs()}\if{html}{\out{</div>}}
@@ -192,8 +192,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-findSingleSteinerSolution"></a>}}
-\if{latex}{\out{\hypertarget{method-findSingleSteinerSolution}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-findSingleSteinerSolution"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-findSingleSteinerSolution}{}}}
 \subsection{Method \code{findSingleSteinerSolution()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$findSingleSteinerSolution(maxItr = 20)}\if{html}{\out{</div>}}
@@ -201,8 +201,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getInitialSeed"></a>}}
-\if{latex}{\out{\hypertarget{method-getInitialSeed}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getInitialSeed"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getInitialSeed}{}}}
 \subsection{Method \code{getInitialSeed()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getInitialSeed()}\if{html}{\out{</div>}}
@@ -210,8 +210,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getLatestSeed"></a>}}
-\if{latex}{\out{\hypertarget{method-getLatestSeed}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getLatestSeed"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getLatestSeed}{}}}
 \subsection{Method \code{getLatestSeed()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getLatestSeed()}\if{html}{\out{</div>}}
@@ -219,8 +219,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getAllSeeds"></a>}}
-\if{latex}{\out{\hypertarget{method-getAllSeeds}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-getAllSeeds"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-getAllSeeds}{}}}
 \subsection{Method \code{getAllSeeds()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerForestProblem$getAllSeeds()}\if{html}{\out{</div>}}
@@ -228,8 +228,8 @@ Other SteinerProblemSolver:
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-nodeCentricSteinerForestProblem-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-nodeCentricSteinerForestProblem-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
