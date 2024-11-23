@@ -14,17 +14,11 @@ globalVariables(c("condensedNode","potentialTerminal","segmentID",".vertexID"))
 #'
 #' @return A graph with neighbouring terminal and potential terminal nodes collapsed to the same node
 #' @seealso uncondenseGraph
-#' @importFrom stringr str_c
-#' @importFrom ensurer ensure
 condenseSearchGraph = function(graphToCondense, condensedNodeSep = ";"){
 
-  validateIsNetwork(graphToCondense, singleWeakComponent = FALSE, isDirected = FALSE)
-
-  condensedNodeSep %<>% ensure(is.character,
-                          all(! V(graphToCondense)$name %like% .),
-                          err_desc = "nodeNameSep must not be in any node names")
-
-
+  check_network(graphToCondense, singleWeakComponent = FALSE, isDirected = FALSE)
+  check_string(condensedNodeSep, allow_empty = FALSE)
+  stopifnot("nodeNameSep must not be in any node names already" = !any(V(graphToCondense)$name %like% condensedNodeSep))
 
   V(graphToCondense)$.vertexID = 1:vcount(graphToCondense)
 
@@ -74,7 +68,6 @@ condenseSearchGraph = function(graphToCondense, condensedNodeSep = ";"){
 #'
 #' @return uncondensed graph
 #' @seealso condenseSearchGraph
-#' @importFrom ensurer ensure
 uncondenseGraph = function(condensedGraph){
 
   if(! 'condensedNode' %in% vertex_attr_names(condensedGraph)){
@@ -82,18 +75,16 @@ uncondenseGraph = function(condensedGraph){
     return(condensedGraph)
   }
 
-  condensedGraph %<>%
-    #validateSearchGraph %>%
-                      ensure(
-                          'condensedNode' %in% list.vertex.attributes(.),
-                          'originalGraph' %in% list.graph.attributes(.),
-                          'nodeNameSep' %in% list.graph.attributes(.),
-                          all(is.logical(V(.)$condensedNode)),
-                          err_desc = "condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'")
+  stopifnot("condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'" = 
+    'condensedNode' %in% list.vertex.attributes(condensedGraph))
+  stopifnot("condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'" = 
+    'originalGraph' %in% list.graph.attributes(condensedGraph))
+  stopifnot("condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'" = 
+    'nodeNameSep' %in% list.graph.attributes(condensedGraph))
 
+  check_logical(is.logical(V(condensedGraph)$condensedNode))
 
   nodeNameSep = graph_attr(condensedGraph)$nodeNameSep
-
   originalGraph = graph_attr(condensedGraph,"originalGraph")
 
   condensedGraphVertexIDs = V(condensedGraph)[condensedNode == TRUE]$.vertexID %>%

@@ -105,7 +105,10 @@ subOptimalSteinerProblem = R6Class("subOptimalSteinerProblem",
     
     getSolutionTolerance = function(){return(private$tolerance)},
     
-    setSolutionTolerance = function(x){ private$tolerance = validateSinglePositiveSemiDefiniteNumeric(x) ; return(invisible(self))},
+    setSolutionTolerance = function(x){ 
+      check_number_decimal(x, min = 0, allow_infinite = FALSE)
+      private$tolerance = x
+      return(invisible(self))},
     
     getNconnectivityConstraintsCalls = function(){ private$nConnectivityConstraintsCalls },
 
