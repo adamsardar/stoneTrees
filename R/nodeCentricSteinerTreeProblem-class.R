@@ -1,23 +1,14 @@
+#' Construct an object representation of a Steiner tree/maximum weight connected subgraph (MWCS) problem, with methods to find solutions
+#' 
+#' @description
 #' Solve Steiner problems (MStTP or MWCS) with uniform or no edge weights.
-#'
+#' 
+#' @details
 #' The base stoneTrees class for solving Steiner Tree problems. Each object constructed represents a single Steiner problem
 #' and the associated methods allow for modifications, solution generation etc. See *examples* below.
 #'
 #' Input networks must be single component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
 #' and/or node costs or prizes for inclusion ($nodeScore).
-#'
-#' @docType class
-#' @format R6Class \code{nodeCentricSteinerTreeProblem} Construct an object representation of a Steiner tree/maximum weight connected subgraph (MWCS) problem, with methods to find solutions
-#'
-#' @section Methods:
-#' \describe{
-#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose))}}{ Constructor for object. Most options can be left as default, but one can set verbose (boolean) and solverTrace (integer - see ?cplexAPI::CPX_PARAM_SCRIND) as desired to prevent output.}
-#'    \item{\code{findSingleSteinerSolution()}}{Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.}
-#'    \item{\code{getCurrentSolutionGraph()}}{Retrieve the current solution graph (could be disconnected)}
-#'    \item{\code{get*Constraints()}}{Extract relevant constraints }
-#'    \item{\code{getCurrentSolutionScore()}}{Compute the objective value of the current solution.}
-#'    \item{...}{Other methods are self explanatory and likely uninteresting to a general user}
-#' }
 #'
 #' @examples
 #' library(igraph)
@@ -59,6 +50,15 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
 
   public = list(
     
+    #' @description
+    #' Define a new Steiner Tree problem for solving
+    #' @param network Search network, with either boolean isTerminal and/or continuous nodeScores recorded for each node in the search network
+    #' @param solverChoice (optional) Select your preffered solver, or rely on default
+    #' @param verbose Controls print verbosity of routine 
+    #' @param presolveGraph Whether to include the speed optimisation routine to coalesce adjacent nodes, decreasing the search space (default:TRUE - strongly recommended)
+    #' @param solverTimeLimit Constrain how long, in seconds, each invocation of the MILP solver can take
+    #' @param  solverTrace Control how much detail to request from the solver
+    #' @return A `nodeCentricSteinerTreeProblem` object, ready to collect solutions
     initialize = function(network, solverChoice = chooseSolver(),
                          verbose = TRUE, presolveGraph = TRUE,
                          solverTimeLimit = 300, solverTrace = as.integer(verbose)){
@@ -142,18 +142,29 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
       return(invisible(self))
     },
     
+    #' @description
+    #' Query if current solution is connected
+    #' @return boolean detailing if all nodes in solutionnodes are weakly connected. Empty graphs are disconnected.
     isSolutionConnected = function(){
       
       if(length(private$currentSolutionIndices) == 0){ return(FALSE) }
       
-      return(is.connected( self$getCurrentSolutionGraph() ))
+      return(is_connected( self$getCurrentSolutionGraph() ))
     },
     
     # Allow the user to inspect the graph (presolved, of course)
     getCurrentSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ])) },
 
+    #' @description
+    #' Compute the objective value of the current solution.
+    #' 
+    #' @return A single numeric value - the sum of the nodeScores in proposed solution
     getCurrentSolutionScore = function(){ return( sum(V(self$getCurrentSolutionGraph())$nodeScore) ) },
     
+    #' @description
+    #' Detail terminal nodes listed by algorithm
+    #' 
+    #' @return A list of terminals; definitions taken from Fischetti et al (2017)
     getTerminals = function(){
       
       return(list(fixedTerminals = private$fixedTerminalIndices,
@@ -161,6 +172,10 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
                   terminals = unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices)) )) 
     },
     
+    #' @description
+    #' Initiate a search for a connected solution to the CURRENT constraints. For derived classes this can mean that the solution changes.
+    #' @param maxItr The maximum number of constraint/solve cycles that the process should attempt 
+    #' @return An induced subgraph of the best solution found given the constraints and interation cap
     findSingleSteinerSolution = function(maxItr = 20){
       
       itrCount = 1
@@ -180,27 +195,50 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
          }else{
                                                  
         #Add connectivity constraints
-        private$addConnectivityConstraints() }
+          private$addConnectivityConstraints() 
+        }
         
-        itrCount %<>% add(1) }
+        itrCount = itrCount + 1 
+      }
+                                      
+      if(itrCount >= maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
       
-                                          
-       if(itrCount >= maxItr) warning("Maximum number of solver iterations reached. In all likelihood the solution has not converged and may well be disconnected! Check!")
-      
-      return( uncondenseGraph( self$getCurrentSolutionGraph() ) ) #Uncondense graph undoes the graph presolve (or does nothing if the presolve step is omitted)
-      
+      return( uncondenseGraph( self$getCurrentSolutionGraph() ) ) 
       },
     
+    #' @description
+    #' Provide a table of node details
+    #' @return A table of nodes
     getNodeDT = function(){ private$nodeDT },
+
+    #' @description
+    #' Provide a table of edge details
+    #' @return A table of edges in search graph
     getEdgeDT = function(){ private$edgeDT },
 
+    #' @description
+    #' Provide a list of all connectivity constraint calls
+    #' @return A list of constraints
     getnConnectivityConstraintsCalls = function(){ private$nConnectivityConstraintsCalls },
 
-
-    #Access to the constraint matricies (will make for easier testing)
+    #' @description
+    #' Provide a list of fixed terminal constrains
+    #' @return A list of constraints
     getFixedTerminalConstraints = function(){ private$fixedTerminalConstraints },
+
+    #' @description
+    #' Provide a list of constraints due to node degrees
+    #' @return A list of constraints
     getNodeDegreeConstraints = function(){ private$nodeDegreeConstraints },
+
+    #' @description
+    #' Provide a list of constraints caused by 'two-cycle' constraint - see paper
+    #' @return A list of constraints
     getTwoCycleConstraints = function(){ private$twoCycleConstraints },
+
+    #' @description
+    #' Provide a list of connectivity constraints
+    #' @return A list of constraints
     getConnectivityConstraints = function(){ private$connectivityConstraints }
   ),
   
