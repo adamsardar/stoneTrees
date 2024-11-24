@@ -63,7 +63,7 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
                          verbose = TRUE, presolveGraph = TRUE,
                          solverTimeLimit = 300, solverTrace = as.integer(verbose)){
       
-      check_string(solverChoice, allow_empty = FALSE)
+      check_solver(solverChoice)
       private$solver = solverChoice
 
       check_number_whole(solverTimeLimit, min = 1)
