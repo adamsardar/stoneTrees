@@ -1,5 +1,5 @@
 #' @import igraph
-check_network = function(network2validate, singleWeakComponent = TRUE, isDirected = FALSE){
+check_network = function(network2validate, singleWeakComponent = TRUE, isDirected = NA){
 
   stopifnot("Input network must be an igraph object" = is.igraph(network2validate))
 
@@ -7,9 +7,10 @@ check_network = function(network2validate, singleWeakComponent = TRUE, isDirecte
   stopifnot("Input network must a single connected component (consider using igraph::decompose?)" =
              length(decompose(network2validate, mode = "weak")) == 1 | !singleWeakComponent)
 
-  check_bool(isDirected)
+  # Only inspect direction if instructed
+  check_bool(isDirected, allow_na = TRUE)
   stopifnot("Expecting is.directed() output of graph to be equal to isDirected" = 
-            is.directed(network2validate) == isDirected)
+            is.directed(network2validate) == isDirected | is.na(isDirected))
 
   if("nodeScore" %in% vertex_attr_names(network2validate)){
 
@@ -24,4 +25,12 @@ check_network = function(network2validate, singleWeakComponent = TRUE, isDirecte
   }
 
   invisible(network2validate)
+}
+
+check_solver = function(solverChoice){
+
+  check_string(solverChoice, allow_empty = FALSE)
+  stopifnot('solver is unsupported' = toupper(solverChoice) %in% toupper(stoneTrees_solvers))
+  
+  invisible(solverChoice)
 }
