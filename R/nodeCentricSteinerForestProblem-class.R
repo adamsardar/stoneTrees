@@ -51,6 +51,7 @@
 #' @seealso nodeCentricSteinerTreeProblem
 #' @seealso subOptimalSteinerProblem
 #' @importFrom sets set set_union
+#' @importFrom purrr map
 #' @export
 nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
                                            inherit = subOptimalSteinerProblem,
@@ -81,7 +82,7 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
     sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5){
       
       check_number_whole(nBootstraps, min = 1)
-      check_number_whole(maxItr, min = 1)
+      check_number_whole(maxItr, min = 0)
       check_number_decimal(resamplingProbability, min = 0, max = 1)
 
       # solve normal steiner tree - this produces a bunch of connectivity constraints and
@@ -89,11 +90,11 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
       self$findSingleSteinerSolution()
       private$metasolutionIndicesPool = set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
       
-      bootItr = 1
+      bootstrapItr = 1
       
-      while(bootItr <= nBootstraps){
+      while(bootstrapItr <= nBootstraps){
         
-        if(private$verbosity) message("Bootstrap ", bootItr)
+        if(private$verbosity) message("Bootstrap ", bootstrapItr)
         
         private$resampleFixedTerminals(resamplingProbability)
         
@@ -108,7 +109,7 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
         #Flush the parent solution pool as we're about to research for solutions
         private$solutionIndicesPool = sets::set()
         
-        bootItr %<>% add(1)
+        bootstrapItr = bootstrapItr + 1
       }
       
       return(invisible(self))
@@ -138,9 +139,9 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
         return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getBootstrapSolutionPool()))]))
       }else{
         
-        return( self$getBootstrapSolutionPool() %>%
-                  as.list %>%
-                  lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) )
+        return( self$getBootstrapSolutionPool() |>
+                  as.list() |>
+                  map( ~ induced.subgraph(private$searchGraph, V(private$searchGraph)[.x])) )
       }
     },
     
