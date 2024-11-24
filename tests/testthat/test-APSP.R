@@ -27,7 +27,7 @@ test_that("Check Behaviour On A Graph With NA Values - with a seed set containin
   expect_warning(calculateAPSPmodule(seedNodes,NAnamefGraph,omitNA = FALSE))
 
   expect_true(is.igraph(apspMod))
-  expect_true(is.connected(apspMod))
+  expect_true(is_connected(apspMod))
 
   expect_false( any( is.na(V(apspMod)$name)),info = "There shouldn't be any NA nodes in the answer here (looking at the input graph)")
 })
