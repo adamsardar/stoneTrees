@@ -14,5 +14,6 @@
 #' @import igraph
 #' @import Matrix
 #' @import data.table
+#' @import rlang
 #' @importFrom magrittr "%<>%"
 NULL
