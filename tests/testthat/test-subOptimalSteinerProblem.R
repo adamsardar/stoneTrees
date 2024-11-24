@@ -6,7 +6,7 @@ library(sets)
 
 test_that("Inspect sub-optimal solution searcher construction and answers found for MWCS",{
 
-  expect_error(subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = -1, verbose = FALSE), regexp = "positive", label = "negative tolerences are not allowed")
+  expect_error(subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = -1, verbose = FALSE), regexp = "number larger than or equal to 0", label = "negative tolerences are not allowed")
 
   expect_silent({testLymphoma = subOptimalSteinerProblem$new(lymphomaGraph, solutionTolerance = 0.5, verbose = FALSE)})
 
@@ -33,7 +33,7 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
   expect_gt( diff(range( c(testLymphoma$getSolutionPoolScores(), testLymphoma$getCurrentSolutionScore())) ), testLymphoma$getSolutionTolerance(), label = "The next solution should be outside solution tolerence")
 
-  expect_error(testLymphoma$setSolutionTolerance( "1" ), regexp = "positive")
+  expect_error(testLymphoma$setSolutionTolerance( "1" ), regexp = "number")
 
   testLymphoma$setSolutionTolerance(1)
 
