@@ -65,7 +65,6 @@
 
 .standalone_types_check_dot_call <- .Call
 
-#' @importFrom rlang ffi_standalone_is_bool_1.0.7
 check_bool <- function(
   x,
   ...,
@@ -129,7 +128,6 @@ check_string <- function(
   )
 }
 
-#' @importFrom rlang is_string
 .rlang_check_is_string <- function(x, allow_empty, allow_na, allow_null) {
   if (is_string(x)) {
     if (allow_empty || !is_string(x, "")) {
@@ -182,7 +180,6 @@ IS_NUMBER_true <- 0
 IS_NUMBER_false <- 1
 IS_NUMBER_oob <- 2
 
-#' @importFrom rlang ffi_standalone_check_number_1.0.7
 check_number_decimal <- function(
   x,
   ...,
@@ -226,7 +223,6 @@ check_number_decimal <- function(
   )
 }
 
-#' @importFrom rlang  env_get_list
 check_number_whole <- function(
   x,
   ...,
@@ -270,8 +266,6 @@ check_number_whole <- function(
   )
 }
 
-#' @importFrom rlang `%||%`
-#' @importFrom rlang is_missing
 .stop_not_number <- function(
   x,
   ...,
@@ -546,9 +540,6 @@ check_character <- function(
   )
 }
 
-#' @importFrom rlang is_logical
-#' @importFrom rlang caller_arg
-#' @importFrom rlang caller_env
 check_logical <- function(
   x,
   ...,

@@ -66,10 +66,6 @@
 #' @return A string describing the type. Starts with an indefinite
 #'   article, e.g. "an integer vector".
 #' @noRd
-#' @importFrom rlang is_vector
-#' @importFrom rlang is_list
-#' @importFrom rlang is_na
-#' @importFrom rlang abort
 obj_type_friendly <- function(x, value = TRUE) {
   if (is_missing(x)) {
     return("absent")
