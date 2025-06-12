@@ -9,7 +9,7 @@ test_that("Check that lpSolve is producing to correct values (lymphoma graph is 
 
   expect_equal(vcount(lpSolveSolution),46)
   expect_gt(sum(V(lpSolveSolution)$nodeScore),70)
-  expect_true(is.connected(lpSolveSolution))
+  expect_true(is_connected(lpSolveSolution))
 })
 
 
@@ -22,7 +22,7 @@ test_that("Compare cplexAPI result", {
 
     expect_equal(vcount(lpSolveSolution), vcount(cplexapiSolution))
     expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(cplexapiSolution)$nodeScore))
-    expect_true(is.connected(cplexapiSolution))
+    expect_true(is_connected(cplexapiSolution))
 
 })
 
@@ -36,7 +36,7 @@ test_that("Compare Rcbc result", {
   
   expect_equal(vcount(lpSolveSolution), vcount(cbcSolution))
   expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(cbcSolution)$nodeScore))
-  expect_true(is.connected(cbcSolution))
+  expect_true(is_connected(cbcSolution))
   
 })
 
@@ -52,7 +52,7 @@ test_that("Compare Rglpk result", {
 
     expect_equal(vcount(lpSolveSolution), vcount(glpkSolution))
     expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(glpkSolution)$nodeScore))
-    expect_true(is.connected(glpkSolution))
+    expect_true(is_connected(glpkSolution))
 
 })
 
@@ -65,6 +65,6 @@ test_that("Compare lpsymphony result", {
 
     expect_equal(vcount(lpSolveSolution), vcount(symphonySolution))
     expect_equal(sum(V(lpSolveSolution)$nodeScore), sum(V(symphonySolution)$nodeScore))
-    expect_true(is.connected(symphonySolution))
+    expect_true(is_connected(symphonySolution))
 
 })

@@ -21,11 +21,11 @@ test_that("Inspect sub-optimal solution searcher construction and answers found 
 
   expect_gt(vcount(testLymphoma$getSolutionPoolGraphs(collapseSols = TRUE)), vcount(singleSolGraph), label = "More solutions must create a larger graph")
 
-  expect_true(all(sapply(testLymphoma$getSolutionPoolGraphs(collapseSols = FALSE), is.igraph)))
-  expect_true(all(sapply(testLymphoma$getSolutionPoolGraphs(collapseSols = FALSE), is.connected)))
+  expect_true(all(sapply(testLymphoma$getSolutionPoolGraphs(collapseSols = FALSE), is_igraph)))
+  expect_true(all(sapply(testLymphoma$getSolutionPoolGraphs(collapseSols = FALSE), is_connected)))
 
-  expect_true( is.igraph(testLymphoma$getSolutionPoolGraphs(collapseSols = TRUE)) )
-  expect_true( is.connected(testLymphoma$getSolutionPoolGraphs(collapseSols = TRUE)) )
+  expect_true( is_igraph(testLymphoma$getSolutionPoolGraphs(collapseSols = TRUE)) )
+  expect_true( is_connected(testLymphoma$getSolutionPoolGraphs(collapseSols = TRUE)) )
 
   expect_lte( diff(range(testLymphoma$getSolutionPoolScores())), testLymphoma$getSolutionTolerance(), label = "Range in solution scores must be within tolerence")
 

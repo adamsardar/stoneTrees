@@ -30,24 +30,24 @@ test_that("Run a small Steiner forest routine and check the results", {
 
   expect_gte(vcount(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), vcount(simpleTreeSol), label = "Forest must be larger than tree by definition")
 
-  expect_true( is.igraph(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Collapsed solution should be an igraph")
+  expect_true( is_igraph(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Collapsed solution should be an igraph")
 
   expect_equal( length(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = FALSE)), length(steinFor$getBootstrapSolutionPool()), label = "Solution pool must be equal to graph list in size")
-  expect_true( all(sapply(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), is.igraph)), label = "All solutions should be igraphs")
+  expect_true( all(sapply(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), is_igraph)), label = "All solutions should be igraphs")
 
-  expect_true(is.connected(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Solution must be connected")
-  expect_true( all( sapply(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = FALSE),is.connected) ), label = "Solution must be connected")
+  expect_true(is_connected(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Solution must be connected")
+  expect_true( all( sapply(steinFor$getBootstrapSolutionPoolGraphs(collapseSols = FALSE),is_connected) ), label = "Solution must be connected")
 })
 
 test_that("Checking ability to find many k-steiner trees in the karate graph",{
 
   karateGraph_MSTP_kStein = nodeCentricSteinerForestProblem$new(karateGraph, verbose = FALSE)$sampleMultipleBootstrapSteinerSolutions(5)
 
-  expect_true( is.igraph(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Collapsed solution should be an igraph")
+  expect_true( is_igraph(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Collapsed solution should be an igraph")
 
   expect_equal( length(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = FALSE)), length(karateGraph_MSTP_kStein$getBootstrapSolutionPool()), label = "Solution pool must be equal to graph list in size")
-  expect_true( all(sapply(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), is.igraph)), label = "All solutions should be igraphs")
+  expect_true( all(sapply(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = FALSE), is_igraph)), label = "All solutions should be igraphs")
 
-  expect_true(is.connected(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Solution must be connected")
-  expect_true( all( sapply(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = FALSE),is.connected) ), label = "Solution must be connected")
+  expect_true(is_connected(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = TRUE)), label = "Solution must be connected")
+  expect_true( all( sapply(karateGraph_MSTP_kStein$getBootstrapSolutionPoolGraphs(collapseSols = FALSE),is_connected) ), label = "Solution must be connected")
 })

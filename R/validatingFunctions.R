@@ -1,7 +1,7 @@
 #' @import igraph
 check_network = function(network2validate, singleWeakComponent = TRUE, isDirected = NA){
 
-  stopifnot("Input network must be an igraph object" = is.igraph(network2validate))
+  stopifnot("Input network must be an igraph object" = is_igraph(network2validate))
 
   check_bool(singleWeakComponent)
   stopifnot("Input network must a single connected component (consider using igraph::decompose?)" =

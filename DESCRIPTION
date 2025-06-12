@@ -18,7 +18,7 @@ Depends: R (>= 3.6)
 Remotes: dirkschumacher/rcbc
 Imports:
     data.table (>= 1.12),
-    igraph (>= 1.3),
+    igraph (>= 2.0),
     Matrix (>= 1.2),
     magrittr (>= 1.0),
     methods,

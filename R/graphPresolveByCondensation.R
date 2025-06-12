@@ -76,11 +76,11 @@ uncondenseGraph = function(condensedGraph){
   }
 
   stopifnot("condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'" = 
-    'condensedNode' %in% list.vertex.attributes(condensedGraph))
+    'condensedNode' %in% vertex_attr_names(condensedGraph))
   stopifnot("condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'" = 
-    'originalGraph' %in% list.graph.attributes(condensedGraph))
+    'originalGraph' %in% graph_attr_names(condensedGraph))
   stopifnot("condensedGraph must be an igraph object resultant from running 'condenseSearchGraph'" = 
-    'nodeNameSep' %in% list.graph.attributes(condensedGraph))
+    'nodeNameSep' %in% graph_attr_names(condensedGraph))
 
   check_logical(is.logical(V(condensedGraph)$condensedNode))
 

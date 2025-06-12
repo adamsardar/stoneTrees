@@ -97,7 +97,7 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
                                              
 
                                              # nodeDT with node indices
-      private$nodeDT = get.data.frame(private$searchGraph, what = "vertices") %>% data.table
+      private$nodeDT = as_data_frame(private$searchGraph, what = "vertices") %>% data.table
       
       # Solution status will effectively be provided by the 'inComponent' attribute
       private$nodeDT[, inComponent := NA_integer_]
@@ -126,7 +126,7 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
       # Check that there are *some* terminals, otherwise error
       if(length( unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))) == 0) stop("No potential terminals (fixedTermals or potentialTerminals) presents. Review nodeScore and/or isTerminal vertex attributes!")
       
-      eDT = get.data.frame( private$searchGraph, what = "edges") %>% data.table
+      eDT = as_data_frame( private$searchGraph, what = "edges") %>% data.table
       eDT[,.edgeID := .I]
       
       private$edgeDT = rbind(eDT[,.(from,to,.edgeID)], eDT[,.(to = from,from = to,.edgeID)])
@@ -153,7 +153,7 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
     },
     
     # Allow the user to inspect the graph (presolved, of course)
-    getCurrentSolutionGraph = function(){ return( induced.subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ])) },
+    getCurrentSolutionGraph = function(){ return( induced_subgraph(private$searchGraph, V(private$searchGraph)[ private$currentSolutionIndices ])) },
 
     #' @description
     #' Compute the objective value of the current solution.
@@ -267,7 +267,7 @@ nodeCentricSteinerTreeProblem = R6Class("nodeCentricSteinerTreeProblem",
       # Constraint 5.) Only potential or fixed terminals can have a degree of 1, all other nodes must have degree >= 2
       addNodeDegreeInequalities = function(){
         
-        nodeDegreeInequalities_variables = get.adjacency(private$searchGraph, sparse = TRUE)
+        nodeDegreeInequalities_variables = as_adjacency_matrix(private$searchGraph, sparse = TRUE)
         diag(nodeDegreeInequalities_variables) = -2
         diag(nodeDegreeInequalities_variables)[unique(c(private$fixedTerminalIndices, private$potentialTerminalIndices))] = -1
         
