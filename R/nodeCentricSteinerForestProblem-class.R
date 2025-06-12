@@ -50,7 +50,7 @@
 #' @family SteinerProblemSolver
 #' @seealso nodeCentricSteinerTreeProblem
 #' @seealso subOptimalSteinerProblem
-#' @importFrom sets set set_union
+#' @importFrom sets set_union
 #' @importFrom purrr map
 #' @export
 nodeCentricSteinerForestProblem = R6Class(

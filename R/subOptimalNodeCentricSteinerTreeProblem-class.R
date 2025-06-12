@@ -45,7 +45,7 @@
 #' @references \url{https://en.wikipedia.org/wiki/Steiner_tree_problem}
 #' @family SteinerProblemSolver
 #' @seealso nodeCentricSteinerTreeProblem
-#' @importFrom sets set set_union
+#' @importFrom sets set_union
 #' @export
 subOptimalSteinerProblem = R6Class(
   "subOptimalSteinerProblem",
