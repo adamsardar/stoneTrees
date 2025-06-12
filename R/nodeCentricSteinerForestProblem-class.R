@@ -39,7 +39,7 @@
 #' #Solve multiple bootstrap Steiner Trees (Steiner Forest)
 #' SteinFor = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph)
 #'
-#' #Run two bootstrap routines (resample fixed terminals and solve) and 
+#' #Run two bootstrap routines (resample fixed terminals and solve) and
 #' #ALSO run the sub-optimal solution searcher thrice
 #' SteinFor$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 2, maxItr = 3)
 #' ## Takes around a minute using RGLPK as the solver
@@ -53,34 +53,46 @@
 #' @importFrom sets set set_union
 #' @importFrom purrr map
 #' @export
-nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
-                                           inherit = subOptimalSteinerProblem,
+nodeCentricSteinerForestProblem = R6Class(
+  "nodeCentricSteinerForestProblem",
+  inherit = subOptimalSteinerProblem,
   public = list(
-    
     #Overide
-    initialize = function(network, solverChoice = chooseSolver(),
-                          verbose = TRUE, solverTimeLimit = 300,
-                          solutionTolerance = 0,
-                          solverTrace = as.integer(verbose),
-                          RNGseed = sample.int(size = 1, .Machine$integer.max)){
-
+    initialize = function(
+      network,
+      solverChoice = chooseSolver(),
+      verbose = TRUE,
+      solverTimeLimit = 300,
+      solutionTolerance = 0,
+      solverTrace = as.integer(verbose),
+      RNGseed = sample.int(size = 1, .Machine$integer.max)
+    ) {
       private$seedPool = RNGseed
 
-      super$initialize(network,
-                       solverChoice = solverChoice,
-                       verbose = verbose,
-                       presolveGraph = FALSE,
-                       solutionTolerance = solutionTolerance,
-                       solverTrace = solverTrace,
-                       solverTimeLimit = solverTimeLimit)
-      
-      if(super$getNodeDT()[isTerminal == TRUE, nrow(.SD)] <= 2) stop("Steiner Forest routines require at least 3 fixed terminals (preferably many more!)")
-      
+      super$initialize(
+        network,
+        solverChoice = solverChoice,
+        verbose = verbose,
+        presolveGraph = FALSE,
+        solutionTolerance = solutionTolerance,
+        solverTrace = solverTrace,
+        solverTimeLimit = solverTimeLimit
+      )
+
+      if (super$getNodeDT()[isTerminal == TRUE, nrow(.SD)] <= 2) {
+        stop(
+          "Steiner Forest routines require at least 3 fixed terminals (preferably many more!)"
+        )
+      }
+
       return(invisible(self))
     },
-    
-    sampleMultipleBootstrapSteinerSolutions = function(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5){
-      
+
+    sampleMultipleBootstrapSteinerSolutions = function(
+      nBootstraps = 5,
+      maxItr = 0,
+      resamplingProbability = 0.5
+    ) {
       check_number_whole(nBootstraps, min = 1)
       check_number_whole(maxItr, min = 0)
       check_number_decimal(resamplingProbability, min = 0, max = 1)
@@ -88,132 +100,175 @@ nodeCentricSteinerForestProblem = R6Class("nodeCentricSteinerForestProblem",
       # solve normal steiner tree - this produces a bunch of connectivity constraints and
       # will also ensure that the solution is connected
       self$findSingleSteinerSolution()
-      private$metasolutionIndicesPool = set_union(self$getBootstrapSolutionPool(), sets::set(private$currentSolutionIndices))
-      
+      private$metasolutionIndicesPool = set_union(
+        self$getBootstrapSolutionPool(),
+        sets::set(private$currentSolutionIndices)
+      )
+
       bootstrapItr = 1
-      
-      while(bootstrapItr <= nBootstraps){
-        
-        if(private$verbosity) message("Bootstrap ", bootstrapItr)
-        
+
+      while (bootstrapItr <= nBootstraps) {
+        if (private$verbosity) {
+          message("Bootstrap ", bootstrapItr)
+        }
+
         private$resampleFixedTerminals(resamplingProbability)
-        
+
         #Find up to ten degenerate solutions as you can
         super$identifyMultipleSteinerSolutions(maxItr)
 
-        private$nConnectivityConstraintsCallsPool = c(self$getNconnectivityConstraintsCallsPool(),
-                                                         super$getNconnectivityConstraintsCalls())
+        private$nConnectivityConstraintsCallsPool = c(
+          self$getNconnectivityConstraintsCallsPool(),
+          super$getNconnectivityConstraintsCalls()
+        )
 
-        private$metasolutionIndicesPool = set_union(self$getBootstrapSolutionPool(), super$getSolutionPool())
-        
+        private$metasolutionIndicesPool = set_union(
+          self$getBootstrapSolutionPool(),
+          super$getSolutionPool()
+        )
+
         #Flush the parent solution pool as we're about to research for solutions
         private$solutionIndicesPool = sets::set()
-        
+
         bootstrapItr = bootstrapItr + 1
       }
-      
+
       return(invisible(self))
     },
-    
-    getBootstrapSolutionPool = function(){
-      
+
+    getBootstrapSolutionPool = function() {
       return(private$metasolutionIndicesPool)
     },
 
-    getNconnectivityConstraintsCallsPool = function(){
-
-      return(private$nConnectivityConstraintsCallsPool) },
+    getNconnectivityConstraintsCallsPool = function() {
+      return(private$nConnectivityConstraintsCallsPool)
+    },
 
     #Overide
-    getSolutionPool = function(){
-      
-      if(identical(parent.frame(), globalenv())) warning("During the Steiner forest process the solution pool constantly being flushed - it is likely to be empty. Use $getBootstrapSolutionPool() for Steiner forest problems.")
+    getSolutionPool = function() {
+      if (identical(parent.frame(), globalenv())) {
+        warning(
+          "During the Steiner forest process the solution pool constantly being flushed - it is likely to be empty. Use $getBootstrapSolutionPool() for Steiner forest problems."
+        )
+      }
       return(super$getSolutionPool())
     },
-    
-    getBootstrapSolutionPoolGraphs = function(collapseSols = TRUE){
-      
-      if(collapseSols){
-        
+
+    getBootstrapSolutionPoolGraphs = function(collapseSols = TRUE) {
+      if (collapseSols) {
         #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
-        return( induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getBootstrapSolutionPool()))]))
-      }else{
-        
-        return( self$getBootstrapSolutionPool() |>
-                  as.list() |>
-                  map( ~ induced.subgraph(private$searchGraph, V(private$searchGraph)[.x])) )
+        return(induced.subgraph(
+          private$searchGraph,
+          V(
+            private$searchGraph
+          )[unique(unlist(self$getBootstrapSolutionPool()))]
+        ))
+      } else {
+        return(
+          self$getBootstrapSolutionPool() |>
+            as.list() |>
+            map(
+              ~ induced.subgraph(
+                private$searchGraph,
+                V(private$searchGraph)[.x]
+              )
+            )
+        )
       }
     },
-    
+
     #Overide
-    getSolutionPoolGraphs = function(){
-      
-      if(identical(parent.frame(), globalenv())) warning("During the Steiner forest process the solution pool constantly being flushed - it is likely to be empty. Use $getBootstrapSolutionPoolGraphs() for Steiner forest problems.")
+    getSolutionPoolGraphs = function() {
+      if (identical(parent.frame(), globalenv())) {
+        warning(
+          "During the Steiner forest process the solution pool constantly being flushed - it is likely to be empty. Use $getBootstrapSolutionPoolGraphs() for Steiner forest problems."
+        )
+      }
       return(super$getSolutionPoolGraphs())
     },
-    
+
     #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time. This is because we resample the seeds repeatedly.
-    findSingleSteinerSolution = function(maxItr = 20){
-      
-      private$fixedTerminalIndices = super$getNodeDT()[isTerminal == TRUE, .nodeID]
+    findSingleSteinerSolution = function(maxItr = 20) {
+      private$fixedTerminalIndices = super$getNodeDT()[
+        isTerminal == TRUE,
+        .nodeID
+      ]
       private$currentSolutionIndices = integer()
-      
+
       return(super$findSingleSteinerSolution(maxItr = maxItr))
     },
-    
-    getInitialSeed = function(){ head(private$seedPool, n=1)},
-    getLatestSeed = function(){ tail(private$seedPool, n=1)},
-    getAllSeeds = function(){ return(private$seedPool) }
 
+    getInitialSeed = function() {
+      head(private$seedPool, n = 1)
+    },
+    getLatestSeed = function() {
+      tail(private$seedPool, n = 1)
+    },
+    getAllSeeds = function() {
+      return(private$seedPool)
+    }
   ),
   private = list(
+    addSeedToPool = function(seed) {
+      private$seedPool = c(private$seedPool, seed)
+      invisible(self)
+    },
 
-    addSeedToPool = function(seed){ private$seedPool = c(private$seedPool, seed); invisible(self)},
-    
-    sampleNewSeed = function(){return(sample.int(n = .Machine$integer.max, size=1))},
-    
-    generateNextRNGseed = function(){
-      
+    sampleNewSeed = function() {
+      return(sample.int(n = .Machine$integer.max, size = 1))
+    },
+
+    generateNextRNGseed = function() {
       latestSeed = self$getLatestSeed()
       set.seed(latestSeed)
       newSeed = private$sampleNewSeed()
-      
+
       private$addSeedToPool(newSeed)
-      
+
       invisible(self)
     },
-    
-    
-    resampleFixedTerminals = function(pSuccess = 0.5){
-      
-      if(private$verbosity){message("Bootstrap sampling seeds/fixed terminals ...")}
-      
+
+    resampleFixedTerminals = function(pSuccess = 0.5) {
+      if (private$verbosity) {
+        message("Bootstrap sampling seeds/fixed terminals ...")
+      }
+
       #Flush the set of existing terminals
       private$fixedTerminalIndices = integer()
-      
+
       private$generateNextRNGseed()
-      
-      while(length(private$fixedTerminalIndices) == 0){
-        
+
+      while (length(private$fixedTerminalIndices) == 0) {
         #Looks complicated, but really it just resamples the isTerminal/fixedTerminal nodeIDs
-        private$fixedTerminalIndices = super$getNodeDT()[isTerminal == TRUE, .SD[runif(n = .N) <= pSuccess, .nodeID] ]
-        
-        if(any(duplicated(private$fixedTerminalIndices))){warning("Duplicated fixed terminals - this shouldn't be possible. Please contact package maintainer!: ",  private$fixedTerminalIndices)}
-        
+        private$fixedTerminalIndices = super$getNodeDT()[
+          isTerminal == TRUE,
+          .SD[runif(n = .N) <= pSuccess, .nodeID]
+        ]
+
+        if (any(duplicated(private$fixedTerminalIndices))) {
+          warning(
+            "Duplicated fixed terminals - this shouldn't be possible. Please contact package maintainer!: ",
+            private$fixedTerminalIndices
+          )
+        }
+
         # I am unsure as to why there needs to be a unique call here - there should never be duplicated .nodeID values.
       }
-      
+
       super$addFixedTerminalConstraints() #Regenerate the fixed terminal constraints now that we have a different fixed terminal set via bootstrap
-      
+
       #The connectivity constraints relate to a different set of terminals (and therefore a different problem) - flush them
-      if(private$verbosity) message("Flush existing connectivity constraints now that we have new fixed terminals")
+      if (private$verbosity) {
+        message(
+          "Flush existing connectivity constraints now that we have new fixed terminals"
+        )
+      }
       super$flushConnectivityConstraints()
-      
+
       return(invisible(self))
     },
-    
 
-    metasolutionIndicesPool = sets::set(),  #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
+    metasolutionIndicesPool = sets::set(), #This will be a aggregated set of integer sets - the parent class has a solution pool - here we aggregate it!
     seedPool = integer(),
     nConnectivityConstraintsCallsPool = numeric()
   )

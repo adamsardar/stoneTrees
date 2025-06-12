@@ -47,174 +47,215 @@
 #' @seealso nodeCentricSteinerTreeProblem
 #' @importFrom sets set set_union
 #' @export
-subOptimalSteinerProblem = R6Class("subOptimalSteinerProblem",
-                                    inherit = nodeCentricSteinerTreeProblem,
+subOptimalSteinerProblem = R6Class(
+  "subOptimalSteinerProblem",
+  inherit = nodeCentricSteinerTreeProblem,
   public = list(
-    
     #Overide
-    initialize = function(network, solverChoice = chooseSolver(),
-                          verbose = TRUE, presolveGraph = TRUE,
-                          solverTimeLimit = 300, solutionTolerance = 0,
-                          solverTrace = as.integer(verbose)){
-      
-      super$initialize(network = network,
-                       solverChoice = solverChoice,
-                       verbose = verbose,
-                       presolveGraph = presolveGraph,
-                       solverTrace = solverTrace,
-                       solverTimeLimit = solverTimeLimit)
-      
-      self$setSolutionTolerance(solutionTolerance + 1E-10)  # Add epsilon to handle small fluctuations
-      
+    initialize = function(
+      network,
+      solverChoice = chooseSolver(),
+      verbose = TRUE,
+      presolveGraph = TRUE,
+      solverTimeLimit = 300,
+      solutionTolerance = 0,
+      solverTrace = as.integer(verbose)
+    ) {
+      super$initialize(
+        network = network,
+        solverChoice = solverChoice,
+        verbose = verbose,
+        presolveGraph = presolveGraph,
+        solverTrace = solverTrace,
+        solverTimeLimit = solverTimeLimit
+      )
+
+      self$setSolutionTolerance(solutionTolerance + 1E-10) # Add epsilon to handle small fluctuations
+
       private$setNoveltyConstraints()
-      
+
       return(invisible(self))
     },
 
-    getSolutionPool = function(){
-      
+    getSolutionPool = function() {
       return(private$solutionIndicesPool)
     },
-    
-    getSolutionPoolGraphs = function(collapseSols = TRUE){
-      
-      if(collapseSols){
-        
+
+    getSolutionPoolGraphs = function(collapseSols = TRUE) {
+      if (collapseSols) {
         #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
-        return( uncondenseGraph(induced.subgraph(private$searchGraph, V(private$searchGraph)[unique(unlist( self$getSolutionPool()))])) )
-      }else{
-        
-        return( self$getSolutionPool() %>%
-                  as.list %>%
-                  lapply( function(indices){ induced.subgraph(private$searchGraph, V(private$searchGraph)[indices])}) ) %>%
+        return(uncondenseGraph(induced.subgraph(
+          private$searchGraph,
+          V(private$searchGraph)[unique(unlist(self$getSolutionPool()))]
+        )))
+      } else {
+        return(
+          self$getSolutionPool() %>%
+            as.list %>%
+            lapply(function(indices) {
+              induced.subgraph(
+                private$searchGraph,
+                V(private$searchGraph)[indices]
+              )
+            })
+        ) %>%
           lapply(uncondenseGraph)
       }
     },
-    
-    getSolutionPoolScores = function(){
-      
-      return( self$getSolutionPool() %>%
-                as.list %>%
-                sapply( function(indices){ super$getNodeDT()[.nodeID %in% indices, sum(nodeScore)] }) %>%
-                unlist )
+
+    getSolutionPoolScores = function() {
+      return(
+        self$getSolutionPool() %>%
+          as.list %>%
+          sapply(function(indices) {
+            super$getNodeDT()[.nodeID %in% indices, sum(nodeScore)]
+          }) %>%
+          unlist
+      )
     },
-    
-    getOptimumScore = function(){ return( max( self$getSolutionPoolScores(), na.rm = TRUE) ) },
-    
-    getNoveltyConstraints = function(){return( private$novelSolutionsConstraint )},
-    
-    getSolutionTolerance = function(){return(private$tolerance)},
-    
-    setSolutionTolerance = function(x){ 
+
+    getOptimumScore = function() {
+      return(max(self$getSolutionPoolScores(), na.rm = TRUE))
+    },
+
+    getNoveltyConstraints = function() {
+      return(private$novelSolutionsConstraint)
+    },
+
+    getSolutionTolerance = function() {
+      return(private$tolerance)
+    },
+
+    setSolutionTolerance = function(x) {
       check_number_decimal(x, min = 0, allow_infinite = FALSE)
       private$tolerance = x
-      return(invisible(self))},
-    
-    getNconnectivityConstraintsCalls = function(){ private$nConnectivityConstraintsCalls },
+      return(invisible(self))
+    },
 
-    identifyMultipleSteinerSolutions = function(maxItr = 10){
-      
+    getNconnectivityConstraintsCalls = function() {
+      private$nConnectivityConstraintsCalls
+    },
+
+    identifyMultipleSteinerSolutions = function(maxItr = 10) {
       check_number_whole(maxItr, min = 0)
-      
+
       self$findSingleSteinerSolution()
 
       private$nConnectivityConstraintsCalls = self$getNconnectivityConstraintsCalls()
 
-      private$solutionIndicesPool = set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
-      
+      private$solutionIndicesPool = set_union(
+        self$getSolutionPool(),
+        sets::set(private$currentSolutionIndices)
+      )
+
       multiSteinerItr = 1
 
       super$nConnectivityConstraintsCalls = 0
 
-      while(multiSteinerItr <= maxItr){
-        
+      while (multiSteinerItr <= maxItr) {
         private$setNoveltyConstraints()
-        
+
         super$solve()
         multiSteinerItr %<>% add(1)
-        
-        if(vcount(super$getCurrentSolutionGraph()) == 0) { 
-        
-        message("STOP iteration, solution not found. No more novelty constraint added")
-        
-        break()
-        
-        }else{
-                                                 
-        #add solution graph if connected, else add connectivity constraints and resolve
-        if( super$isSolutionConnected() ){
-          
-          #If the absolute difference between scores is within tolerance, then add to pool
-          if(  abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <= private$tolerance ){
-            
-            private$solutionIndicesPool = set_union(self$getSolutionPool(), sets::set(private$currentSolutionIndices) )
 
-            private$nConnectivityConstraintsCalls = c(self$getNconnectivityConstraintsCalls(),
-                                                           super$nConnectivityConstraintsCalls)
+        if (vcount(super$getCurrentSolutionGraph()) == 0) {
+          message(
+            "STOP iteration, solution not found. No more novelty constraint added"
+          )
 
-            super$nConnectivityConstraintsCalls = 0
+          break()
+        } else {
+          #add solution graph if connected, else add connectivity constraints and resolve
+          if (super$isSolutionConnected()) {
+            #If the absolute difference between scores is within tolerance, then add to pool
+            if (
+              abs(super$getCurrentSolutionScore() - self$getOptimumScore()) <=
+                private$tolerance
+            ) {
+              private$solutionIndicesPool = set_union(
+                self$getSolutionPool(),
+                sets::set(private$currentSolutionIndices)
+              )
 
-          }else{
-            
-            message("Next feasible solution is outside of solution tolerance! Consider increasing it with $setSolutionTolerance(x) method?")
-            break()
+              private$nConnectivityConstraintsCalls = c(
+                self$getNconnectivityConstraintsCalls(),
+                super$nConnectivityConstraintsCalls
+              )
+
+              super$nConnectivityConstraintsCalls = 0
+            } else {
+              message(
+                "Next feasible solution is outside of solution tolerance! Consider increasing it with $setSolutionTolerance(x) method?"
+              )
+              break()
+            }
+          } else {
+            super$addConnectivityConstraints()
+
+            super$nConnectivityConstraintsCalls = super$nConnectivityConstraintsCalls %<>%
+              add(1)
           }
+        }
+      }
 
-        }else{ super$addConnectivityConstraints()
-
-          super$nConnectivityConstraintsCalls = super$nConnectivityConstraintsCalls %<>% add(1)
-
-
-               }
-                                                  }
-                                                 }
-      
-      return( invisible(self) )
+      return(invisible(self))
     }
-    
   ),
-  
+
   private = list(
-    
     # Overide the superclass
-    gatherConstraintObjects = function(){
-      
-      return( list(private$fixedTerminalConstraints,
-                   private$nodeDegreeConstraints,
-                   private$twoCycleConstraints,
-                   private$connectivityConstraints,
-                   private$novelSolutionsConstraint) ) },
+    gatherConstraintObjects = function() {
+      return(list(
+        private$fixedTerminalConstraints,
+        private$nodeDegreeConstraints,
+        private$twoCycleConstraints,
+        private$connectivityConstraints,
+        private$novelSolutionsConstraint
+      ))
+    },
 
     # Add a constraint that we cannot have a solution that we have already seen
     # This constraint is not from the original paper, but it is quite simple
     # For each solution, sum_i y_i > 0 for i !in a solution
-    setNoveltyConstraints = function(){
-      
+    setNoveltyConstraints = function() {
       noveltyConstraintsList = private$solutionIndicesPool %>%
-                                as.list %>%
-                                lapply(function(solIndices){
-                                noveltyConstraint = Matrix(1, nrow = 1, ncol = vcount(private$searchGraph), sparse = TRUE)
-                                noveltyConstraint[solIndices] = 0
-                                return(noveltyConstraint)})
-      
-      if(private$verbosity) message("Adding ", length(noveltyConstraintsList)," novelty constraint(s) ...")
-      
+        as.list %>%
+        lapply(function(solIndices) {
+          noveltyConstraint = Matrix(
+            1,
+            nrow = 1,
+            ncol = vcount(private$searchGraph),
+            sparse = TRUE
+          )
+          noveltyConstraint[solIndices] = 0
+          return(noveltyConstraint)
+        })
+
+      if (private$verbosity) {
+        message(
+          "Adding ",
+          length(noveltyConstraintsList),
+          " novelty constraint(s) ..."
+        )
+      }
+
       #Deal with empty solution pools - add a matrix with no rows but the correct columns
-      noveltyConstraintsList %<>% c(list(Matrix(nrow = 0, ncol = vcount(private$searchGraph))))
-      
+      noveltyConstraintsList %<>%
+        c(list(Matrix(nrow = 0, ncol = vcount(private$searchGraph))))
+
       noveltyConstraintsMatrix = Reduce(rbind, noveltyConstraintsList)
-      
+
       private$novelSolutionsConstraint = list(
         variables = noveltyConstraintsMatrix,
-        directions = rep(">=",nrow(noveltyConstraintsMatrix)) ,
-        rhs = rep(1,nrow(noveltyConstraintsMatrix)))
+        directions = rep(">=", nrow(noveltyConstraintsMatrix)),
+        rhs = rep(1, nrow(noveltyConstraintsMatrix))
+      )
     },
-    
+
     solutionIndicesPool = sets::set(),
-    
+
     novelSolutionsConstraint = list(),
-    
+
     tolerance = numeric()
   )
-
 )

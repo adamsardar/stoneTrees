@@ -6,8 +6,6 @@ library(data.table)
 library(ggplot2)
 
 
-
-
 # reformat node score for MStT (not MWCS) and add Terminal attributes
 fixedTerminalLymphomaGraph <- lymphomaGraph
 V(fixedTerminalLymphomaGraph)$isTerminal <- FALSE
@@ -34,40 +32,54 @@ nsuboptimalSol <- 5
 
 Solver <- "rcbc"
 
-steinForestSuboptimalBenchDT <- map(1:numberOfTrial, function(i){
-
-
+steinForestSuboptimalBenchDT <- map(1:numberOfTrial, function(i) {
   print(i)
 
   # Note, The two process are not solving the exact same problem. Stochastic algorithms are a pain
 
-time <- system.time( SteinForSolverX <- nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph,
-                                                                               solverChoice = Solver,
-                                                                               verbose = TRUE,
-                                                                               solverTrace = 0)$sampleMultipleBootstrapSteinerSolutions(nBootstraps = bootstrapIteraction,
-                                                                                                                                        maxItr = nsuboptimalSol) )
+  time <- system.time(
+    SteinForSolverX <- nodeCentricSteinerForestProblem$new(
+      fixedTerminalLymphomaGraph,
+      solverChoice = Solver,
+      verbose = TRUE,
+      solverTrace = 0
+    )$sampleMultipleBootstrapSteinerSolutions(
+      nBootstraps = bootstrapIteraction,
+      maxItr = nsuboptimalSol
+    )
+  )
 
-    SolutionPool <- SteinForSolverX$getBootstrapSolutionPoolGraphs(collapseSols = FALSE)
+  SolutionPool <- SteinForSolverX$getBootstrapSolutionPoolGraphs(
+    collapseSols = FALSE
+  )
 
+  save(
+    SolutionPool,
+    file = paste0(
+      "./results/Reproducible_steinForestSuboptimalSolver_",
+      Solver,
+      "_Trial",
+      i,
+      ".RData"
+    )
+  )
 
-    save(SolutionPool, file = paste0("./results/Reproducible_steinForestSuboptimalSolver_",Solver,"_Trial", i,".RData"))
+  Sizes <- map_int(SolutionPool, vcount)
 
-
-
-    Sizes <- map_int(SolutionPool, vcount)
-
-  return(data.table(trial = paste(i),
-                   solver = paste(Solver),
-                    time = time["elapsed"],
-                    vcount = vcount(SteinForSolverX$getBootstrapSolutionPoolGraphs()),
-                    modulesVcount = list(Sizes[-length(Sizes)]),
-                    Niteration = length(Sizes[-length(Sizes)])))
-
-
-
-}) %>% rbindlist()
+  return(data.table(
+    trial = paste(i),
+    solver = paste(Solver),
+    time = time["elapsed"],
+    vcount = vcount(SteinForSolverX$getBootstrapSolutionPoolGraphs()),
+    modulesVcount = list(Sizes[-length(Sizes)]),
+    Niteration = length(Sizes[-length(Sizes)])
+  ))
+}) %>%
+  rbindlist()
 
 #test1 <- rbindlist(steinForestSuboptimalBenchDT)
 
-
-fwrite(steinForestSuboptimalBenchDT, paste0("./results/Reproducible_steinForestSuboptimalBench_",Solver, ".tsv"))
+fwrite(
+  steinForestSuboptimalBenchDT,
+  paste0("./results/Reproducible_steinForestSuboptimalBench_", Solver, ".tsv")
+)
