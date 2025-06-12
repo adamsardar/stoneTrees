@@ -21,7 +21,7 @@ check_network = function(
   # Only inspect direction if instructed
   check_bool(isDirected, allow_na = TRUE)
   stopifnot(
-    "Expecting is.directed() output of graph to be equal to isDirected" = is.directed(
+    "Expecting is_directed() output of graph to be equal to isDirected" = is_directed(
       network2validate
     ) ==
       isDirected |

@@ -65,7 +65,7 @@ Other SteinerProblemSolver:
 }
 \concept{SteinerProblemSolver}
 \section{Super class}{
-\code{stoneTrees::nodeCentricSteinerTreeProblem} -> \code{subOptimalSteinerProblem}
+\code{\link[stoneTrees:nodeCentricSteinerTreeProblem]{stoneTrees::nodeCentricSteinerTreeProblem}} -> \code{subOptimalSteinerProblem}
 }
 \section{Methods}{
 \subsection{Public methods}{

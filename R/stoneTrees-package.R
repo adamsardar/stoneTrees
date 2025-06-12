@@ -14,6 +14,18 @@
 #' @import igraph
 #' @import Matrix
 #' @import data.table
-#' @import rlang
 #' @importFrom magrittr "%<>%"
+#' @importFrom rlang is_vector
+#' @importFrom rlang is_list
+#' @importFrom rlang is_na
+#' @importFrom rlang abort
+#' @importFrom rlang ffi_standalone_is_bool_1.0.7
+#' @importFrom rlang is_string
+#' @importFrom rlang ffi_standalone_check_number_1.0.7
+#' @importFrom rlang  env_get_list
+#' @importFrom rlang `%||%`
+#' @importFrom rlang is_missing
+#' @importFrom rlang is_logical
+#' @importFrom rlang caller_arg
+#' @importFrom rlang caller_env
 NULL

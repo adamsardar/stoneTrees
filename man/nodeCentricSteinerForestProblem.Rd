@@ -47,7 +47,7 @@ MStTPsingle$findSingleSteinerSolution()
 #Solve multiple bootstrap Steiner Trees (Steiner Forest)
 SteinFor = nodeCentricSteinerForestProblem$new(fixedTerminalLymphomaGraph)
 
-#Run two bootstrap routines (resample fixed terminals and solve) and 
+#Run two bootstrap routines (resample fixed terminals and solve) and
 #ALSO run the sub-optimal solution searcher thrice
 SteinFor$sampleMultipleBootstrapSteinerSolutions(nBootstraps = 2, maxItr = 3)
 ## Takes around a minute using RGLPK as the solver
@@ -71,7 +71,7 @@ Other SteinerProblemSolver:
 }
 \concept{SteinerProblemSolver}
 \section{Super classes}{
-\code{stoneTrees::nodeCentricSteinerTreeProblem} -> \code{stoneTrees::subOptimalSteinerProblem} -> \code{nodeCentricSteinerForestProblem}
+\code{\link[stoneTrees:nodeCentricSteinerTreeProblem]{stoneTrees::nodeCentricSteinerTreeProblem}} -> \code{\link[stoneTrees:subOptimalSteinerProblem]{stoneTrees::subOptimalSteinerProblem}} -> \code{nodeCentricSteinerForestProblem}
 }
 \section{Methods}{
 \subsection{Public methods}{
