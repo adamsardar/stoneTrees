@@ -1,5 +1,11 @@
+#' Construct an object representation of the bootstraped Steiner Tree process (aka Steiner Forest routine)
+#' 
+#' @description
 #' Solve multiple bootstrap Minimum Steiner Tree problems (aka Steiner Forest procedure)
 #'
+#' @details
+#' Sub-sample seed sets and gather robust solutions to seed subsets.
+#' 
 #' Given a set of seeds/fixed terminals a Minimum Steiner Tree can be found. One might well be interested in studying the common nodes that
 #' would be included with, say, just 50% of the seed set. This process is known as a 'bootstrap' in statistics and this class looks to
 #' repeatedly sample seeds to produce a consensus set of MStTP solutions. Sub-solutions can also be collected, albeit at an increased burden on the
@@ -9,23 +15,10 @@
 #' each acceptable solution is found, the solution is a.) stored in a bootstrap solution pool and b.) used to generate a 'novelty' constraint on future solutions. For each bootstrap run, the solution pool
 #' is flushed and the process re-rerun. In the end, all of the boostrap solutions are in the bootstrap solution pool.
 #'
-#' @docType class
-#' @format R6Class \code{nodeCentricSteinerForestProblem} Construct an object representation of the bootstraped Steiner Tree process (aka Steiner Forest routine)
-#'
-#' @section methods:
-#' Alongisde those for *nodeCentricSteinerTreeProblem* and *subOptimalSteinerProblem*
-#' \describe{
-#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the nodeCentricSteinerForestProblem class. Note the loss of 'presolveGraph'; the repeated resampling of fixed terminal nodes prevents this.}
-#'    \item{\code{sampleMultipleBootstrapSteinerSolutions(nBootstraps = 5, maxItr = 0, resamplingProbability= 0.5)}}{Run the bootstrap procedure nBootstraps times, each time resampling seeds with pSuccess = resamplingProbability, collecting degenerate or suboptimal solutions for maxItr times.}
-#'    \item{\code{getBootstrapSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerance (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
-#'    \item{...}{Other methods are self explanatory and likely uninteresting to a general user}
-#' ' }
-#'
 #' @examples
 #' library(igraph)
 #'
 #' #Prepare a simple seed-based Steiner sampling in a reasonable sized network
-#'
 #' fixedTerminalLymphomaGraph = lymphomaGraph
 #' V(fixedTerminalLymphomaGraph)$isTerminal = FALSE
 #' V(fixedTerminalLymphomaGraph)[nodeScore > 0]$isTerminal = TRUE
@@ -57,7 +50,18 @@ nodeCentricSteinerForestProblem = R6Class(
   "nodeCentricSteinerForestProblem",
   inherit = subOptimalSteinerProblem,
   public = list(
-    #Overide
+    
+    #' @description
+    #' Constructor for the nodeCentricSteinerForestProblem class. Note the loss of 'presolveGraph'; the repeated resampling of fixed terminal nodes prevents this.
+    #' @param network Search network, with either boolean isTerminal and/or continuous nodeScores recorded for each node in the search network
+    #' @param solverChoice (optional) Select your preffered solver, or rely on default
+    #' @param verbose Controls print verbosity of routine
+    #' @param presolveGraph Whether to include the speed optimisation routine to coalesce adjacent nodes, decreasing the search space (default:TRUE - strongly recommended)
+    #' @param solverTimeLimit Constrain how long, in seconds, each invocation of the MILP solver can take
+    #' @param solverTrace Control how much detail to request from the solver  
+    #' @param solutionTolerance If sub-optimal solutions are to be collected, what tolerance to use? (default: 0)
+    #' @param RNGseed Integer seed to control ootstrap sampling process
+    #' @return A `nodeCentricSteinerForestProblem` object, ready to collect solutions
     initialize = function(
       network,
       solverChoice = chooseSolver(),
@@ -88,6 +92,12 @@ nodeCentricSteinerForestProblem = R6Class(
       return(invisible(self))
     },
 
+    #' @description
+    #' Run the bootstrap procedure nBootstraps times, each time resampling seeds with pSuccess = resamplingProbability, collecting degenerate or suboptimal solutions for maxItr times.
+    #' @param nBootstraps Number of bootstrap samplings
+    #' @param maxItr The maximum number of constraint/solve cycles that the process should attempt
+    #' @param resamplingProbability chance of node being chosen in a resampled subset
+    #' @return self
     sampleMultipleBootstrapSteinerSolutions = function(
       nBootstraps = 5,
       maxItr = 0,
@@ -136,15 +146,23 @@ nodeCentricSteinerForestProblem = R6Class(
       return(invisible(self))
     },
 
+    #' @description
+    #' Extract the set of node IDs appearing in solutions
+    #' @return A set of integers that map to nodes
     getBootstrapSolutionPool = function() {
       return(private$metasolutionIndicesPool)
     },
 
+    #' @description
+    #' Getting for the 
+    #' @return Matrix for use in MILP problem
     getNconnectivityConstraintsCallsPool = function() {
       return(private$nConnectivityConstraintsCallsPool)
     },
 
-    #Overide
+    #' @description
+    #' Internal function aggegating solutions
+    #' @return A set of integers that map to nodes
     getSolutionPool = function() {
       if (identical(parent.frame(), globalenv())) {
         warning(
@@ -154,6 +172,11 @@ nodeCentricSteinerForestProblem = R6Class(
       return(super$getSolutionPool())
     },
 
+
+    #' @description
+    #' Either return a list of solutions within tolerance (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)
+    #' @param collapseSols Return all graphs collapsed, or a list of graphs
+    #' @return Either a list of graph solutions, or a collapsed version of all answers
     getBootstrapSolutionPoolGraphs = function(collapseSols = TRUE) {
       if (collapseSols) {
         #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
@@ -177,7 +200,9 @@ nodeCentricSteinerForestProblem = R6Class(
       }
     },
 
-    #Overide
+    #' @description
+    #' Internal function aggegating solutions
+    #' @return A set of integers that map to nodes
     getSolutionPoolGraphs = function() {
       if (identical(parent.frame(), globalenv())) {
         warning(
@@ -187,7 +212,10 @@ nodeCentricSteinerForestProblem = R6Class(
       return(super$getSolutionPoolGraphs())
     },
 
-    #Overide: This overides the parent classes method and freshly regenerates the Steiner solution afresh each time. This is because we resample the seeds repeatedly.
+    #' @description
+    #' overides the parent classes method and freshly regenerates the Steiner solution afresh each time. This is because we resample the seeds repeatedly.
+    #' @param maxItr The maximum number of constraint/solve cycles that the process should attempt
+    #' @return An induced subgraph of the best solution found given the constraints and interation cap
     findSingleSteinerSolution = function(maxItr = 20) {
       private$fixedTerminalIndices = super$getNodeDT()[
         isTerminal == TRUE,
@@ -198,12 +226,23 @@ nodeCentricSteinerForestProblem = R6Class(
       return(super$findSingleSteinerSolution(maxItr = maxItr))
     },
 
+    #' @description
+    #' Utility method to extract first seed for random sampling
+    #' @return Integer seed
     getInitialSeed = function() {
       head(private$seedPool, n = 1)
     },
+
+    #' @description
+    #' Utility method to extract most recent seed for random sampling
+    #' @return Integer seed
     getLatestSeed = function() {
       tail(private$seedPool, n = 1)
     },
+
+    #' @description
+    #' Utility method to return all seeds
+    #' @return Integer seeds
     getAllSeeds = function() {
       return(private$seedPool)
     }

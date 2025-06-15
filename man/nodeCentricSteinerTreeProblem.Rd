@@ -131,10 +131,14 @@ boolean detailing if all nodes in solutionnodes are weakly connected. Empty grap
 \if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getCurrentSolutionGraph"></a>}}
 \if{latex}{\out{\hypertarget{method-nodeCentricSteinerTreeProblem-getCurrentSolutionGraph}{}}}
 \subsection{Method \code{getCurrentSolutionGraph()}}{
+Allow the user to inspect the current solution in the presolved graph
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{nodeCentricSteinerTreeProblem$getCurrentSolutionGraph()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+igraph induce subgraph of current solution nodes
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-nodeCentricSteinerTreeProblem-getCurrentSolutionScore"></a>}}

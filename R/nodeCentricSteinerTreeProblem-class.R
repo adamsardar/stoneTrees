@@ -9,7 +9,6 @@
 #'
 #' Input networks must be single component igraph objects with node attributes detailing forced node inclusion in solution ($isTerminal = TRUE)
 #' and/or node costs or prizes for inclusion ($nodeScore).
-#'
 #' @examples
 #' library(igraph)
 #'
@@ -57,7 +56,7 @@ nodeCentricSteinerTreeProblem = R6Class(
     #' @param verbose Controls print verbosity of routine
     #' @param presolveGraph Whether to include the speed optimisation routine to coalesce adjacent nodes, decreasing the search space (default:TRUE - strongly recommended)
     #' @param solverTimeLimit Constrain how long, in seconds, each invocation of the MILP solver can take
-    #' @param  solverTrace Control how much detail to request from the solver
+    #' @param solverTrace Control how much detail to request from the solver    
     #' @return A `nodeCentricSteinerTreeProblem` object, ready to collect solutions
     initialize = function(
       network,
@@ -79,7 +78,8 @@ nodeCentricSteinerTreeProblem = R6Class(
       check_number_whole(solverTrace)
       private$solverTrace = solverTrace
 
-      interactomeName = deparse(substitute(network)) #Capture interactome name for later
+      #Capture interactome name for later
+      interactomeName = deparse(substitute(network))
 
       check_network(network)
       if (is.directed(network)) {
@@ -192,7 +192,9 @@ nodeCentricSteinerTreeProblem = R6Class(
       return(is_connected(self$getCurrentSolutionGraph()))
     },
 
-    # Allow the user to inspect the graph (presolved, of course)
+    #' @description
+    #' Allow the user to inspect the current solution in the presolved graph
+    #' @return igraph induce subgraph of current solution nodes
     getCurrentSolutionGraph = function() {
       return(induced_subgraph(
         private$searchGraph,
