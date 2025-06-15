@@ -1,26 +1,14 @@
+#' Construct an object representation of a multiple-solution Steiner tree/maximum weight connected subgraph (MWCS) problem
+#' 
+#' @description
 #' Collect degenerate and sub-optimal solutions to Steiner problems (MStTP or MWCS) with uniform or no edge weights.
 #'
+#' @details 
 #' Rather than find just a single solution to a MStTP/MWCS, one can populate a solution pool with multiple degenerate/tolerable solutions.
 #'
 #' This class is derived from *nodeCentricSteinerTreeProblem*: all methods available in the superclass are available here. The difference is that after
 #' each acceptable solution is found, the solution is a.) stored in a solution pool and b.) used to generate a 'novelty' constraint on future solutions.
-#'
-#' @docType class
-#' @format R6Class \code{subOptimalSteinerProblem} Construct an object representation of a multiple-solution Steiner tree/maximum weight connected subgraph (MWCS) problem
-#'
-#' @section methods:
-#'
-#' Alongisde those for *nodeCentricSteinerTreeProblem*
-#' \describe{
-#'    \item{\code{new(network, solverChoice = chooseSolver(), verbose = TRUE, presolveGraph = TRUE, solverTimeLimit = 300, solverTrace = as.integer(verbose), solutionTolerance = 0)}}{Constructor for the subOptimalSteinerProblem class. Alongside the arguments for the super-class constructor, there is also 'solutionTolerance', which instructs the object as to the gap between optimal and observed solution that is acceptable.}
-#'    \item{\code{identifyMultipleSteinerSolutions(maxItr = 10)}}{Add solutions to the solution pool. maxItr is an argument dictating the number of runs through the optimsation procedure.}
-#'    \item{\code{getSolutionPoolGraphs(collapseSols = TRUE)}}{Either return a list of solutions within tolerance (collapseSols = FALSE) or pool all solutions together and return a single graph (collapseSols = TRUE, defaults)}
-#'    \item{\code{getSolutionPoolScores()}}{Compute the scores of the solutions in the solution pool. These are in the same order as the list of graphs returned by $getSolutionPoolGraphs(FALSE)}
-#'    \item{\code{getOptimumScore()}}{Returns the optimum score from solutions in the solution pool}
-#'    \item{\code{getSolutionTolerance()}}{Retreive the tolerance that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
-#'    \item{\code{setSolutionTolerance(x)}}{Alter the tolerance that permits a solution to be added to the solution pool in future calls to $identifyMultipleSteinerSolutions()}
-#' }
-#'
+#' 
 #' @examples
 #' library(igraph)
 #'
@@ -51,7 +39,16 @@ subOptimalSteinerProblem = R6Class(
   "subOptimalSteinerProblem",
   inherit = nodeCentricSteinerTreeProblem,
   public = list(
-    #Overide
+    #' @description
+    #' Constructor for the subOptimalSteinerProblem class. Alongside the arguments for the super-class constructor, there is also 'solutionTolerance', which instructs the object as to the gap between optimal and observed solution that is acceptable.
+    #' @param network Search network, with either boolean isTerminal and/or continuous nodeScores recorded for each node in the search network
+    #' @param solverChoice (optional) Select your preffered solver, or rely on default
+    #' @param verbose Controls print verbosity of routine
+    #' @param presolveGraph Whether to include the speed optimisation routine to coalesce adjacent nodes, decreasing the search space (default:TRUE - strongly recommended)
+    #' @param solverTimeLimit Constrain how long, in seconds, each invocation of the MILP solver can take
+    #' @param solverTrace Control how much detail to request from the solver  
+    #' @param solutionTolerance If sub-optimal solutions are to be collected, what tolerance to use? (default: 0)
+    #' @return A `nodeCentricSteinerForestProblem` object, ready to collect solutions
     initialize = function(
       network,
       solverChoice = chooseSolver(),
@@ -77,10 +74,17 @@ subOptimalSteinerProblem = R6Class(
       return(invisible(self))
     },
 
+    #' @description
+    #' Internal function aggegating solutions
+    #' @return A set of integers that map to nodes
     getSolutionPool = function() {
       return(private$solutionIndicesPool)
     },
 
+    #' @description
+    #' Internal function aggegating solutions
+    #' @param collapseSols  Return all graphs collapsed, or a list of graphs
+    #' @return A set of integers that map to nodes
     getSolutionPoolGraphs = function(collapseSols = TRUE) {
       if (collapseSols) {
         #Ensure that the solution pool is up to date when we induce the subgraph. Since we are using a set, there is no cost to this
@@ -103,6 +107,9 @@ subOptimalSteinerProblem = R6Class(
       }
     },
 
+    #' @description
+    #' Compute the scores of the solutions in the solution pool. These are in the same order as the list of graphs returned by $getSolutionPoolGraphs(FALSE)
+    #' @return A set of continuous scores of solutions
     getSolutionPoolScores = function() {
       return(
         self$getSolutionPool() %>%
@@ -114,28 +121,52 @@ subOptimalSteinerProblem = R6Class(
       )
     },
 
+
+    #' @description 
+    #' Returns the optimum score from solutions in the solution pool
+    #' @return Continuous value of the top score
     getOptimumScore = function() {
       return(max(self$getSolutionPoolScores(), na.rm = TRUE))
     },
 
+    #' @description 
+    #' Internal utility function that forces new solutions to be found
+    #' @return Matrix of existing solutions
     getNoveltyConstraints = function() {
       return(private$novelSolutionsConstraint)
     },
 
+    #' @description 
+    #' setter for the solver solution tolerance
+    #' @return Continuous value of the top score
     getSolutionTolerance = function() {
       return(private$tolerance)
     },
 
+    #' @description 
+    #' setter for the solver solution tolerance
+    #' @param x Single continuous number to use for search 
+    #' @return self
     setSolutionTolerance = function(x) {
       check_number_decimal(x, min = 0, allow_infinite = FALSE)
       private$tolerance = x
       return(invisible(self))
     },
 
+    
+    #' @description
+    #' Provide a list of all connectivity constraint calls
+    #' @return A list of constraints
     getNconnectivityConstraintsCalls = function() {
       private$nConnectivityConstraintsCalls
     },
 
+
+    
+    #' @description
+    #' The multi-solution version of `$findSingleSteinerSolution`
+    #' @param maxItr As we sample the sub-optimal solutions, what is the maximum number of within-tolerance solutions to aggregate?
+    #' @return self
     identifyMultipleSteinerSolutions = function(maxItr = 10) {
       check_number_whole(maxItr, min = 0)
 
