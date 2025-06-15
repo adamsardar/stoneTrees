@@ -82,7 +82,7 @@ nodeCentricSteinerTreeProblem = R6Class(
       interactomeName = deparse(substitute(network))
 
       check_network(network)
-      if (is.directed(network)) {
+      if (is_directed(network)) {
         warning(
           "Input network is directed and only undirected networks are supported - casting to a simple undirected network."
         )
@@ -91,7 +91,7 @@ nodeCentricSteinerTreeProblem = R6Class(
       check_bool(presolveGraph)
       private$graphPresolved = presolveGraph
 
-      inputGraph = network %>% as.undirected %>% simplify
+      inputGraph = network %>% as_undirected %>% simplify
       if (presolveGraph) {
         inputGraph = condenseSearchGraph(inputGraph)
       } #graph condensation is a presolve step

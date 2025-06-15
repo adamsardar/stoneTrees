@@ -197,7 +197,7 @@ readMStTPgraph = function(MStTPstpFile) {
   }
 
   if (edgesDT[, (length(unique(edgeType)) == 1 & unique(edgeType) == 'E')]) {
-    MStTP_igraph %<>% as.undirected
+    MStTP_igraph %<>% as_undirected
     #Note, this will strip out edgeWeight attributes (thanks igraph ...), but by the definition of SteinLib format,
     #there shouldn't be any edgeWeight info for E type (undirected) edges
   }
@@ -254,7 +254,7 @@ readMWCSgraph = function(MWCSstpFile) {
         edgeType == 'E',
         .(start = end, end = start, edgeType, weight)
       ])
-    MWCS_igraph = graph.data.frame(edgesDT[, .(
+    MWCS_igraph = graph_from_data_frame(edgesDT[, .(
       start,
       end,
       edgeWeight = weight
@@ -262,7 +262,7 @@ readMWCSgraph = function(MWCSstpFile) {
   } else if (ncol(edgesDT) == 3) {
     edgesDT %<>%
       rbind(edgesDT[edgeType == 'E', .(start = end, end = start, edgeType)])
-    MWCS_igraph = graph.data.frame(edgesDT[, .(start, end)])
+    MWCS_igraph = graph_from_data_frame(edgesDT[, .(start, end)])
   } else {
     stop('Parsing of MStTP file failed on edges\n')
   }
@@ -338,7 +338,7 @@ writeMStTPfile_heinzFormat = function(
   node2ID = data.table(node = unique(V(network.igraph)$name))
   node2ID[, index := 1:nrow(node2ID)]
 
-  edges2ID = get.edgelist(network.igraph) %>% data.table
+  edges2ID = as_edgelist(network.igraph) %>% data.table
   setnames(edges2ID, c('V1'), c('node'))
   edges2ID = merge(node2ID, edges2ID, by = 'node')
   setnames(edges2ID, c('node', 'index', 'V2'), c('nodeA', 'indexA', 'node'))
@@ -348,7 +348,7 @@ writeMStTPfile_heinzFormat = function(
   edge.type = 'E'
   edges2ID[, edgeType := edge.type]
   #To do - allow for variable edge weight
-  if (is.element('edgeWeight', list.edge.attributes(network.igraph))) {
+  if (is.element('edgeWeight', edge_attr_names(network.igraph))) {
     edges2ID[, edgeWeight := E(network.igraph)$edgeWeight]
   } else {
     edges2ID[, edgeWeight := 0]

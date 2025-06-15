@@ -245,7 +245,7 @@ test_that("Ensure that incorrect constructor inputs are not tolerated", {
     info = "Class should fail when a nonsense verbosity choice is given"
   )
 
-  disconnectedGraph = add.vertices(lymphomaGraph, 1)
+  disconnectedGraph = add_vertices(lymphomaGraph, 1)
 
   expect_error(
     nodeCentricSteinerTreeProblem$new(disconnectedGraph),
